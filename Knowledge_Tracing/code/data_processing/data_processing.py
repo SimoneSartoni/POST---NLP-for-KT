@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 import nltk
-# import hunspell
+# data_processing hunspell
 from nltk.corpus import stopwords
 
 # eng_dict = hunspell.HunSpell('/usr/share/hunspell/en_US.dic', '/usr/share/hunspell/en_US.aff')
@@ -127,4 +127,38 @@ def generate_text_and_interacted_sets(problem_ids, problems, real_lens, corrects
     print(len(problems_text_and_interacted_set))
     return problems_with_text_set, problems_interacted_set, problems_text_and_interacted_set
 
+
+def remove_problems_without_text_or_interactions(problems_list, correctness_list, problems_set_text_and_results):
+    new_problems_list = []
+    new_correctness_list = []
+    for p in range(0, len(problems_list)):
+        if p in problems_set_text_and_results:
+            new_problems_list.append(problems_list[p])
+            new_correctness_list.append(correctness_list[p])
+    new_real_len = len(new_problems_list)
+    return new_problems_list, new_correctness_list, new_real_len
+
+
+def generate_data_for_predictions(problems_set_text_and_results, problems, corrects, real_lens):
+    labels = []
+    new_problems = []
+    new_corrects = []
+    new_real_lens = []
+    target_problems = []
+    for problem, correct, real_len in list(zip(*(problems, corrects, real_lens))):
+        # TF-IDF:
+        target_problem = problem[real_len - 1]
+        target_correct = correct[real_len - 1]
+        new_problem, new_correct, new_real_len = remove_problems_without_text_or_interactions
+        new_problem, new_correct, new_real_len = new_problem[0:-2], new_correct[0:-2], new_real_len-1
+        if target_problem in problems_set_text_and_results:
+            new_problems.append(new_problem)
+            new_corrects.append(new_correct)
+            new_real_lens.append(new_real_len)
+            target_problems.append(target_problem)
+            if target_correct == 1.0:
+                labels.append(1)
+            else:
+                labels.append(0)
+    return new_problems, new_corrects, new_real_lens, target_problems, labels
 
