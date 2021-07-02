@@ -1,18 +1,12 @@
 import pandas as pd
 import numpy as np
 
-def import_questions_text(assistments=True, junyi=True, poj=True):
+def import_questions_text(datasets_dict):
     datasets = {}
-    if assistments:
-        assistments_problems = pd.read_csv(
-            "../../data/Assistments/problem_bodies/ASSISTments2012DataSet-ProblemBodies.csv", low_memory=False)
-        datasets["assistments"] = assistments_problems
-    if junyi:
-        junyi_problems = pd.read_csv("../../data/Junyi/junyi_question_text.txt", low_memory=False, sep='#')
-        datasets["junyi"] = junyi_problems
-    if poj:
-        poj_problems = pd.read_csv("../../data/poj/poj_question_text.txt", low_memory=False, sep='\n', names=["data"])
-        datasets["poj"] = poj_problems
+    for el in datasets_dict:
+        problems = pd.read_csv(
+            el.path, low_memory=False)
+        datasets[el.name] = problems
     return datasets
 
 
