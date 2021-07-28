@@ -1,10 +1,10 @@
-from abc import abstractmethod, ABC
+from abc import abstractmethod, ABCMeta
 
 
-class base_model(ABC):
-    def __init__(self, name, type):
+class base_model(metaclass=ABCMeta):
+    def __init__(self, name, class_of_method):
         self.name = name
-        self.type = type
+        self.class_of_method = class_of_method
         self.time_to_build = 0
         self.time_to_train = 0
 

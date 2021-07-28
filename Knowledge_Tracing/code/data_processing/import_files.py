@@ -1,18 +1,18 @@
 import pandas as pd
 import numpy as np
 
+
 def import_questions_text(datasets_dict):
     datasets = {}
     for el in datasets_dict:
-        problems = pd.read_csv(
-            el.path, low_memory=False)
+        problems = pd.read_csv(el.path, low_memory=False)
         datasets[el.name] = problems
     return datasets
 
 
 # Load already processed interactions for assistments dataset
 def import_assistments_interactions():
-    data = np.load('../input/assesments-12-13-precessed-data/2012-2013-data-with-predictions-4-final.csv.npz')
+    data = np.load('C:/Users/Simone Sartoni/Simone/Universita/5anno/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/data/Assistments/2012_2013/2012-2013-data-with-predictions-4-final.csv.npz')
     y, problems, real_lens, pro_num = data['y'], data['problem'], data['real_len'], data['problem_num']
 
     # Modify corrects value to have: 1.0 if answer is correct, -1.0 if wrong, 0.0 if unknown

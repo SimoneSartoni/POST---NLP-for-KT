@@ -1,11 +1,12 @@
 import pandas as pd
 import numpy as np
 import os
-import scipy as sps
+import scipy
+from scipy import sparse as sps
 from Knowledge_Tracing.code.Similarity.Compute_Similarity import Compute_Similarity
 
 from sklearn.feature_extraction.text import TfidfVectorizer
-import base_model
+from Knowledge_Tracing.code.models.base_model import base_model
 
 
 def write_txt(file, data):
@@ -13,14 +14,15 @@ def write_txt(file, data):
         for dd in data:
             f.write(str(dd) + '\n')
 
+
 def identity_tokenizer(text):
     return text
 
 
 class TF_IDF(base_model):
-    def __init__(self, name, type):
-        super().__init__(name, type)
-        self.tf_idf_vectorizer = TfidfVectorizer(
+    def __init__(self):
+        super().__init__("TF_IDF", "NLP")
+        self.tfidf_vectorizer = TfidfVectorizer(
             analyzer='word',
             tokenizer=identity_tokenizer,
             preprocessor=identity_tokenizer,
@@ -36,18 +38,18 @@ class TF_IDF(base_model):
         self.shrink = 10
         self.normalize = True
         self.similarity = "cosine"
-
-
+        self.vectors = None
 
     def fit(self, texts):
         tfidf_vectorizer_vectors = self.tfidf_vectorizer.fit_transform(texts)
+        self.vectors = tfidf_vectorizer_vectors
         df_tf_idf = pd.DataFrame.sparse.from_spmatrix(tfidf_vectorizer_vectors)
         dataframe_tf_idf = df_tf_idf
         self.words_unique = self.tfidf_vectorizer.get_feature_names()
         # Save sparse matrix in current directory
         data_folder = './'
 
-        sps.save_npz(os.path.join(data_folder, 'pro_words.npz'), self.tfidf_vectorizer)
+        sps.save_npz(os.path.join(data_folder, 'pro_words.npz'), tfidf_vectorizer_vectors)
 
         self.words_dict = dict({})
         for i in range(0, len(self.words_unique)):
@@ -60,13 +62,14 @@ class TF_IDF(base_model):
 
     def compute_similarity(self, shrink=10, topK=100, normalize=True, similarity="cosine"):
         self.shrink, self.topK, self.normalize, self.similarity = shrink, topK, normalize, similarity
-        self.similarity_matrix = Compute_Similarity(self.tfidf_vectorizer.T, shrink=shrink, topK=topK,
+        self.similarity_matrix = Compute_Similarity(self.vectors.T, shrink=shrink, topK=topK,
                                                     normalize=normalize,
                                                     similarity=similarity).compute_similarity()
 
     def save_similarity_matrix(self, data_folder):
-        sps.save_npz(os.path.join(data_folder, 'TF_IDF_pro_pro_' + str(self.shrink) + str(self.topK) + str(self.normalize) + '.npz'),
-                    self.similarity_matrix)
+        sps.save_npz(os.path.join(data_folder,
+                                  'TF_IDF_pro_pro_' + str(self.shrink) + str(self.topK) + str(self.normalize) + '.npz'),
+                     self.similarity_matrix)
 
     def _compute_problem_score(self, problems, corrects, target_problem):
         """
