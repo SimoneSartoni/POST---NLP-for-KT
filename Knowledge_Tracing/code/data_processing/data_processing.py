@@ -63,21 +63,25 @@ def assistments_process_bodies(df):
     problem_ids, assistment_ids, bodies = df['problem_id'], df['assistment_id'], df['body']
     texts = []
     # nltk.download('stopwords')
-    for body in bodies:
+    problem_id_to_index = dict({})
+    index = 0
+    for body, id in list(zip(bodies, problem_ids)):
         text = escape_values(body)
         # text = remove_words_not_in_english_dict(text)
         text = remove_stopwords(text)
         text = remove_issues(text)
         texts.append(text)
-    return problem_ids, texts
+        problem_id_to_index[id] = index
+        index += 1
+    return texts, problem_id_to_index
 
 
 def junyi_process_questions(df):
     problem_names, questions, question_descriptions = df['question_name'], df['chinese_question'], df[
         'chinese_question_desc']
     texts = []
+    problem_id_to_index = dict({})
     # nltk.download('stopwords')
-    problem_ids = range(0, len(questions))
     for index in range(0, len(questions)):
         text = escape_values(questions[index])
         text_desc = escape_values(question_descriptions[index])
@@ -86,41 +90,40 @@ def junyi_process_questions(df):
         text = remove_stopwords(text)
         text = remove_issues(text)
         texts.append(text)
-    return problem_ids, texts
+        problem_id_to_index[index] = index
+    return texts, problem_id_to_index
 
 
 def generate_questions_poj(df):
     questions = []
-    number_to_index = dict({})
+    problem_id_to_index = dict({})
     index = -1
     for row in df["data"]:
         if '#' in row:
             array = row.split('#')
             if array[0].isdigit():
                 questions.append(" ")
-                index = index + 1
-                number = int(array[0])
-                number_to_index[number] = index
+                index += 1
+                id = int(array[0])
+                problem_id_to_index[id] = index
                 questions[index] = array[1]
 
         else:
             new = str(questions[index]) + str(row)
             questions[index] = new
     questions.append([])
-    problem_ids = number_to_index.keys()
-    return problem_ids, questions, number_to_index
+    return questions, problem_id_to_index
 
 
 def poj_process_bodies(df):
-    problem_ids, questions, number_to_index = generate_questions_poj(df)
-    texts = []
+    questions, problem_id_to_index = generate_questions_poj(df)
     # nltk.download('stopwords')
-    for index in range(0, len(questions)):
-        text = escape_values(questions[index])
-        # text = remove_words_not_in)
+    for id in problem_id_to_index.keys():
+        text = escape_values(questions[problem_id_to_index[id]])
+        # text = remove_words_not_in
         text = remove_issues(text)
-        texts.append(text)
-    return number_to_index, texts
+        questions[problem_id_to_index[id]] = text
+    return questions, problem_id_to_index
 
 
 def generate_text_and_interacted_sets(problem_ids, problems):
@@ -130,7 +133,6 @@ def generate_text_and_interacted_sets(problem_ids, problems):
     problems_with_text_set = set(problem_ids)
 
     problems_text_and_interacted_set = problems_with_text_set.intersection(problems_interacted_set)
-    print(problems_text_and_interacted_set)
     return problems_with_text_set, problems_interacted_set, problems_text_and_interacted_set
 
 

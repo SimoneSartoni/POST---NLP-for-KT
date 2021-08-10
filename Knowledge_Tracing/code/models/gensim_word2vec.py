@@ -72,7 +72,7 @@ class world2vec(base_model):
         word_vectors.save("word2vec" + str(self.vector_size) + str(self.epochs) + ".wordvectors")
 
     # Overriding abstract method
-    def _compute_problem_score(self, problems, corrects, target_problem):
+    def compute_problem_score(self, problems, corrects, target_problem):
         """
 
         """

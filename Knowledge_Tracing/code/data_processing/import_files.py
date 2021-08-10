@@ -61,7 +61,7 @@ def import_junyi_interactions():
 
 
 # Load and process interactions of POJ dataset
-def import_poj_interactions(number_to_index):
+def import_poj_interactions():
     data = pd.read_csv('C:/Users/Simone Sartoni/Simone/Universita/5anno/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/data/poj/poj_log.csv')
     real_lens = []
     problems = []
@@ -75,15 +75,14 @@ def import_poj_interactions(number_to_index):
         y = []
         k = 0
         for p, c in list(zip(*(problem_df, correct_answer))):
-            if p in number_to_index:
-                problem_list.append(number_to_index[p])
-                if c == "Accepted":
-                    correct.append(1.0)
-                    y.append(1.0)
-                else:
-                    correct.append(-1.0)
-                    y.append(0.0)
-                k += 1
+            problem_list.append(p)
+            if c == "Accepted":
+                correct.append(1.0)
+                y.append(1.0)
+            else:
+                correct.append(-1.0)
+                y.append(0.0)
+            k += 1
         if k > 1:
             real_lens.append(k)
             problems.append(problem_list)

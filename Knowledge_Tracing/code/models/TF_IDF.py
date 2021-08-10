@@ -71,13 +71,14 @@ class TF_IDF(base_model):
                                   'TF_IDF_pro_pro_' + str(self.shrink) + str(self.topK) + str(self.normalize) + '.npz'),
                      self.similarity_matrix)
 
-    def _compute_problem_score(self, problems, corrects, target_problem):
+    def compute_problem_score(self, problems, corrects, target_problem):
         """
 
         """
         item_scores = self.similarity_matrix.tocsr()[problems, :].dot(
             self.similarity_matrix.tocsr().getrow(target_problem).transpose())
         item_scores = item_scores.transpose().todense().dot(corrects)
-        if item_scores == 0.0:
-            return -10.0
-        return item_scores
+        if item_scores > 0.0:
+            return 1.0
+        else:
+            return 0.0
