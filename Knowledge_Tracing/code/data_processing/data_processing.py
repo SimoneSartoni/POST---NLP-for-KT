@@ -62,7 +62,7 @@ def remove_issues(text):
 def assistments_process_bodies(df):
     problem_ids, assistment_ids, bodies = df['problem_id'], df['assistment_id'], df['body']
     texts = []
-    nltk.download('stopwords')
+    # nltk.download('stopwords')
     for body in bodies:
         text = escape_values(body)
         # text = remove_words_not_in_english_dict(text)
@@ -76,7 +76,7 @@ def junyi_process_questions(df):
     problem_names, questions, question_descriptions = df['question_name'], df['chinese_question'], df[
         'chinese_question_desc']
     texts = []
-    nltk.download('stopwords')
+    # nltk.download('stopwords')
     problem_ids = range(0, len(questions))
     for index in range(0, len(questions)):
         text = escape_values(questions[index])
@@ -86,18 +86,18 @@ def junyi_process_questions(df):
         text = remove_stopwords(text)
         text = remove_issues(text)
         texts.append(text)
-    return texts, problem_ids
+    return problem_ids, texts
 
 
 def generate_questions_poj(df):
     questions = []
     number_to_index = dict({})
-    index = 0
-    for row in df['data']:
+    index = -1
+    for row in df["data"]:
         if '#' in row:
             array = row.split('#')
             if array[0].isdigit():
-                questions.append([])
+                questions.append(" ")
                 index = index + 1
                 number = int(array[0])
                 number_to_index[number] = index
@@ -108,30 +108,28 @@ def generate_questions_poj(df):
             questions[index] = new
     questions.append([])
     problem_ids = number_to_index.keys()
-    return questions, problem_ids, number_to_index
+    return problem_ids, questions, number_to_index
 
 
 def poj_process_bodies(df):
-    questions, number_to_index = generate_questions_poj(df)
+    problem_ids, questions, number_to_index = generate_questions_poj(df)
     texts = []
-    nltk.download('stopwords')
+    # nltk.download('stopwords')
     for index in range(0, len(questions)):
         text = escape_values(questions[index])
-        # text = remove_words_not_in_english_dict(text)
-        text = remove_stopwords(text)
+        # text = remove_words_not_in)
         text = remove_issues(text)
         texts.append(text)
-    return texts, number_to_index
+    return number_to_index, texts
 
 
 def generate_text_and_interacted_sets(problem_ids, problems):
-    problems_interacted_set = set([])
+    problems_interacted_set = set()
     for problem in problems:
-        problems_set_with_results = problems_interacted_set.union(set(problem))
+        problems_interacted_set = problems_interacted_set.union(set(problem))
     problems_with_text_set = set(problem_ids)
-    print(problems_with_text_set)
-    print(problems_interacted_set)
-    problems_text_and_interacted_set = problems_with_text_set.intersection(problems_set_with_results)
+
+    problems_text_and_interacted_set = problems_with_text_set.intersection(problems_interacted_set)
     print(problems_text_and_interacted_set)
     return problems_with_text_set, problems_interacted_set, problems_text_and_interacted_set
 
