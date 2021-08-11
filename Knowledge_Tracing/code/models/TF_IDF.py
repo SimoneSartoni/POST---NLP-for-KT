@@ -28,7 +28,6 @@ class TF_IDF(base_model):
             preprocessor=identity_tokenizer,
             token_pattern=None,
             use_idf=True)
-        self.problem_to_text = None
         self.similarity_matrix = None
         self.words_unique = None
         self.pro_num = None
@@ -39,8 +38,12 @@ class TF_IDF(base_model):
         self.normalize = True
         self.similarity = "cosine"
         self.vectors = None
+        self.problem_id_to_index = None
+        self.problem_ids = None
 
-    def fit(self, texts):
+    def fit(self, problem_id_to_index, texts):
+        self.problem_id_to_index = problem_id_to_index
+        self.problem_ids = problem_id_to_index.keys()
         tfidf_vectorizer_vectors = self.tfidf_vectorizer.fit_transform(texts)
         self.vectors = tfidf_vectorizer_vectors
         df_tf_idf = pd.DataFrame.sparse.from_spmatrix(tfidf_vectorizer_vectors)
@@ -51,7 +54,7 @@ class TF_IDF(base_model):
 
         sps.save_npz(os.path.join(data_folder, 'pro_words.npz'), tfidf_vectorizer_vectors)
 
-        self.words_dict = dict({})
+        self.words_dict = {}
         for i in range(0, len(self.words_unique)):
             self.words_dict[str(i)] = self.words_unique[i]
         self.pro_num = dataframe_tf_idf.shape[0]
@@ -71,14 +74,24 @@ class TF_IDF(base_model):
                                   'TF_IDF_pro_pro_' + str(self.shrink) + str(self.topK) + str(self.normalize) + '.npz'),
                      self.similarity_matrix)
 
-    def compute_problem_score(self, problems, corrects, target_problem):
+    def compute_problem_score(self, input_problems, corrects, target_problem, default_value):
         """
 
         """
-        item_scores = self.similarity_matrix.tocsr()[problems, :].dot(
-            self.similarity_matrix.tocsr().getrow(target_problem).transpose())
-        item_scores = item_scores.transpose().todense().dot(corrects)
-        if item_scores > 0.0:
-            return 1.0
+        input_ids = []
+        correct_ids = []
+        for p, c in list(zip(input_problems, corrects)):
+            if p in self.problem_ids:
+                input_ids.append(self.problem_id_to_index[p])
+                correct_ids.append(c)
+        if target_problem in self.problem_ids:
+            item_scores = self.similarity_matrix.tocsr()[input_ids, :].dot(
+                self.similarity_matrix.tocsr().getrow(self.problem_id_to_index[target_problem]).transpose())
+            item_scores = item_scores.transpose().todense().dot(correct_ids)
+            if item_scores > 0.0:
+                return 1.0
+            elif item_scores < 0.0:
+                return 0.0
         else:
-            return 0.0
+            return default_value
+

@@ -62,8 +62,8 @@ def remove_issues(text):
 def assistments_process_bodies(df):
     problem_ids, assistment_ids, bodies = df['problem_id'], df['assistment_id'], df['body']
     texts = []
-    # nltk.download('stopwords')
-    problem_id_to_index = dict({})
+    nltk.download('stopwords')
+    problem_id_to_index = {}
     index = 0
     for body, id in list(zip(bodies, problem_ids)):
         text = escape_values(body)
@@ -80,7 +80,7 @@ def junyi_process_questions(df):
     problem_names, questions, question_descriptions = df['question_name'], df['chinese_question'], df[
         'chinese_question_desc']
     texts = []
-    problem_id_to_index = dict({})
+    problem_id_to_index = {}
     # nltk.download('stopwords')
     for index in range(0, len(questions)):
         text = escape_values(questions[index])
@@ -96,7 +96,7 @@ def junyi_process_questions(df):
 
 def generate_questions_poj(df):
     questions = []
-    problem_id_to_index = dict({})
+    problem_id_to_index = {}
     index = -1
     for row in df["data"]:
         if '#' in row:

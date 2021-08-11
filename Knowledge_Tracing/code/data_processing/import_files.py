@@ -11,7 +11,7 @@ def import_questions_text(datasets_dict):
         elif el.name == "junyi_texts":
             problems = pd.read_csv(el.path, low_memory=False, sep='#')
         else:
-            problems = pd.read_csv(el.path, low_memory=False, error_bad_lines=False)
+            problems = pd.read_csv(el.path, low_memory=False)
         datasets[el.name] = problems
     return datasets
 

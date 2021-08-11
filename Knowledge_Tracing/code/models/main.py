@@ -7,10 +7,14 @@ from Knowledge_Tracing.code.data_processing.data_processing import assistments_p
     generate_text_and_interacted_sets
 from Knowledge_Tracing.code.evaluation import *
 from Knowledge_Tracing.code.models.TF_IDF import TF_IDF
+from Knowledge_Tracing.code.models.gensim_word2vec import world2vec
 from Knowledge_Tracing.code.utils.utils import write_txt
 from Knowledge_Tracing.code.evaluation.predictor import predictor as Predictor
 from Knowledge_Tracing.code.evaluation.evaluation import evaluator as Evaluator
 from Knowledge_Tracing.code.evaluation.balanced_accuracy import balanced_accuracy
+
+from distutils.core import setup
+from Cython.Build import cythonize
 
 
 def import_text():
@@ -32,29 +36,31 @@ def import_text():
 
 def tf_idf_evaluation(dataset):
     tf_idf = TF_IDF()
-    print(dataset.texts)
-    tf_idf.fit(dataset.texts)
+    tf_idf.fit(dataset.problem_id_to_index, dataset.texts)
     tf_idf.compute_similarity()
-    similarity_matrix = tf_idf.similarity_matrix
-    models = [tf_idf]
+    gensim_model = world2vec(name="word2vec", class_of_method="NLP")
+    gensim_model.fit(dataset.texts)
+    gensim_model.encode_problems(dataset.problem_id_to_index, dataset.texts)
+    models = [tf_idf, gensim_model]
     predictor = Predictor()
     labels, predictions = predictor.compute_predictions(dataset=dataset, models=models)
-    metrics = [balanced_accuracy]
+    metrics = [balanced_accuracy(name="balanced_accuracy")]
     evaluator = Evaluator("Evaluator", metrics)
     return evaluator.evaluate(labels, models, predictions)
 
 
 def main():
+
     # import text of POJ (needed to import its interactions)
     datasets = import_text()
 
     # import interaction datasets
-    # assistment_dataset = import_assistments_interactions()
-    # junyi_dataset = import_junyi_interactions()
+    """assistment_dataset = import_assistments_interactions()
+    junyi_dataset = import_junyi_interactions()"""
     poj_dataset = import_poj_interactions()
 
-    """ # import assistment texts dataset
-    texts, problem_id_to_index = poj_process_bodies(datasets["poj_texts"])
+    """# import assistment texts dataset
+    texts, problem_id_to_index = assistments_process_bodies(datasets["assistments_texts"])
     problem_ids = problem_id_to_index.keys()    
     # produces set of problems according to data available
     problems_with_text_set, problems_interacted_set, problems_text_and_interacted_set = \
@@ -63,7 +69,7 @@ def main():
                                  problems_text_and_interacted_set)
 
     # import junyi texts dataset
-    texts, problem_id_to_index = poj_process_bodies(datasets["poj_texts"])
+    texts, problem_id_to_index = junyi_process_questions(datasets["junyi_texts"])
     problem_ids = problem_id_to_index.keys()    
     # produces set of problems according to data available
     problems_with_text_set, problems_interacted_set, problems_text_and_interacted_set = \
@@ -80,20 +86,19 @@ def main():
     poj_dataset.set_texts(texts, problem_id_to_index, problems_with_text_set, problems_interacted_set,
                           problems_text_and_interacted_set)
 
+    """assistment_dataset.set_performances(tf_idf_evaluation(assistment_dataset))
+    junyi_dataset.set_performances(tf_idf_evaluation(junyi_dataset))"""
+    poj_dataset.set_performances(tf_idf_evaluation(poj_dataset))
 
     """assistment_dataset.write_dataset_info()
     junyi_dataset.write_dataset_info()"""
     poj_dataset.write_dataset_info()
 
-    """print(TF_IDF_evaluation(assistment_dataset))
-    print(TF_IDF_evaluation(junyi_dataset))"""
-    print(tf_idf_evaluation(poj_dataset))
 
-
-    write_txt("C:/Users/Simone Sartoni/Simone/Universita/5anno/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/logs/problems_set", problems_text_and_interacted_set)
+    """write_txt("C:/Users/Simone Sartoni/Simone/Universita/5anno/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/logs/problems_set", problems_text_and_interacted_set)
     write_txt("C:/Users/Simone Sartoni/Simone/Universita/5anno/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/logs/problems_texts", texts)
     write_txt("C:/Users/Simone Sartoni/Simone/Universita/5anno/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/logs/problems_ids", problem_ids)
-
+    """
 
 
 
