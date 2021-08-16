@@ -9,6 +9,6 @@ class base_model(metaclass=ABCMeta):
         self.time_to_train = 0
 
     @abstractmethod
-    def compute_problem_score(self, problems, corrects, target_problem):
+    def compute_problem_score(self, input_problems, corrects, target_problem, default_value):
         pass
 

@@ -8,6 +8,8 @@ Created on 06/06/18
 
 import numpy as np
 import scipy.sparse as sps
+import pyximport
+pyximport.install()
 
 from Knowledge_Tracing.code.Similarity.Compute_Similarity_Python import Compute_Similarity_Python
 from Knowledge_Tracing.code.Similarity.Compute_Similarity_Euclidean import Compute_Similarity_Euclidean
@@ -84,7 +86,7 @@ class Compute_Similarity:
             if use_implementation == "cython":
 
                 try:
-                    from Knowledge_Tracing.code.Similarity.Cython.Compute_Similarity_Cython import Compute_Similarity_Cython
+                    from Compute_Similarity_Cython import Compute_Similarity_Cython
                     self.compute_similarity_object = Compute_Similarity_Cython(dataMatrix, **args)
 
                 except ImportError:

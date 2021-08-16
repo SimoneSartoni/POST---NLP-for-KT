@@ -38,13 +38,20 @@ class TF_IDF(base_model):
         self.normalize = True
         self.similarity = "cosine"
         self.vectors = None
-        self.problem_id_to_index = None
+        self.problem_id_to_index = {}
         self.problem_ids = None
+        self.texts = None
 
-    def fit(self, problem_id_to_index, texts):
-        self.problem_id_to_index = problem_id_to_index
-        self.problem_ids = problem_id_to_index.keys()
-        tfidf_vectorizer_vectors = self.tfidf_vectorizer.fit_transform(texts)
+    def fit(self, interacted_and_text_problems, problem_id_to_index, texts):
+        self.problem_ids = interacted_and_text_problems
+        self.texts = []
+        index = 0
+        for p in self.problem_ids:
+            self.problem_id_to_index[p] = index
+            self.texts.append(texts[problem_id_to_index[p]])
+            index += 1
+        print(self.texts)
+        tfidf_vectorizer_vectors = self.tfidf_vectorizer.fit_transform(self.texts)
         self.vectors = tfidf_vectorizer_vectors
         df_tf_idf = pd.DataFrame.sparse.from_spmatrix(tfidf_vectorizer_vectors)
         dataframe_tf_idf = df_tf_idf
@@ -52,7 +59,7 @@ class TF_IDF(base_model):
         # Save sparse matrix in current directory
         data_folder = './'
 
-        sps.save_npz(os.path.join(data_folder, 'pro_words.npz'), tfidf_vectorizer_vectors)
+        sps.save_npz(os.path.join(data_folder, '../pro_words.npz'), tfidf_vectorizer_vectors)
 
         self.words_dict = {}
         for i in range(0, len(self.words_unique)):
@@ -63,35 +70,44 @@ class TF_IDF(base_model):
     def write_words_unique(self, data_folder):
         write_txt(os.path.join(data_folder, 'words_set.txt'), self.words_unique)
 
-    def compute_similarity(self, shrink=10, topK=100, normalize=True, similarity="cosine"):
+    def load_similarity_matrix(self, path):
+        self.similarity_matrix = sps.load_npz(path)
+
+    def compute_similarity(self, shrink=10, topK=100, normalize=True, similarity="cosine", dataset_name=''):
         self.shrink, self.topK, self.normalize, self.similarity = shrink, topK, normalize, similarity
         self.similarity_matrix = Compute_Similarity(self.vectors.T, shrink=shrink, topK=topK,
                                                     normalize=normalize,
                                                     similarity=similarity).compute_similarity()
+        self.save_similarity_matrix(dataset_name=dataset_name)
 
-    def save_similarity_matrix(self, data_folder):
+    def save_similarity_matrix(self, dataset_name):
+        data_folder = "C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/code/models/TF_IDF/"
         sps.save_npz(os.path.join(data_folder,
-                                  'TF_IDF_pro_pro_' + str(self.shrink) + str(self.topK) + str(self.normalize) + '.npz'),
+                                  dataset_name+'TF_IDF_pro_pro_' + str(self.shrink) + str(self.topK) + str(self.normalize) + '.npz'),
                      self.similarity_matrix)
 
-    def compute_problem_score(self, input_problems, corrects, target_problem, default_value):
+    def compute_problem_score(self, input_problems, corrects, target_problem, default_value=0.0):
         """
 
         """
         input_ids = []
         correct_ids = []
+        unique_problems_set = set()
         for p, c in list(zip(input_problems, corrects)):
             if p in self.problem_ids:
+                # and p not in unique_problems_set:
+                # unique_problems_set.add(p)
                 input_ids.append(self.problem_id_to_index[p])
                 correct_ids.append(c)
         if target_problem in self.problem_ids:
             item_scores = self.similarity_matrix.tocsr()[input_ids, :].dot(
                 self.similarity_matrix.tocsr().getrow(self.problem_id_to_index[target_problem]).transpose())
             item_scores = item_scores.transpose().todense().dot(correct_ids)
+            if not item_scores:
+                return default_value
             if item_scores > 0.0:
                 return 1.0
             elif item_scores < 0.0:
                 return 0.0
         else:
             return default_value
-

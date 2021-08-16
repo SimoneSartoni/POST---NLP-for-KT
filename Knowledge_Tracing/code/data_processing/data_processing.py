@@ -1,4 +1,6 @@
 import gc
+import re
+from bs4 import BeautifulSoup
 
 import numpy as np
 import pandas as pd
@@ -15,21 +17,28 @@ from Knowledge_Tracing.code.data_processing.dataset_pytorch import dataset
 
 # eng_dict = hunspell.HunSpell('/usr/share/hunspell/en_US.dic', '/usr/share/hunspell/en_US.aff')
 
-
 def escape_values(question):
-    text = str(question).replace(' ', '#').replace('/', '#slash#').replace('<', '#lessthan#').replace('>',
-                                                                                                      '#morethan#').replace(
-        ",", "#comma#").replace(";", "#semicolon#").replace(".", "#point#").replace("?", "#questionmark#").replace(
-        "!", "exclamationpoint").replace("=", "#equal#").replace("\\", "#slash#").replace("%",
-                                                                                          "#percentage#").replace(
-        "\\t", "#").replace("\\n", "#").replace("\t", "#").replace("\n", "#").replace('\"',
-                                                                                      "#quotationmark#").replace(
-        "(", "#openroundbracket#").replace(")", "#closeroundbracket#").replace("[", "#opensquarebracket#").replace(
-        "]", "#closesquarebracket#").replace("_", "#underscore#").replace("&", "#ampersand#").replace("}",
-                                                                                                      "#closebrace#").replace(
-        "{", "#openbrace#").replace("+", "#plus#").replace("-", "#minus#").replace("*", "#multiplication#").replace(
-        "€", "#euros#").replace("$", "#dollar#").replace("^", "#powerof#exponent#")
-    return str(text).split('#')
+    def replace(text):
+        text = str(text).replace(' ', '#').replace('/', '#slash#').replace('<', '#lessthan#').replace('>','#morethan#').replace(",", "#").replace(";", "#").replace(".", "#").replace("?", "#").replace(
+            "!", "exclamationpoint").replace("=", "#equal#").replace("\\", "#").replace("%", "#percentage#").replace(
+            "\\t", "#").replace("\\n", "#").replace("\t", "#").replace("\n", "#").replace('\"', "##").replace(
+            "(", "#openroundbracket#").replace(")", "#closeroundbracket#").replace("[", "#opensquarebracket#").replace(
+            "]", "#closesquarebracket#").replace("_", "#underscore#").replace("&", "#ampersand#").replace("}","#closebrace#").replace(
+            "{", "#openbrace#").replace("+", "#plus#").replace("-", "#minus#").replace("*", "#multiplication#").replace(
+            "€", "#euros#").replace("$", "#dollar#").replace("^", "#powerof#exponent#")
+        words = str(text).split('#')
+        words = list(set(words))
+        return words
+
+    texts = ""
+    question = str(question).lower()
+    # names = ['head', 'p', 'sup', 'br', 'b', 'td', 'tr', 'table', 'i', 'em', 'sub', 'tbody', 'strong', 'span', 'li', 'ul', ]
+    soup = BeautifulSoup(question, "html.parser")
+    for el in soup.find_all('img'):
+        texts = texts + ' ' + str(el.unwrap())
+    p = re.compile(r'<.*?>')
+    texts = texts + ' ' + p.sub('', question)
+    return replace(texts)
 
 
 """def remove_words_not_in_english_dict(text):
@@ -50,6 +59,8 @@ def remove_stopwords(text):
 
 
 def remove_issues(text):
+    if text.count('Timeout') > 0:
+        text.remove('Timeout')
     if text.count('TIMEOUT') > 0:
         text.remove('TIMEOUT')
     if text.count('ISSUE') > 0:
@@ -59,19 +70,20 @@ def remove_issues(text):
     return text
 
 
+
 def assistments_process_bodies(df):
     problem_ids, assistment_ids, bodies = df['problem_id'], df['assistment_id'], df['body']
     texts = []
     nltk.download('stopwords')
     problem_id_to_index = {}
     index = 0
-    for body, id in list(zip(bodies, problem_ids)):
+    for body, problem_id in list(zip(bodies, problem_ids)):
         text = escape_values(body)
         # text = remove_words_not_in_english_dict(text)
         text = remove_stopwords(text)
         text = remove_issues(text)
         texts.append(text)
-        problem_id_to_index[id] = index
+        problem_id_to_index[problem_id] = index
         index += 1
     return texts, problem_id_to_index
 
@@ -82,15 +94,18 @@ def junyi_process_questions(df):
     texts = []
     problem_id_to_index = {}
     # nltk.download('stopwords')
-    for index in range(0, len(questions)):
-        text = escape_values(questions[index])
-        text_desc = escape_values(question_descriptions[index])
+    index = 0
+    for question_id in range(0, len(questions)):
+        text = escape_values(questions[question_id])
+        text_desc = escape_values(question_descriptions[question_id])
         text = list(set(text) | set(text_desc))
         # text = remove_words_not_in_english_dict(text)
         text = remove_stopwords(text)
         text = remove_issues(text)
-        texts.append(text)
-        problem_id_to_index[index] = index
+        if len(text) > 0:
+            texts.append(text)
+            problem_id_to_index[question_id] = index
+        index += 1
     return texts, problem_id_to_index
 
 
@@ -118,7 +133,8 @@ def generate_questions_poj(df):
 def poj_process_bodies(df):
     questions, problem_id_to_index = generate_questions_poj(df)
     # nltk.download('stopwords')
-    for id in problem_id_to_index.keys():
+    copy = problem_id_to_index.keys()
+    for id in copy:
         text = escape_values(questions[problem_id_to_index[id]])
         # text = remove_words_not_in
         text = remove_issues(text)
@@ -127,12 +143,15 @@ def poj_process_bodies(df):
 
 
 def generate_text_and_interacted_sets(problem_ids, problems):
-    problems_interacted_set = set()
+    problems_text_and_interacted_set = []
+    problems_with_text_set = problem_ids
+    problems_interacted_set = []
     for problem in problems:
-        problems_interacted_set = problems_interacted_set.union(set(problem))
-    problems_with_text_set = set(problem_ids)
-
-    problems_text_and_interacted_set = problems_with_text_set.intersection(problems_interacted_set)
+        for p in problem:
+            if p not in problems_interacted_set:
+                problems_interacted_set.append(p)
+                if p in problems_with_text_set:
+                    problems_text_and_interacted_set.append(p)
     return problems_with_text_set, problems_interacted_set, problems_text_and_interacted_set
 
 

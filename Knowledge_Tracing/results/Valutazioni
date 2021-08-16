@@ -1,0 +1,17 @@
+Per quanto riguarda i dataset ho notato che effettivamente ognuno di essi ha delle differenze evidenti e problematiche correlate, ho calcolato alcuni valori per ogni dataset:
+
+Ad esempio POJ:
+ {'name': 'poj', 'target mean': 0.355222, 'number_of_users': 19563, 'average_number_of_interactions_per_users': 50.75, 'number of total interactions': 19563, 'all_1_predictor_precision': 0.355222, 'all_0_predictor_precision': 0.644777, 'average number of problems we know text per user': 17.439503143689617,
+
+Inoltre, ho anche impiegato tempo per organizzare in modo strutturato il mio codice, creando classi astratte in modo da rendere l’esecuzione delle varie fasi (caricamento dati, pulizia, analisi, creazione modello, training, generazione previsioni, valutazione) indipendente dai modelli, dalle metriche e dai dataset usati.
+Al momento ho provato i due modelli (TF_IDF, e Word2Vec) sui vari dataset, tenendo conto della moda del dataset in automatico (che in poj ad esempio è 0, mentre in Assistments e junyi è 1), e restituendo quella qualora non si avessero informazioni sul testo del problema da predire.
+I risultati (temporanei, visto che non ho ancora ottimizzato i parametri dei modelli) sono stati molto soddisfacenti per POJ:
+all_1_predictor balanced accuracy: 0. 644777      (baseline di riferimento per il modello più semplice ma efficace)
+{TF_IDF': {'balanced_accuracy': 0.7294}, 'word2vec': {'balanced_accuracy': 0.7116}}}
+Mostrando un significativo aumento anche con modelli semplici come TF_IDF.
+
+Mentre per Assistments i risultati sono stati scarsi e anzi hanno peggiorato di poco il risultato della baseline:
+'all_1_predictor_precision': 0.6955
+{'TF_IDF': {'balanced_accuracy': 0.6822}, 'word2vec': {'balanced_accuracy': 0.6839}}}
+
+In questo caso ho analizzato le differenze fra i dataset e penso siano dovute al basso numero di problemi di cui abbiamo il testo e le interazioni dell’utente. Perciò al momento sto cercando di migliorare il dataset di assistments, unendo i dati provenienti sia da quello del 2009, sia da quello del 2012.

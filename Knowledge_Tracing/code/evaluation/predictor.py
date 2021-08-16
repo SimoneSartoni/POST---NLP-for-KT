@@ -12,7 +12,9 @@ class predictor:
         for model in models:
             self.predictions[model.name] = []
         self.labels = []
-        for problem, correct, real_len in list(zip(*(dataset.problems, dataset.corrects, dataset.real_lens))):
+        i = 0
+        for problem, correct, real_len in list(zip(*(dataset.users_interactions_problems, dataset.user_interactions_labels, dataset.user_interactions_lengths))):
+            i += 1
             target_problem = problem[real_len-1]
             input_problems = problem[:real_len-1]
             input_corrects = correct[:real_len-1]
@@ -22,5 +24,7 @@ class predictor:
                 self.labels.append(0.0)
             else:
                 self.labels.append(1.0)
+            if i % 1000 == 0:
+                print(i)
         self.time_to_predict = round((time() - t) / 60, 2)
         return self.labels, self.predictions
