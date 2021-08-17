@@ -55,7 +55,7 @@ class dataset:
         interacted_problem_list = []
         for problem in self.users_interactions_problems:
             for p in problem:
-                if p not in interacted_problem_list:
+                if not (p in interacted_problem_list):
                     interacted_problem_list.append(p)
         self.interacted_problem_list = interacted_problem_list
 
@@ -90,7 +90,9 @@ class dataset:
                     problems_list.append(el)
             self.user_interactions_with_known_text.append(problems_list)
             self.users_interactions_with_known_text_lengths.append(len(problems_list))
-        self.interacted_with_text_problem_set = set(self.interacted_problem_list).intersection(set(self.problems_with_text_known_list))
+
+        self.interacted_with_text_problem_set = set(self.interacted_problem_list).intersection(
+            set(self.problems_with_text_known_list))
         self.avg_number_of_interactions_with_known_text_per_user = np.mean(
             [len(p) for p in self.user_interactions_with_known_text])
 
@@ -100,15 +102,12 @@ class dataset:
     def save_texts(self):
         file = "C:/thesis_2/TransformersForKnowledgeTracing" \
                "/Knowledge_Tracing/logs/" + self.name + "/texts_list.json"
-        a_file = open(file, "w")
-        json.dump(self.texts_list, a_file)
-        a_file.close()
-
+        with open(file, "w") as f:
+            json.dump(self.texts_list, f)
         file = "C:/thesis_2/TransformersForKnowledgeTracing" \
                "/Knowledge_Tracing/logs/" + self.name + "/problem_id_to_index.json"
-        a_file = open(file, "w")
-        json.dump(self.problem_id_to_index, a_file)
-        a_file.close()
+        with open(file, "w") as f:
+            json.dump(self.problem_id_to_index, f)
 
     def load_saved_texts(self, path="C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/results/"):
         file = path + self.name + "/texts_list.json"
@@ -117,7 +116,10 @@ class dataset:
 
         file = path + self.name + "/problem_id_to_index.json"
         with open(file, "r") as f:
-            self.problem_id_to_index = json.load(f)
+            x = json.load(f)
+        self.problem_id_to_index = {}
+        for el in x.keys():
+            self.problem_id_to_index[int(el)] = x[el]
         self._compute_problems_with_text_known_list()
         self._compute_texts_metadata()
 

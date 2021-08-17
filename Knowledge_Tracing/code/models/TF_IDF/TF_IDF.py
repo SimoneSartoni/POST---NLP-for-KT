@@ -50,7 +50,6 @@ class TF_IDF(base_model):
             self.problem_id_to_index[p] = index
             self.texts.append(texts[problem_id_to_index[p]])
             index += 1
-        print(self.texts)
         tfidf_vectorizer_vectors = self.tfidf_vectorizer.fit_transform(self.texts)
         self.vectors = tfidf_vectorizer_vectors
         df_tf_idf = pd.DataFrame.sparse.from_spmatrix(tfidf_vectorizer_vectors)
@@ -70,8 +69,9 @@ class TF_IDF(base_model):
     def write_words_unique(self, data_folder):
         write_txt(os.path.join(data_folder, 'words_set.txt'), self.words_unique)
 
-    def load_similarity_matrix(self, path):
-        self.similarity_matrix = sps.load_npz(path)
+    def load_similarity_matrix(self, dataset_name):
+        data_folder = "C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/results/"
+        self.similarity_matrix = sps.load_npz(os.path.join(data_folder, dataset_name + '/TF_IDF_similarity_' + str(self.shrink) + '_' + str(self.topK) + '_' + str(self.normalize) + '.npz'))
 
     def compute_similarity(self, shrink=10, topK=100, normalize=True, similarity="cosine", dataset_name=''):
         self.shrink, self.topK, self.normalize, self.similarity = shrink, topK, normalize, similarity
@@ -83,7 +83,7 @@ class TF_IDF(base_model):
     def save_similarity_matrix(self, dataset_name):
         data_folder = "C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/code/models/TF_IDF/"
         sps.save_npz(os.path.join(data_folder,
-                                  dataset_name+'TF_IDF_pro_pro_' + str(self.shrink) + str(self.topK) + str(self.normalize) + '.npz'),
+                                  dataset_name+'TF_IDF_similarity_' + str(self.shrink) + '_' + str(self.topK) + '_' + str(self.normalize) + '.npz'),
                      self.similarity_matrix)
 
     def compute_problem_score(self, input_problems, corrects, target_problem, default_value=0.0):

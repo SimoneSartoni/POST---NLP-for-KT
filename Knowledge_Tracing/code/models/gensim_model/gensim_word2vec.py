@@ -1,3 +1,5 @@
+import os.path
+
 import numpy as np
 from time import time
 from gensim.models import Word2Vec
@@ -25,12 +27,27 @@ class world2vec(base_model):
         self.problem_id_to_index = None
         self.problem_ids = None
 
-    def load_model(self, path):
-        self.word2vec = Word2Vec.load(path)
-        self.wordvectors = world2vec.wv
+    def load_model(self, epochs, path="C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/logs/", name="poj"):
+        x = "word2vec_" + str(self.vector_size) + "_" + str(epochs) + ".model"
+        path = path + name + '/'
+        self.word2vec = Word2Vec.load(path + x)
+        self.min_count = self.word2vec.min_count
+        self.window = self.word2vec.window
+        self.vector_size = self.word2vec.vector_size
+        self.workers = self.word2vec.workers
+        self.sg = self.word2vec.sg
+        self.epochs = self.word2vec.epochs
 
-    def load_word_vectors(self, path):
+    def load_word_vectors(self, epochs, path="C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/logs/", name="poj"):
+        x = "word2vec_" + str(self.vector_size) + "_" + str(epochs) + ".wordvectors"
+        path = path + name + '/'
         self.wordvectors = Word2Vec.load(path)
+        self.min_count = self.word2vec.min_count
+        self.window = self.word2vec.window
+        self.vector_size = self.word2vec.vector_size
+        self.workers = self.word2vec.workers
+        self.sg = self.word2vec.sg
+        self.epochs = self.word2vec.epochs
 
     def get_similarity_matrix_from_vectors(self, word_vectors):
         self.word2vec = np.dot(word_vectors.vectors, word_vectors.vectors.T)
@@ -64,7 +81,7 @@ class world2vec(base_model):
             k += 1
 
     def save_model(self, path, name):
-        self.word2vec.save(name + "_word2vec_" + str(self.vector_size) + "_" + str(self.epochs) + ".model")
+        self.word2vec.save("word2vec_" + str(self.vector_size) + "_" + str(self.epochs) + ".model")
 
     def save_vectors(self, name, path):
         word_vectors = self.word2vec.wv
