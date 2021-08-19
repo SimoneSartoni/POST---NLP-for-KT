@@ -37,6 +37,7 @@ class dataset:
         self.avg_words_per_text = 0
 
         self.interacted_with_text_problem_set = []
+        self.number_of_problems_interacted_with_text = 0
 
         self.performances = None
 
@@ -95,6 +96,7 @@ class dataset:
             set(self.problems_with_text_known_list))
         self.avg_number_of_interactions_with_known_text_per_user = np.mean(
             [len(p) for p in self.user_interactions_with_known_text])
+        self.number_of_problems_interacted_with_text = len(self.interacted_with_text_problem_set)
 
     def set_performances(self, performances):
         self.performances = performances

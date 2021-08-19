@@ -11,4 +11,3 @@ class base_model(metaclass=ABCMeta):
     @abstractmethod
     def compute_problem_score(self, input_problems, corrects, target_problem, default_value):
         pass
-

@@ -8,13 +8,15 @@ class evaluator:
         self.performances = {}
         self.metrics = metrics
 
-    def evaluate(self, labels, models, predictions):
+    def evaluate(self, labels, predictions, models, predictors):
         t = time()
         print(labels)
         print(predictions)
-        for model, prediction in list(zip(*(models, predictions))):
-            self.performances[model.name] = {}
-            for metric in self.metrics:
-                self.performances[model.name][metric.name] = metric.evaluate(labels=labels, predictions=predictions[model.name])
+        for predictor in predictors:
+            self.performances[predictor.name] = {}
+            for model in models:
+                self.performances[predictor.name][model.name] = {}
+                for metric in self.metrics:
+                    self.performances[predictor.name][model.name][metric.name] = metric.evaluate(labels=labels[predictor.name], predictions=predictions[predictor.name][model.name])
         self.time_to_evaluate = round((time() - t) / 60, 2)
         return self.performances

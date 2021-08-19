@@ -1,14 +1,8 @@
 from Knowledge_Tracing.code.data_processing.dataset import dataset
-from Knowledge_Tracing.code.data_processing.import_files import import_questions_text, \
-    import_poj_interactions, import_junyi_interactions
+from Knowledge_Tracing.code.data_processing.import_files import import_questions_text
 
 from Knowledge_Tracing.code.data_processing.data_processing import poj_process_bodies, assistments_process_bodies, \
     junyi_process_questions
-from Knowledge_Tracing.code.models.TF_IDF.TF_IDF import TF_IDF
-from Knowledge_Tracing.code.evaluation.predictor import predictor as Predictor
-from Knowledge_Tracing.code.evaluation.evaluation import evaluator as Evaluator
-from Knowledge_Tracing.code.evaluation.balanced_accuracy import balanced_accuracy
-from Knowledge_Tracing.code.models.gensim_model.gensim_word2vec import world2vec
 from Knowledge_Tracing.code.models.models_creation import *
 
 
@@ -28,7 +22,7 @@ def import_text():
 
 def process_dataset_text(target_dataset, dataset_texts, name, load_texts):
     if not load_texts:
-        if name == "assistments":
+        if name == "assistments_2012_npz" or name == "assistments_2012" or name == "assistments_2009":
             texts, problem_id_to_index = assistments_process_bodies(dataset_texts["assistments_texts"])
         elif name == "poj":
             texts, problem_id_to_index = poj_process_bodies(dataset_texts["poj_texts"])
@@ -42,38 +36,13 @@ def process_dataset_text(target_dataset, dataset_texts, name, load_texts):
     return target_dataset
 
 
-def evaluate(input_dataset, models, metrics):
-    predictor = Predictor()
-    labels, predictions = predictor.compute_predictions(dataset=input_dataset, models=models)
-    evaluator = Evaluator("Evaluator", metrics)
-    performances = evaluator.evaluate(labels, models, predictions)
-    input_dataset.set_performances(performances)
-    return input_dataset
-
-
-def main():
-    # import text of poj (needed to import its interactions)
-    datasets = import_text()
-
-    # import interaction datasets
-    # assistment_dataset_npz = import_assistments_2009()
-
-
-    # POJ:
-    poj_dataset = import_poj_interactions()
-    poj_dataset = process_dataset_text(poj_dataset, datasets, "poj", True)
-
-    #JUNYI:
-    #junyi_dataset = import_junyi_interactions()
-    #junyi_dataset = process_dataset_text(junyi_dataset, datasets, "junyi", True)
-
-    models = add_tf_idf_model([], poj_dataset, True)
-    models = add_gensim_model(models, poj_dataset, True, vector_size=200, epochs= 20)
-    metrics = add_balanced_accuracy([])
-    evaluate(poj_dataset, models, metrics)
-    poj_dataset.write_dataset_info()
-
-
-
-
-main()
+def evaluate(input_datasets, models, metrics, predictors=[Predictor()]):
+    labels = {}
+    predictions = {}
+    for input_dataset in input_datasets:
+        for predictor in predictors:
+            labels[predictor.name], predictions[predictor.name] = predictor.compute_predictions(dataset=input_dataset, models=models)
+        evaluator = Evaluator("Evaluator", metrics)
+        performances = evaluator.evaluate(labels, predictions, models, predictors)
+        input_dataset.set_performances(performances)
+    return input_datasets

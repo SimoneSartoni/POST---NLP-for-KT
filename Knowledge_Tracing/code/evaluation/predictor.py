@@ -2,7 +2,8 @@ from time import time
 
 
 class predictor:
-    def __init__(self):
+    def __init__(self, name="base_predictor"):
+        self.name = name
         self.time_to_predict = None
         self.predictions = {}
         self.labels = []
