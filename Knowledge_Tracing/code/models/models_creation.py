@@ -1,6 +1,4 @@
 from Knowledge_Tracing.code.models.TF_IDF.TF_IDF import TF_IDF
-from Knowledge_Tracing.code.evaluation.predictor import predictor as Predictor
-from Knowledge_Tracing.code.evaluation.evaluation import evaluator as Evaluator
 from Knowledge_Tracing.code.evaluation.balanced_accuracy import balanced_accuracy
 from Knowledge_Tracing.code.models.gensim_model.gensim_word2vec import world2vec
 

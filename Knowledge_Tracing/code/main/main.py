@@ -1,9 +1,9 @@
-from Knowledge_Tracing.code.experiments.TF_IDF_experiment import *
+from Knowledge_Tracing.code.experiments.reduce_and_save import *
 
 
 def main():
-    tf_idf_experiment = TF_IDF_experiment()
-    tf_idf_experiment.run()
+    reduce_and_save_exp = reduce_and_save()
+    reduce_and_save_exp.run()
 
 
 main()

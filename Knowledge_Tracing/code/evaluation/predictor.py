@@ -14,7 +14,7 @@ class predictor:
             self.predictions[model.name] = []
         self.labels = []
         i = 0
-        for problem, correct, real_len in list(zip(*(dataset.users_interactions_problems, dataset.user_interactions_labels, dataset.user_interactions_lengths))):
+        for problem, correct, real_len in list(zip(*(dataset.problem_ids, dataset.labels, dataset.lengths))):
             i += 1
             target_problem = problem[real_len-1]
             input_problems = problem[:real_len-1]

@@ -1,5 +1,7 @@
 from Knowledge_Tracing.code.data_processing.dataset import dataset
 from Knowledge_Tracing.code.data_processing.import_files import import_questions_text
+from Knowledge_Tracing.code.evaluation.predictor import predictor
+from Knowledge_Tracing.code.evaluation.evaluator import evaluator as Evaluator
 
 from Knowledge_Tracing.code.data_processing.data_processing import poj_process_bodies, assistments_process_bodies, \
     junyi_process_questions
@@ -8,7 +10,7 @@ from Knowledge_Tracing.code.models.models_creation import *
 
 def import_text():
     assistment_df = dataset(name="assistments_texts",
-                            path="C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/data/Assistments/problem_bodies"
+                            path="C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/data/assistments/problem_bodies"
                                  "/ASSISTments2012DataSet-ProblemBodies.csv")
     junyi_df = dataset(name="junyi_texts",
                        path="C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/data/Junyi/junyi_question_text"
@@ -31,12 +33,12 @@ def process_dataset_text(target_dataset, dataset_texts, name, load_texts):
         # produces set of problems according to data available
         target_dataset.set_texts(texts, problem_id_to_index)
     else:
-        target_dataset.load_saved_texts(path="C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/results/")
+        target_dataset.load_saved_texts()
     target_dataset.compute_intersection_texts_and_interactions()
     return target_dataset
 
 
-def evaluate(input_datasets, models, metrics, predictors=[Predictor()]):
+def evaluate(input_datasets, models, metrics, predictors=[predictor()]):
     labels = {}
     predictions = {}
     for input_dataset in input_datasets:

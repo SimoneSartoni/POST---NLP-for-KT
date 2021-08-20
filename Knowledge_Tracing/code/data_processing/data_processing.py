@@ -59,12 +59,10 @@ def remove_stopwords(text):
 
 
 def remove_issues(text):
-    if text.count('Timeout') > 0:
-        text.remove('Timeout')
-    if text.count('TIMEOUT') > 0:
-        text.remove('TIMEOUT')
-    if text.count('ISSUE') > 0:
-        text.remove('ISSUE')
+    if text.count('timeout') > 0:
+        text.remove('timeout')
+    if text.count('issue') > 0:
+        text.remove('issue')
     if text.count('underscore') > 0:
         text.remove('underscore')
     return text
@@ -155,47 +153,28 @@ def generate_text_and_interacted_sets(problem_ids, problems):
     return problems_with_text_set, problems_interacted_set, problems_text_and_interacted_set
 
 
-def remove_problems_without_text_or_interactions(problems_list, correctness_list, problems_set_text_and_results):
+def reduce_to_known_text(problems_list, correctness_list, lengths, problems_set_text_and_results):
     new_problems_list = []
     new_correctness_list = []
-    for p in range(0, len(problems_list)):
-        if p in problems_set_text_and_results:
+    for p in range(0, lengths):
+        if problems_list[p] in problems_set_text_and_results:
             new_problems_list.append(problems_list[p])
             new_correctness_list.append(correctness_list[p])
     new_real_len = len(new_problems_list)
     return new_problems_list, new_correctness_list, new_real_len
 
 
-def generate_data_for_predictions(problems_set_text_and_results, problems, corrects, real_lens):
-    labels = []
+def remove_interactions_without_text(problems_set_text_and_results, problems, corrects, real_lens):
     new_problems = []
     new_corrects = []
     new_real_lens = []
-    target_problems = []
     for problem, correct, real_len in list(zip(*(problems, corrects, real_lens))):
-        # TF-IDF:
-        target_problem = problem[real_len - 1]
-        target_correct = correct[real_len - 1]
-        new_problem, new_correct, new_real_len = remove_problems_without_text_or_interactions
-        new_problem, new_correct, new_real_len = new_problem[0:-2], new_correct[0:-2], new_real_len - 1
-        if target_problem in problems_set_text_and_results:
+        new_problem, new_correct, new_real_len = reduce_to_known_text(problem, correct, real_len, problems_set_text_and_results)
+        if new_real_len > 0:
             new_problems.append(new_problem)
             new_corrects.append(new_correct)
             new_real_lens.append(new_real_len)
-            target_problems.append(target_problem)
-            if target_correct == 1.0:
-                labels.append(1)
-            else:
-                labels.append(0)
-    return new_problems, new_corrects, new_real_lens, target_problems, labels
-
-
-def train_test_split(data, labels, split=0.8):
-    n_samples = len(data)
-    # x is your dataset
-    training_data, test_data = data[:int(n_samples*split)], data[int(n_samples*split):]
-    training_labels, test_labels = labels[:int(n_samples*split)], labels[int(n_samples*split):]
-    return training_data, test_data, training_labels, test_labels
+    return new_problems, new_corrects, new_real_lens
 
 
 def generate_sequences_for_training_RKT(problems, real_lens, corrects, batch_size=64):
@@ -213,6 +192,7 @@ def generate_sequences_for_training_RKT(problems, real_lens, corrects, batch_siz
     # data = np.load('../input/assesments-12-13-precessed-data/2012-2013-data-with-predictions-4-final.csv.npz')
     skill_num, pro_num = 0, len(problems)
     timestamps = []
+    y = []
     item_ids = [torch.tensor(i).type(torch.cuda.LongTensor) for i in problems]
     timestamp = [
         torch.tensor([(t - np.datetime64('1970-01-01T00:00:00Z')) / np.timedelta64(1, 's') for t in timestamp]).type(
