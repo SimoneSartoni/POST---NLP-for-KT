@@ -19,11 +19,14 @@ from Knowledge_Tracing.code.data_processing.dataset_pytorch import dataset
 
 def escape_values(question):
     def replace(text):
-        text = str(text).replace(' ', '#').replace('/', '#slash#').replace('<', '#lessthan#').replace('>','#morethan#').replace(",", "#").replace(";", "#").replace(".", "#").replace("?", "#").replace(
+        text = str(text).replace(' ', '#').replace('/', '#slash#').replace('<', '#lessthan#').replace('>',
+                                                                                                      '#morethan#').replace(
+            ",", "#").replace(";", "#").replace(".", "#").replace("?", "#").replace(
             "!", "exclamationpoint").replace("=", "#equal#").replace("\\", "#").replace("%", "#percentage#").replace(
             "\\t", "#").replace("\\n", "#").replace("\t", "#").replace("\n", "#").replace('\"', "##").replace(
             "(", "#openroundbracket#").replace(")", "#closeroundbracket#").replace("[", "#opensquarebracket#").replace(
-            "]", "#closesquarebracket#").replace("_", "#underscore#").replace("&", "#ampersand#").replace("}","#closebrace#").replace(
+            "]", "#closesquarebracket#").replace("_", "#underscore#").replace("&", "#ampersand#").replace("}",
+                                                                                                          "#closebrace#").replace(
             "{", "#openbrace#").replace("+", "#plus#").replace("-", "#minus#").replace("*", "#multiplication#").replace(
             "€", "#euros#").replace("$", "#dollar#").replace("^", "#powerof#exponent#")
         words = str(text).split('#')
@@ -65,8 +68,11 @@ def remove_issues(text):
         text.remove('issue')
     if text.count('underscore') > 0:
         text.remove('underscore')
+    while text.count('') > 0:
+        text.remove('')
+    while text.count("") > 0:
+        text.remove("")
     return text
-
 
 
 def assistments_process_bodies(df):
@@ -103,7 +109,7 @@ def junyi_process_questions(df):
         if len(text) > 0:
             texts.append(text)
             problem_id_to_index[question_id] = index
-        index += 1
+            index += 1
     return texts, problem_id_to_index
 
 
@@ -169,7 +175,8 @@ def remove_interactions_without_text(problems_set_text_and_results, problems, co
     new_corrects = []
     new_real_lens = []
     for problem, correct, real_len in list(zip(*(problems, corrects, real_lens))):
-        new_problem, new_correct, new_real_len = reduce_to_known_text(problem, correct, real_len, problems_set_text_and_results)
+        new_problem, new_correct, new_real_len = reduce_to_known_text(problem, correct, real_len,
+                                                                      problems_set_text_and_results)
         if new_real_len > 0:
             new_problems.append(new_problem)
             new_corrects.append(new_correct)
@@ -207,7 +214,8 @@ def generate_sequences_for_training_RKT(problems, real_lens, corrects, batch_siz
     inputs_and_ids = [pad_sequence(seqs, batch_first=True, padding_value=0)
                       for seqs in seq_lists[0:4]]
     labels = pad_sequence(seq_lists[-1], batch_first=True, padding_value=-1)  # Pad labels with -1
-    train_data, test_data, training_labels, test_labels = train_test_split(data=list(zip(*inputs_and_ids)), labels=labels, split=0.8)
+    train_data, test_data, training_labels, test_labels = train_test_split(data=list(zip(*inputs_and_ids)),
+                                                                           labels=labels, split=0.8)
 
     # TODO
     print("pro_pro_dense computation")

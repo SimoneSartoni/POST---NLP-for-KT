@@ -27,7 +27,7 @@ class world2vec(base_model):
         self.problem_id_to_index = None
         self.problem_ids = None
 
-    def load_model(self, epochs, path="C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/logs/", name="poj"):
+    def load_model(self, epochs, path="C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/intermediate_files/", name="poj"):
         x = "word2vec_" + str(self.vector_size) + "_" + str(epochs) + ".model"
         path = path + name + '/'
         self.word2vec = Word2Vec.load(path + x)
@@ -38,7 +38,7 @@ class world2vec(base_model):
         self.sg = self.word2vec.sg
         self.epochs = self.word2vec.epochs
 
-    def load_word_vectors(self, epochs, path="C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/logs/", name="poj"):
+    def load_word_vectors(self, epochs, path="C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/intermediate_files/", name="poj"):
         x = "word2vec_" + str(self.vector_size) + "_" + str(epochs) + ".wordvectors"
         path = path + name + '/'
         self.wordvectors = Word2Vec.load(path)
@@ -52,7 +52,7 @@ class world2vec(base_model):
     def get_similarity_matrix_from_vectors(self, word_vectors):
         self.word2vec = np.dot(word_vectors.vectors, word_vectors.vectors.T)
 
-    def fit(self, texts, epochs=10, path='', name=''):
+    def fit(self, texts, epochs=20, path='', name=''):
         t = time()
         self.epochs = epochs
         self.word2vec.build_vocab(texts, progress_per=100)
@@ -80,27 +80,22 @@ class world2vec(base_model):
             self.problem_to_text[problem_id] = problem_words
             k += 1
 
-    def save_model(self, path, name):
-        self.word2vec.save("word2vec_" + str(self.vector_size) + "_" + str(self.epochs) + ".model")
+    def save_model(self, path="", name="poj"):
+        self.word2vec.save(path+name+"_word2vec_" + str(self.vector_size) + "_" + str(self.epochs) + ".model")
 
-    def save_vectors(self, name, path):
+    def save_vectors(self, path="", name="poj"):
         word_vectors = self.word2vec.wv
-        word_vectors.save("word2vec_" + str(self.vector_size) + "_" + str(self.epochs) + ".wordvectors")
+        word_vectors.save(path+name+"_word2vec_" + str(self.vector_size) + "_" + str(self.epochs) + ".wordvectors")
 
     # Overriding abstract method
-    def compute_problem_score(self, input_problems, corrects, target_problem, default_value):
+    def compute_problem_score(self, input_problems, corrects, target_problem):
         """
 
         """
         item_scores = []
-        input_ids = []
-        correct_ids = []
-        for p, c in list(zip(input_problems, corrects)):
-            if p in self.problem_to_text:
-                input_ids.append(p)
-                correct_ids.append(c)
+        final_score = 0
         if target_problem in self.problem_to_text:
-            for input_id in input_ids:
+            for input_id in input_problems:
                 if input_id in self.problem_to_text and len(self.problem_to_text[input_id]) > 0 and len(
                         self.problem_to_text[target_problem]) > 0:
                     similarity = self.wordvectors.n_similarity(self.problem_to_text[input_id],
@@ -108,9 +103,5 @@ class world2vec(base_model):
                 else:
                     similarity = 0.0
                 item_scores.append(similarity)
-            item_scores = np.array(item_scores).transpose().dot(correct_ids)
-            if item_scores and item_scores > 0:
-                return 1.0
-            elif item_scores and item_scores < 0:
-                return 0.0
-        return default_value
+            final_score = np.array(item_scores).transpose().dot(corrects)
+        return final_score

@@ -1,17 +1,25 @@
-Per quanto riguarda i dataset ho notato che effettivamente ognuno di essi ha delle differenze evidenti e problematiche correlate, ho calcolato alcuni valori per ogni dataset:
+Assistments:
+    2019) Questo dataset contiene interazioni ben strutturate di cui conosciamo molti problemi, pulire il dataset
+        tenendo solo le interazioni coi problemi di cui conosciamo il testo non influisce sulla complessità
+        computazionale in maniera significativa
+    2012_npz) Questo dataset è stato preso dagli autori di Relational Self-Aware Attention KT, è ben strutturato,
+        ma la maggior parte della maggior parte dei problemi che compaiono nelle interazioni non conosciamo il testo.
+        è sicuramente sensato rimuovere le interazioni con problemi di cui non si conosce il testo, per ridurre la
+        dimensione del dataset e i conseguenti tempi di training e prediction NEL CASO SI UTILIZZINO METODI BASATI SUL
+        TESTO.
+        Nel caso invece si usino per la prediction anche metodi non basati sul testo, allora il dataset è già pronto per
+        essere utilizzato, in particolare per RKT o SAINT.
+    2012) #TODO
+POJ:
+    Questo dataset contiene pochi problemi (774 con testo e interazione) lunghi (249 in media), ma abbastanza interazioni per utente
+    (50 per utente prima della pulizia, 25 di cui conosciamo il testo), per un totale id 19563 utenti pre pulizia
+    e 13535 post.
+    è il dataset che richiede minor costo computazionale data la piccola mole di informazione e può essere utilizzato
+    per verificare il funzionamento dei modelli su testi più lunghi (avendo 249 parole per testo) rispetto agli altri
+    datasets
 
-Ad esempio POJ:
- {'name': 'poj', 'target mean': 0.355222, 'number_of_users': 19563, 'average_number_of_interactions_per_users': 50.75, 'number of total interactions': 19563, 'all_1_predictor_precision': 0.355222, 'all_0_predictor_precision': 0.644777, 'average number of problems we know text per user': 17.439503143689617,
+JUNYI:
+    Junyi contiene un numero elevato di interazioni per ogni utente anche dopo la pulizia. Il numero di problemi
+    disponibili è motlo basso (287), perciò ci sono moltissime ripetizioni.
 
-Inoltre, ho anche impiegato tempo per organizzare in modo strutturato il mio codice, creando classi astratte in modo da rendere l’esecuzione delle varie fasi (caricamento dati, pulizia, analisi, creazione modello, training, generazione previsioni, valutazione) indipendente dai modelli, dalle metriche e dai dataset usati.
-Al momento ho provato i due modelli (TF_IDF, e Word2Vec) sui vari dataset, tenendo conto della moda del dataset in automatico (che in poj ad esempio è 0, mentre in Assistments e junyi è 1), e restituendo quella qualora non si avessero informazioni sul testo del problema da predire.
-I risultati (temporanei, visto che non ho ancora ottimizzato i parametri dei modelli) sono stati molto soddisfacenti per POJ:
-all_1_predictor balanced accuracy: 0. 644777      (baseline di riferimento per il modello più semplice ma efficace)
-{TF_IDF': {'balanced_accuracy': 0.7294}, 'word2vec': {'balanced_accuracy': 0.7116}}}
-Mostrando un significativo aumento anche con modelli semplici come TF_IDF.
 
-Mentre per Assistments i risultati sono stati scarsi e anzi hanno peggiorato di poco il risultato della baseline:
-'all_1_predictor_precision': 0.6955
-{'TF_IDF': {'balanced_accuracy': 0.6822}, 'word2vec': {'balanced_accuracy': 0.6839}}}
-
-In questo caso ho analizzato le differenze fra i dataset e penso siano dovute al basso numero di problemi di cui abbiamo il testo e le interazioni dell’utente. Perciò al momento sto cercando di migliorare il dataset di assistments, unendo i dati provenienti sia da quello del 2009, sia da quello del 2012.

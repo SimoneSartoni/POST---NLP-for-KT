@@ -1,6 +1,6 @@
 from Knowledge_Tracing.code.data_processing.dataset import dataset
 from Knowledge_Tracing.code.data_processing.import_files import import_questions_text
-from Knowledge_Tracing.code.evaluation.predictor import predictor
+from Knowledge_Tracing.code.evaluation.perceptron import perceptron
 from Knowledge_Tracing.code.evaluation.evaluator import evaluator as Evaluator
 
 from Knowledge_Tracing.code.data_processing.data_processing import poj_process_bodies, assistments_process_bodies, \
@@ -38,7 +38,7 @@ def process_dataset_text(target_dataset, dataset_texts, name, load_texts):
     return target_dataset
 
 
-def evaluate(input_datasets, models, metrics, predictors=[predictor()]):
+def evaluate(input_datasets, models, metrics, predictors=[perceptron()]):
     labels = {}
     predictions = {}
     for input_dataset in input_datasets:
@@ -48,3 +48,4 @@ def evaluate(input_datasets, models, metrics, predictors=[predictor()]):
         performances = evaluator.evaluate(labels, predictions, models, predictors)
         input_dataset.set_performances(performances)
     return input_datasets
+

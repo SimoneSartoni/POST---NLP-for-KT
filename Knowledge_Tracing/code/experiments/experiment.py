@@ -15,5 +15,5 @@ class experiment(metaclass=ABCMeta):
         self.predictors = []
 
     @abstractmethod
-    def run(self):
+    def run(self, current_experiment):
         pass

@@ -48,12 +48,12 @@ def import_assistments_2009():
 
 
 def import_assistments_2012():
-    data = pd.read_csv('C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/data/assistments/2012_2013/2012-2013-data-with-predictions-4-final.csv.csv', error_bad_lines=False)
-
+    data = pd.read_csv('C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/data/assistments/2012_2013/2012-2013-data-with-predictions-4-final.csv', index_col=False)
     real_lens = []
     problems = []
     corrects = []
     for user, problem in data.groupby("user_id"):
+        print(problem)
         correct_answer = problem['correct']
         correct = []
         problem_df = problem["problem_id"]

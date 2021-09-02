@@ -5,7 +5,7 @@ class balanced_accuracy(metric):
     """Compute balanced accuracy defined as rateo: (TP + TN) / (TP + TN + FP + FN), equal to:  (TP + TN) / number of labels
     """
 
-    def __init__(self, name):
+    def __init__(self, name="balanced_accuracy"):
         self.name = name
         self.acc = 0.0
 

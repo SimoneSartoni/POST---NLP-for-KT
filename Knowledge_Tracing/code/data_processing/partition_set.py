@@ -7,7 +7,7 @@ class partition_set:
         self.path = path
 
         # series of sequences of problems
-        self.problem_ids = []
+        self.problems = []
         self.labels = []
         self.lengths = []
 
@@ -19,7 +19,7 @@ class partition_set:
         self.all_0_predictor_precision = 0.0
 
     def _compute_interactions_metadata(self):
-        self.number_of_users = len(self.problem_ids)
+        self.number_of_users = len(self.problems)
         self.number_interactions = np.sum(self.lengths)
         self.avg_number_of_interactions_per_user = np.mean(self.lengths)
         label_sum = 0
@@ -30,7 +30,7 @@ class partition_set:
         self.all_0_predictor_precision = 1.0 - self.labels_mean
 
     def set_interactions(self, problem_ids, labels, lengths):
-        self.problem_ids = problem_ids
+        self.problems = problem_ids
         self.labels = labels
         self.lengths = lengths
         self._compute_interactions_metadata()
@@ -38,5 +38,5 @@ class partition_set:
     def write_dataset_info(self, f):
         items = dict(vars(self).items())
         f.write("\n")
-        del [items['path'], items['problem_ids'], items['labels'], items['lengths']]
+        del [items['path'], items['problems'], items['labels'], items['lengths']]
         f.write(str(items))

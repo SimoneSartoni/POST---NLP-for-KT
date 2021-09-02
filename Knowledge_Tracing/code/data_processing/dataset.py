@@ -1,8 +1,8 @@
+import ast
 import json
-
+import csv
 import numpy as np
 import pandas as pd
-
 from Knowledge_Tracing.code.data_processing.partition_set import partition_set
 from Knowledge_Tracing.code.utils.utils import write_txt
 from sklearn.model_selection import train_test_split
@@ -73,7 +73,7 @@ class dataset:
         self.interacted_problem_list = interacted_problem_list
 
     def set_interactions(self, user_interactions, user_interactions_lengths, user_interactions_labels,
-                         validation_percentage=0.2, test_percentage=0.2):
+                         validation_percentage=0.0, test_percentage=0.2):
         random_state = 42
         self.problems, self.labels, self.lengths = user_interactions, user_interactions_labels, user_interactions_lengths
         train_ids, test_ids, train_labels, test_labels, train_lengths, test_lengths = train_test_split(user_interactions, user_interactions_labels, user_interactions_lengths, test_size=test_percentage, random_state=random_state)
@@ -94,9 +94,11 @@ class dataset:
 
     def load_interactions(self):
         path = "C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/intermediate_files/"+self.name+"/interactions.csv"
-        data = pd.read_csv(path)
+        data = pd.read_csv(filepath_or_buffer=path)
         problems, labels, lengths = data["problems"], data["labels"], data["lengths"]
-        self.set_interactions(problems, lengths, labels, 0.2, 0.2)
+        problems = [ast.literal_eval(x) for x in problems]
+        labels = [ast.literal_eval(x) for x in labels]
+        self.set_interactions(problems, lengths, labels, 0.2)
 
     def _compute_problems_with_text_known_list(self):
         self.problems_with_text_known_list = self.problem_id_to_index.keys()

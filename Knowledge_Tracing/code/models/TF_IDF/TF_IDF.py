@@ -70,7 +70,7 @@ class TF_IDF(base_model):
         write_txt(os.path.join(data_folder, 'words_set.txt'), self.words_unique)
 
     def load_similarity_matrix(self, dataset_name):
-        data_folder = "C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/results/"
+        data_folder = "C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/intermediate_files/"
         self.similarity_matrix = sps.load_npz(os.path.join(data_folder, dataset_name + '/TF_IDF_similarity_' + str(self.shrink) + '_' + str(self.topK) + '_' + str(self.normalize) + '.npz'))
 
     def compute_similarity(self, shrink=10, topK=100, normalize=True, similarity="cosine", dataset_name=''):
@@ -81,33 +81,26 @@ class TF_IDF(base_model):
         self.save_similarity_matrix(dataset_name=dataset_name)
 
     def save_similarity_matrix(self, dataset_name):
-        data_folder = "C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/code/models/TF_IDF/"
+        data_folder = "C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/intermediate_files/"
         sps.save_npz(os.path.join(data_folder,
-                                  dataset_name+'TF_IDF_similarity_' + str(self.shrink) + '_' + str(self.topK) + '_' + str(self.normalize) + '.npz'),
+                                  dataset_name+'/TF_IDF_similarity_' + str(self.shrink) + '_' + str(self.topK) + '_' + str(self.normalize) + '.npz'),
                      self.similarity_matrix)
 
-    def compute_problem_score(self, input_problems, corrects, target_problem, default_value=0.0):
+    def compute_problem_score(self, input_problems, corrects, target_problem):
         """
 
         """
         input_ids = []
         correct_ids = []
-        unique_problems_set = set()
         for p, c in list(zip(input_problems, corrects)):
             if p in self.problem_ids:
                 # and p not in unique_problems_set:
                 # unique_problems_set.add(p)
                 input_ids.append(self.problem_id_to_index[p])
                 correct_ids.append(c)
+        item_scores = 0.0
         if target_problem in self.problem_ids:
             item_scores = self.similarity_matrix.tocsr()[input_ids, :].dot(
                 self.similarity_matrix.tocsr().getrow(self.problem_id_to_index[target_problem]).transpose())
             item_scores = item_scores.transpose().todense().dot(correct_ids)
-            if not item_scores:
-                return default_value
-            if item_scores > 0.0:
-                return 1.0
-            elif item_scores < 0.0:
-                return 0.0
-        else:
-            return default_value
+        return float(item_scores)

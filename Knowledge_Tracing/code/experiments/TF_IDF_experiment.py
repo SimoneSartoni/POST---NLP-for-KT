@@ -48,10 +48,6 @@ class TF_IDF_experiment(experiment):
         self.time_to_process = round(time() / 60.0, 2)
         print('Time to process vocab: {} mins'.format(self.time_to_process - self.time_to_import))
 
-        for reduced_dataset, processed_dataset in list(zip(reduced_datasets, processed_datasets)):
-            processed_dataset.write_dataset_info()
-            reduced_dataset.write_dataset_info()
-
         predictor_model = predictor()
         for reduced_dataset in reduced_datasets:
             tf_idf_experiment = tf_idf(reduced_dataset, predictor_model)
