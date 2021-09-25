@@ -11,3 +11,7 @@ class base_model(metaclass=ABCMeta):
     @abstractmethod
     def compute_problem_score(self, input_problems, corrects, target_problem):
         pass
+
+    @abstractmethod
+    def get_serializable_params(self):
+        pass

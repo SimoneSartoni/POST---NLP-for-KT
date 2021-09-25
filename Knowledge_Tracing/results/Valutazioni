@@ -11,15 +11,22 @@ Assistments:
         essere utilizzato, in particolare per RKT o SAINT.
     2012) #TODO
 POJ:
-    Questo dataset contiene pochi problemi (774 con testo e interazione) lunghi (249 in media), ma abbastanza interazioni per utente
-    (50 per utente prima della pulizia, 25 di cui conosciamo il testo), per un totale id 19563 utenti pre pulizia
-    e 13535 post.
+    Questo dataset contiene pochi problemi (774 con testo e interazione) lunghi (249 in media), ma interazioni per
+    utente: 50 per utente prima della pulizia, 25 di cui conosciamo il testo.
+    Il problema è la presenza di tantissime ripetizioni, probabilmente derivanti dal fatto che i problemi sono di natura
+    informatica e perciò serve scrivere del codice con conseguenti errori di compilazione e bug.
+
     è il dataset che richiede minor costo computazionale data la piccola mole di informazione e può essere utilizzato
     per verificare il funzionamento dei modelli su testi più lunghi (avendo 249 parole per testo) rispetto agli altri
-    datasets
+    datasets.
+    Dopo l'eliminazione dei duplicati rimangono pochissime interazioni per utente (5 in media), quindi le possibilità
+    sono: 1) prendere solo gli utenti con abbastanza interazioni
+          2) usare il dataset per valutare solo in condizione di poche interazioni per utente (cold start)
+
 
 JUNYI:
     Junyi contiene un numero elevato di interazioni per ogni utente anche dopo la pulizia. Il numero di problemi
     disponibili è motlo basso (287), perciò ci sono moltissime ripetizioni.
 
 
+Using Optimize_tf_idf I have seen that augmenting min_df decrease performances in each datasets

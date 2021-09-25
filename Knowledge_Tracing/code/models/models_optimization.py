@@ -1,7 +1,6 @@
-from Knowledge_Tracing.code.evaluation.predictor import predictor as Predictor
+from Knowledge_Tracing.code.evaluation.predictors.predictor import predictor as Predictor
 from Knowledge_Tracing.code.evaluation.evaluator import evaluator as Evaluator
-from Knowledge_Tracing.code.evaluation.balanced_accuracy import balanced_accuracy
-from Knowledge_Tracing.code.models.gensim_model.gensim_word2vec import world2vec
+from Knowledge_Tracing.code.evaluation.metrics.balanced_accuracy import balanced_accuracy
 from Knowledge_Tracing.code.models.models_creation import add_gensim_model
 
 

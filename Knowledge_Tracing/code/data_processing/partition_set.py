@@ -10,6 +10,8 @@ class partition_set:
         self.problems = []
         self.labels = []
         self.lengths = []
+        self.timestamps = []
+        self.skills = []
 
         self.number_of_users = 0
         self.labels_mean = 0.0
@@ -29,14 +31,16 @@ class partition_set:
         self.all_1_predictor_precision = self.labels_mean
         self.all_0_predictor_precision = 1.0 - self.labels_mean
 
-    def set_interactions(self, problem_ids, labels, lengths):
+    def set_interactions(self, problem_ids, labels, lengths, timestamps, skills=None):
         self.problems = problem_ids
         self.labels = labels
         self.lengths = lengths
+        self.timestamps = timestamps
+        self.skills = skills
         self._compute_interactions_metadata()
 
     def write_dataset_info(self, f):
         items = dict(vars(self).items())
         f.write("\n")
-        del [items['path'], items['problems'], items['labels'], items['lengths']]
+        del [items['path'], items['problems'], items['labels'], items['lengths'], items['timestamps']]
         f.write(str(items))

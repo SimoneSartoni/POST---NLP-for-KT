@@ -1,5 +1,4 @@
 import os
-from abc import abstractmethod, ABC
 import copy
 import numpy as np
 import psutil
@@ -7,7 +6,7 @@ import psutil
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from Knowledge_Tracing.code.evaluation.metrics_RKT import metrics_RKT
+from Knowledge_Tracing.code.evaluation.metrics.metrics_RKT import metrics_RKT
 
 from Knowledge_Tracing.code.models.RKT.multi_head_attention import MultiHeadedAttention
 

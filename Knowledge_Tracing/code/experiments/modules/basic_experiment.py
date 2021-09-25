@@ -1,6 +1,17 @@
+import codecs
+import os
 from abc import abstractmethod, ABCMeta
 import json
 from mlflow import *
+from Knowledge_Tracing.code.utils.json_utils import NumpyEncoder
+
+def make_dir(path):
+    try:
+        os.mkdir(path)
+    except OSError:
+        print("Creation of the directory %s failed" % path)
+    else:
+        print("Successfully created the directory %s " % path)
 
 
 class basic_experiment(metaclass=ABCMeta):
@@ -12,17 +23,28 @@ class basic_experiment(metaclass=ABCMeta):
         self.predictions = []
         self.labels = []
 
-    def save_predictions(self):
-        file = "C:/thesis_2/TransformersForKnowledgeTracing" \
-               "/Knowledge_Tracing/logs/" + self.dataset.name + "/predictions.json"
-        with open(file, "w") as f:
-            json.dump(self.predictions, f)
-
     def log_params(self):
-        params = dict(vars(self.encode_model).items())
-        log_text(json.dumps(params))
-        params = dict(vars(self.prediction_model).items())
-        log_text(json.dumps(params))
+        path = "C:/thesis_2/TransformersForKnowledgeTracing" \
+               "/Knowledge_Tracing/temporary/" + self.dataset.name
+        make_dir(path)
+        path = "C:/thesis_2/TransformersForKnowledgeTracing" \
+               "/Knowledge_Tracing/temporary/" + self.dataset.name + "/" + self.name
+        make_dir(path)
+        if self.encode_model:
+            params = self.encode_model.get_serializable_params()
+            file = path + "/encode_params.json"
+            with open(file, "w") as f:
+                json.dump(params, f)
+        if self.prediction_model:
+            params = self.prediction_model.get_serializable_params()
+            file = path + "/prediction_params.json"
+            with open(file, "w") as f:
+                json.dump(params, f)
 
     def log_predictions(self):
-        log_text(json.dumps(self.predictions))
+        path = "C:/thesis_2/TransformersForKnowledgeTracing" \
+               "/Knowledge_Tracing/temporary/" + self.dataset.name + "/" + self.name
+        file = path + "/predictions.json"
+        json.dump(self.predictions.tolist(), codecs.open(file, 'w', encoding='utf-8'), separators=(',', ':'),
+                  sort_keys=True, indent=4)
+        log_artifact(path)

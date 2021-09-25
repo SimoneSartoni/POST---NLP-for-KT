@@ -12,7 +12,6 @@ from nltk.corpus import stopwords
 from sklearn.model_selection import train_test_split
 from torch.nn.utils.rnn import pad_sequence
 import psutil
-from Knowledge_Tracing.code.data_processing.dataset_pytorch import dataset
 
 
 # eng_dict = hunspell.HunSpell('/usr/share/hunspell/en_US.dic', '/usr/share/hunspell/en_US.aff')
@@ -117,6 +116,7 @@ def generate_questions_poj(df):
     questions = []
     problem_id_to_index = {}
     index = -1
+    print(df["data"])
     for row in df["data"]:
         if '#' in row:
             array = row.split('#')
@@ -135,14 +135,14 @@ def generate_questions_poj(df):
 
 
 def poj_process_bodies(df):
-    questions, problem_id_to_index = generate_questions_poj(df)
+    temp_questions, problem_id_to_index = generate_questions_poj(df)
     # nltk.download('stopwords')
-    copy = problem_id_to_index.keys()
-    for id in copy:
-        text = escape_values(questions[problem_id_to_index[id]])
+    questions = []
+    for question in temp_questions:
+        text = escape_values(question)
         # text = remove_words_not_in
         text = remove_issues(text)
-        questions[problem_id_to_index[id]] = text
+        questions.append(text)
     return questions, problem_id_to_index
 
 
@@ -159,29 +159,60 @@ def generate_text_and_interacted_sets(problem_ids, problems):
     return problems_with_text_set, problems_interacted_set, problems_text_and_interacted_set
 
 
-def reduce_to_known_text(problems_list, correctness_list, lengths, problems_set_text_and_results):
+def reduce_to_known_text(problems_list, correctness_list, timestamp_list, lengths, problems_set_text_and_results):
     new_problems_list = []
     new_correctness_list = []
+    new_timestamp_list = []
     for p in range(0, lengths):
         if problems_list[p] in problems_set_text_and_results:
             new_problems_list.append(problems_list[p])
             new_correctness_list.append(correctness_list[p])
+            new_timestamp_list.append(timestamp_list[p])
     new_real_len = len(new_problems_list)
-    return new_problems_list, new_correctness_list, new_real_len
+    return new_problems_list, new_correctness_list, new_timestamp_list, new_real_len
 
 
-def remove_interactions_without_text(problems_set_text_and_results, problems, corrects, real_lens):
+def remove_interactions_without_text(problems_set_text_and_results, problems, corrects, timestamps, real_lens):
     new_problems = []
     new_corrects = []
     new_real_lens = []
-    for problem, correct, real_len in list(zip(*(problems, corrects, real_lens))):
-        new_problem, new_correct, new_real_len = reduce_to_known_text(problem, correct, real_len,
-                                                                      problems_set_text_and_results)
+    new_timestamps = []
+
+    for problem, correct, timestamp, real_len in list(zip(*(problems, corrects, timestamps, real_lens))):
+        new_problem, new_correct, new_timestamp, new_real_len = reduce_to_known_text(problem, correct, timestamp, real_len, problems_set_text_and_results)
         if new_real_len > 0:
             new_problems.append(new_problem)
             new_corrects.append(new_correct)
+            new_timestamps.append(new_timestamp)
             new_real_lens.append(new_real_len)
-    return new_problems, new_corrects, new_real_lens
+    return new_problems, new_corrects, new_real_lens, new_timestamps
+
+
+def delete_duplicates(problems_list, correctness_list, timestamp_list, lengths):
+    new_problems_list = []
+    new_correctness_list = []
+    new_timestamp_list = []
+    for p in range(0, lengths):
+        if problems_list[p] not in new_problems_list:
+            new_problems_list.append(problems_list[p])
+            new_correctness_list.append(correctness_list[p])
+            new_timestamp_list.append(timestamp_list[p])
+    new_real_len = len(new_problems_list)
+    return new_problems_list, new_correctness_list, new_timestamp_list, new_real_len
+
+
+def remove_duplications(problems, corrects, real_lens, timestamps):
+    new_problems = []
+    new_corrects = []
+    new_real_lens = []
+    new_timestamps = []
+    for problem, correct, timestamp, real_len in list(zip(*(problems, corrects, timestamps, real_lens))):
+        new_problem, new_correct, new_timestamp, new_real_len = delete_duplicates(problem, correct, timestamp, real_len)
+        new_problems.append(new_problem)
+        new_corrects.append(new_correct)
+        new_timestamps.append(new_timestamp)
+        new_real_lens.append(new_real_len)
+    return new_problems, new_corrects, new_real_lens, new_timestamps
 
 
 def generate_sequences_for_training_RKT(problems, real_lens, corrects, batch_size=64):
