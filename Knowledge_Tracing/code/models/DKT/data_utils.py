@@ -111,6 +111,8 @@ def split_dataset(dataset, total_size, test_fraction, val_fraction=None):
 
 def get_target(y_true, y_pred):
     # Get skills and labels from y_true
+    print(y_true)
+    print(y_pred)
     mask = 1. - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
     y_true = y_true * mask
     skills, y_true = tf.split(y_true, num_or_size_splits=[-1, 1], axis=-1)

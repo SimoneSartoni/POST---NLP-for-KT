@@ -16,9 +16,7 @@ def main():
     test_fraction = 0.2  # Portion of data to be used for testing
     validation_fraction = 0.2  # Portion of training data to be used for validation
 
-    dataset, length, nb_skills, encoding_depth = dt_utils.load_dataset_NLP_skills(fn=fn,
-                                                                                               batch_size=batch_size,
-                                                                                               shuffle=True)
+    dataset, length, nb_features, encoding_depth = dt_utils.load_dataset_NLP_skills(fn=fn, batch_size=batch_size, shuffle=True)
 
     train_set, test_set, val_set = utils.split_dataset(dataset=dataset, total_size=length, test_fraction=test_fraction,
                                                        val_fraction=validation_fraction)
@@ -32,11 +30,11 @@ def main():
     print("Training set size: %d" % train_set_sz)
     print("Validation set size: %d" % val_set_sz)
     print("Testing set size: %d" % test_set_sz)
-    print("Number of skills: %d" % nb_skills)
+    print("Number of features: %d" % nb_features)
     print("========================================")
 
     student_model = NLP_deepkt.NLP_DKTModel(
-        nb_skills=nb_skills,
+        nb_features=nb_features,
         nb_encodings=encoding_depth,
         hidden_units=lstm_units,
         dropout_rate=dropout_rate)

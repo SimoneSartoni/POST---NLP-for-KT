@@ -10,7 +10,7 @@ from gensim.models import KeyedVectors
 # WORD2VEC using Gensim:
 
 class pretrained_word2vec(base_model):
-    def __init__(self, min_count=2, window=5, vector_size=300, workers=3, sg=1, pretrained='conceptnet-numberbatch-17-06-300'):
+    def __init__(self, load=True, min_count=2, window=5, vector_size=300, workers=3, sg=1, pretrained='conceptnet-numberbatch-17-06-300'):
         super(pretrained_word2vec, self).__init__("pretrained_world2vec_"+pretrained, "NLP")
         self.min_count = min_count
         self.window = window
@@ -20,7 +20,11 @@ class pretrained_word2vec(base_model):
         self.pretrained = pretrained
         if self.pretrained in list(downloader.info()['models'].keys()):
             print("download")
-            self.wordvectors = KeyedVectors.load("C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/code/models/vectors.kv")
+            if load:
+                self.wordvectors = KeyedVectors.load(
+                    "C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/code/models/DKT_NLPforSkills/vectors.kv")
+            else:
+                self.wordvectors = downloader.load(pretrained)
             self.wordvectors.save('vectors.kv')
             self.vector_size = self.wordvectors.vector_size
             print("end")

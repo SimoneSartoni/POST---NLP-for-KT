@@ -1,6 +1,6 @@
 from tensorflow.keras import Model, Input, layers, losses
 
-from Knowledge_Tracing.code.models.DKT.data_utils import get_target
+from Knowledge_Tracing.code.models.DKT_NLPforSkills.data_utils import get_target
 
 
 class NLP_DKTModel(Model):
@@ -14,29 +14,30 @@ class NLP_DKTModel(Model):
             and what the model expects.
     """
 
-    def __init__(self, nb_skills, nb_encodings, hidden_units=100, dropout_rate=0.2):
-        input_skill = Input(shape=[None, nb_skills], name='input_skill')
-        input_correct = Input(shape=[None, 1], name='input_correct')
-        input_encoding = Input(shape=[None, nb_encodings], name='input_encoding')
+    def __init__(self, nb_features, nb_encodings, hidden_units=100, dropout_rate=0.2):
+        input_features = Input(shape=[None, nb_features], name='input_feature')
+        input_encoding_correct = Input(shape=[None, nb_encodings], name='input_encoding_correct')
+        input_encoding_wrong = Input(shape=[None, nb_encodings], name='input_encoding_wrong')
 
-        mask_skill = layers.Masking(mask_value=-1)(input_skill)
-        mask_correct = layers.Masking(mask_value=-1.0)(input_correct)
-        mask_encoding = layers.Masking(mask_value=-1.0)(input_encoding)
+        mask_features = layers.Masking(mask_value=-1.0)(input_features)
+        mask_encoding_correct = layers.Masking(mask_value=-1.0)(input_encoding_correct)
+        mask_encoding_wrong = layers.Masking(mask_value=-1.0)(input_encoding_wrong)
 
-        mask = layers.concatenate([mask_correct, mask_skill, mask_encoding], axis=2)
+        mask = layers.concatenate([mask_encoding_correct, mask_encoding_wrong, mask_features], axis=2)
         lstm = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask)
 
-        dense_encodings = layers.Dense(nb_encodings, activation='sigmoid')
-        dense_corrects = layers.Dense(1, activation='sigmoid')
-        dense_skills = layers.Dense(nb_skills, activation='sigmoid')
-        output_encodings = layers.TimeDistributed(dense_encodings, name='output_encodings')(lstm)
-        output_skills = layers.TimeDistributed(dense_skills, name='output_skills')(lstm)
-        output_corrects = layers.TimeDistributed(dense_corrects, name='output_corrects')(lstm)
-
-        super(NLP_DKTModel, self).__init__(inputs={'input_correct': input_correct, 'input_skill': input_skill,
-                                                   'input_encoding': input_encoding},
-                                           outputs={'output_correct': output_corrects, 'output_skill': output_skills,
-                                                    'output_encoding': output_encodings}, name="DKT_NLP_Model")
+        dense_encodings_correct = layers.Dense(nb_encodings, activation='sigmoid')
+        dense_encodings_wrong = layers.Dense(nb_encodings, activation='sigmoid')
+        dense_features = layers.Dense(nb_features, activation='sigmoid')
+        output_encodings_correct = layers.TimeDistributed(dense_encodings_correct, name='output_encodings_correct')(lstm)
+        output_feature = layers.TimeDistributed(dense_features, name='output_feature')(lstm)
+        output_encodings_wrong = layers.TimeDistributed(dense_encodings_wrong, name='output_encodings_wrong')(lstm)
+        outputs = layers.concatenate([output_encodings_correct, output_encodings_wrong, output_feature])
+        super(NLP_DKTModel, self).__init__(inputs=(input_encoding_correct, input_features, input_encoding_wrong),
+                                           outputs=outputs,
+                                           name="DKT_NLP_Model")
+        self.nb_encodings = nb_encodings
+        self.nb_features = nb_features
 
     def compile(self, optimizer, metrics=None):
         """Configures the model for training.
@@ -57,7 +58,7 @@ class NLP_DKTModel(Model):
         """
 
         def custom_loss(y_true, y_pred):
-            y_true, y_pred = get_target(y_true, y_pred)
+            y_true, y_pred = get_target(y_true, y_pred, nb_encodings=self.nb_encodings, nb_features=self.nb_features)
             return losses.binary_crossentropy(y_true, y_pred)
 
         super(NLP_DKTModel, self).compile(
@@ -80,7 +81,7 @@ class NLP_DKTModel(Model):
         """Trains the model for a fixed number of epochs (iterations on a dataset).
         Arguments:
             dataset: A `tf.data` dataset. Should return a tuple
-                of `(inputs, (skills, targets))`.
+                of `(inputs, outputs)`.
             epochs: Integer. Number of epochs to train the model.
                 An epoch is an iteration over the entire data provided.
                 Note that in conjunction with `initial_epoch`,
