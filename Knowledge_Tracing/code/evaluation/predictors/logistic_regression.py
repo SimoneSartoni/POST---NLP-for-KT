@@ -20,7 +20,6 @@ class logistic_regressor(predictor):
     def train(self, encoding_model, train_set):
         self.encoding_model = encoding_model
         x, y = generate_features_encoding(encoding_model, train_set.problems, train_set.labels, train_set.lengths)
-        print(x)
         self.regressor = LogisticRegression(penalty="l1", solver="liblinear", random_state=self.random_state).fit(x, y)
         self.predictions = self.regressor.predict(x)
 
@@ -29,7 +28,6 @@ class logistic_regressor(predictor):
         similarities, self.labels = generate_features_encoding(self.encoding_model, test_set.problems, test_set.labels,
                                                           test_set.lengths)
         self.predictions = self.regressor.predict(similarities)
-        print(self.regressor.predict_proba(similarities))
         for el in self.regressor.predict_proba(similarities):
             self.scores.append(el[1])
         self.time_to_predict = round((time() - t) / 60, 2)

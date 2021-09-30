@@ -21,7 +21,7 @@ class load_preprocessed_datasets(experiment):
                                          path="/Knowledge_Tracing/intermediate_files",
                                          prefix="clean_datasets/"))
         if assist_12:
-            datasets.append(load_dataset(name="assistments_2012_npz",
+            datasets.append(load_dataset(name="assistments_2012",
                                          path="/Knowledge_Tracing/intermediate_files",
                                          prefix="clean_datasets/"))
         if assist_09:

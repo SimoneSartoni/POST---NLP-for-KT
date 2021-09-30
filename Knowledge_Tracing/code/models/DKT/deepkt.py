@@ -141,10 +141,10 @@ class DKTModel(tf.keras.Model):
                                          validation_freq=validation_freq)
 
     def custom_evaluate(self,
-                 dataset,
-                 verbose=1,
-                 steps=None,
-                 callbacks=None):
+                        dataset,
+                        verbose=1,
+                        steps=None,
+                        callbacks=None):
         """Returns the loss value & metrics values for the model in test mode.
         Computation is done in batches.
         Arguments:

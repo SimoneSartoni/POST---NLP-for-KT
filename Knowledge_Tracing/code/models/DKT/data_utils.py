@@ -2,7 +2,6 @@ import pandas as pd
 import tensorflow as tf
 import numpy as np
 
-
 MASK_VALUE = -1.  # The masking value cannot be zero.
 
 
@@ -114,9 +113,7 @@ def get_target(y_true, y_pred):
     # Get skills and labels from y_true
     mask = 1. - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
     y_true = y_true * mask
-
     skills, y_true = tf.split(y_true, num_or_size_splits=[-1, 1], axis=-1)
-
     # Get predictions for each skill
     y_pred = tf.reduce_sum(y_pred * skills, axis=-1, keepdims=True)
 

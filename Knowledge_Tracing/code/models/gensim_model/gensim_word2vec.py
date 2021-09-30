@@ -25,6 +25,7 @@ class world2vec(base_model):
         self.wordvectors = None
         self.problem_to_text = {}
         self.problem_id_to_index = None
+        self.similarities = None
 
     def load_model(self, epochs, path="C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/intermediate_files/", name="poj"):
         x = "word2vec_" + str(self.vector_size) + "_" + str(epochs) + ".model"
@@ -49,7 +50,7 @@ class world2vec(base_model):
         self.epochs = self.word2vec.epochs
 
     def get_similarity_matrix_from_vectors(self, word_vectors):
-        self.word2vec = np.dot(word_vectors.vectors, word_vectors.vectors.T)
+        self.similarities = np.dot(word_vectors.vectors, word_vectors.vectors.T)
 
     def fit(self, texts, epochs=20, path='', name=''):
         t = time()

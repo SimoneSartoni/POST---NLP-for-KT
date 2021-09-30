@@ -17,15 +17,15 @@ class reduce_and_save(experiment):
         # import texts
         datasets_texts = import_text()
         # import interaction datasets
-        # assistment_2012 = import_assistments_2012()
+        assistment_2012 = import_assistments_2012()
         # assistment_dataset_npz = import_assistments_2012_npz()
-        assistment_dataset_2009 = import_assistments_2009()
+        # assistment_dataset_2009 = import_assistments_2009()
         # POJ:
-        poj_dataset = import_poj_interactions()
+        # poj_dataset = import_poj_interactions()
         # JUNYI:
-        junyi_dataset = import_junyi_interactions()
+        # junyi_dataset = import_junyi_interactions()
 
-        input_datasets = [poj_dataset, assistment_dataset_2009, junyi_dataset]
+        input_datasets = [assistment_2012]
 
         mlflow.end_run()
         self.time_to_import = round((time()) / 60, 2)
@@ -47,11 +47,6 @@ class reduce_and_save(experiment):
                                                                 test_percentage=0.2)
                 dataset_interactions_with_text.set_texts(processed_dataset.texts_list, processed_dataset.problem_id_to_index)
                 dataset_interactions_with_text.compute_intersection_texts_and_interactions()
-                dataset_interactions_with_text.save_interactions()
-                dataset_interactions_with_text.save_texts()
-                dataset_interactions_with_text.write_dataset_info()
-                dataset_interactions_with_text.draw_graphs()
-                dataset_interactions_with_text.log_all()
                 datasets_interactions_with_text.append(dataset_interactions_with_text)
             datasets_no_duplicated_interactions = []
             for d, d_reduced in list(zip(processed_datasets, datasets_interactions_with_text)):

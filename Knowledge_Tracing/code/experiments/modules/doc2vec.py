@@ -1,11 +1,10 @@
-from abc import ABC
-
 from Knowledge_Tracing.code.experiments.modules.basic_experiment import basic_experiment
 from Knowledge_Tracing.code.models.gensim_model.gensim_doc2vec import doc2vec as doc2vec_model
 
 
 class doc2vec(basic_experiment):
-    def __init__(self, dataset, prediction_model, load=False, min_count=2, window=5, vector_size=100, workers=3, sg=1, epochs=20):
+    def __init__(self, dataset, prediction_model, load=False, min_count=2, window=5, vector_size=300, workers=3, sg=1,
+                 epochs=80):
         super().__init__(name="doc2vec_" + dataset.name + "_" + prediction_model.name)
         self.dataset = dataset
         self.encode_model = None
@@ -25,7 +24,7 @@ class doc2vec(basic_experiment):
         self.encode_model = doc2vec_model(min_count=self.min_count, window=self.window,vector_size=self.vector_size,
                                           workers=self.workers, sg=self.sg)
         if not self.load:
-            self.encode_model.fit(self.dataset.texts_list, epochs=self.epochs)
+            self.encode_model.fit(self.dataset.texts_list, self.dataset.problem_id_to_index, epochs=self.epochs)
         else:
             self.encode_model.load_model(epochs=self.epochs, name=self.dataset.name)
             self.encode_model.load_word_vectors(epochs=self.epochs, name=self.dataset.name)

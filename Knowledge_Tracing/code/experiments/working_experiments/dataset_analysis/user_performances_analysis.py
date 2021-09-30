@@ -15,7 +15,7 @@ class user_performances_analysis(experiment):
     def run(self, current_experiment):
         initial_t = round(time() / 60.0, 2)
         with mlflow.start_run(experiment_id=current_experiment.experiment_id, run_name=current_experiment.name):
-            input_datasets = load_preprocessed_datasets().run(current_experiment, assist_12=False)
+            input_datasets = load_preprocessed_datasets().run(current_experiment, assist_09=False, poj=False, junyi=False)
 
             for input_dataset in input_datasets:
                 users_avg_scores_distribution, problems_avg_scores_dict, problems_avg_scores_distribution = \

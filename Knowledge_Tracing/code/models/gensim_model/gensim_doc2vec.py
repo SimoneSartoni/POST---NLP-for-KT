@@ -16,13 +16,8 @@ class doc2vec(base_model):
         self.window = window
         self.vector_size = vector_size
         self.workers = workers
-        self.sg = sg
         self.epochs = None
-        self.doc2vec = Doc2Vec(min_count=min_count,
-                               window=window,
-                               vector_size=vector_size,
-                               workers=workers,
-                               sg=sg)
+        self.doc2vec = Doc2Vec(dm=1, alpha=0.1, min_alpha=0.025, vector_size=vector_size, workers=workers)
         self.docvectors = None
         self.problem_to_text = {}
         self.problem_id_to_index = None
@@ -37,7 +32,6 @@ class doc2vec(base_model):
         self.window = self.doc2vec.window
         self.vector_size = self.doc2vec.vector_size
         self.workers = self.doc2vec.workers
-        self.sg = self.doc2vec.sg
         self.epochs = self.doc2vec.epochs
 
     def load_word_vectors(self, epochs,
@@ -50,7 +44,6 @@ class doc2vec(base_model):
         self.window = self.doc2vec.window
         self.vector_size = self.doc2vec.vector_size
         self.workers = self.doc2vec.workers
-        self.sg = self.doc2vec.sg
         self.epochs = self.doc2vec.epochs
 
     def get_similarity_matrix_from_vectors(self, word_vectors):
@@ -60,8 +53,9 @@ class doc2vec(base_model):
         t = time()
         self.epochs = epochs
         taggedDocuments = []
+        self.problem_id_to_index = problem_id_to_index
         for index in problem_id_to_index.keys():
-            taggedDocuments.append(TaggedDocument(index, texts[problem_id_to_index[index]]))
+            taggedDocuments.append(TaggedDocument(texts[problem_id_to_index[index]], [index]))
 
         self.doc2vec.build_vocab(taggedDocuments, progress_per=100)
         self.time_to_build = round((time() - t) / 60, 2)
@@ -94,8 +88,7 @@ class doc2vec(base_model):
         if target_problem in self.problem_id_to_index.keys():
             for input_id in input_problems:
                 if input_id in self.problem_id_to_index.keys():
-                    similarity = self.doc2vec.similarity_unseen_docs(self.docvectors[input_id],
-                                                                     self.docvectors[target_problem])
+                    similarity = self.docvectors.similarity(input_id, target_problem)
                 else:
                     similarity = 0.0
                 item_scores.append(similarity)
@@ -103,8 +96,8 @@ class doc2vec(base_model):
         return final_score
 
     def compute_encoding(self, input_problems, corrects, target_problem):
-        pos_mean_encoding = np.zeros(shape=self.words_num, dtype=np.float)
-        neg_mean_encoding = np.zeros(shape=self.words_num, dtype=np.float)
+        pos_mean_encoding = np.zeros(shape=self.vector_size, dtype=np.float)
+        neg_mean_encoding = np.zeros(shape=self.vector_size, dtype=np.float)
         pos, neg = 0.0, 0.0
         for p, c in list(zip(input_problems, corrects)):
             if p in self.problem_id_to_index.keys():
@@ -112,22 +105,22 @@ class doc2vec(base_model):
                 # unique_problems_set.add(p)
                 if c > 0.0:
                     pos += 1.0
-                    x = np.array(self.docvectors[p])
+                    x = np.array(self.doc2vec.dv.get_vector(p))
                     pos_mean_encoding = pos_mean_encoding + x
                 else:
                     neg += 1.0
-                    neg_mean_encoding = neg_mean_encoding + np.array(self.docvectors[p])
+                    neg_mean_encoding = neg_mean_encoding + np.array(self.doc2vec.dv.get_vector(p))
         if pos > 0.0:
             pos_mean_encoding = pos_mean_encoding / pos
         if neg > 0.0:
             neg_mean_encoding = neg_mean_encoding / neg
-        target_encoding = np.zeros(shape=self.words_num, dtype=np.float)
+        target_encoding = np.zeros(shape=self.vector_size, dtype=np.float)
         if target_problem in self.problem_id_to_index.keys():
-            x = np.array(self.docvectors[target_problem])
+            x = np.array(self.doc2vec.dv.get_vector(target_problem))
             target_encoding = target_encoding + x
         encoding = np.concatenate((pos_mean_encoding, neg_mean_encoding, target_encoding), axis=0)
         return encoding
 
     def get_serializable_params(self):
         return {"name": self.name, "min_count": self.min_count, "window": self.window, "vector_size": self.vector_size,
-                "sg": self.sg, "epochs": self.epochs}
+                "epochs": self.epochs}
