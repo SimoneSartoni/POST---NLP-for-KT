@@ -1,6 +1,6 @@
 from tensorflow.keras import Model, Input, layers, losses
 
-from Knowledge_Tracing.code.models.DKT_NLPforSkills.data_utils import get_target
+from Knowledge_Tracing.code.models.DKT_NLPforSkills.data_utils import get_target as NLP_get_target
 
 
 class NLP_DKTModel(Model):
@@ -15,13 +15,13 @@ class NLP_DKTModel(Model):
     """
 
     def __init__(self, nb_features, nb_encodings, hidden_units=100, dropout_rate=0.2):
-        input_features = Input(shape=[None, nb_features], name='input_feature')
         input_encoding_correct = Input(shape=[None, nb_encodings], name='input_encoding_correct')
         input_encoding_wrong = Input(shape=[None, nb_encodings], name='input_encoding_wrong')
+        input_features = Input(shape=[None, nb_features], name='input_feature')
 
-        mask_features = layers.Masking(mask_value=-1.0)(input_features)
         mask_encoding_correct = layers.Masking(mask_value=-1.0)(input_encoding_correct)
         mask_encoding_wrong = layers.Masking(mask_value=-1.0)(input_encoding_wrong)
+        mask_features = layers.Masking(mask_value=-1.0)(input_features)
 
         mask = layers.concatenate([mask_encoding_correct, mask_encoding_wrong, mask_features], axis=2)
         lstm = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask)
@@ -30,11 +30,16 @@ class NLP_DKTModel(Model):
         dense_encodings_wrong = layers.Dense(nb_encodings, activation='sigmoid')
         dense_features = layers.Dense(nb_features, activation='sigmoid')
         output_encodings_correct = layers.TimeDistributed(dense_encodings_correct, name='output_encodings_correct')(lstm)
-        output_feature = layers.TimeDistributed(dense_features, name='output_feature')(lstm)
         output_encodings_wrong = layers.TimeDistributed(dense_encodings_wrong, name='output_encodings_wrong')(lstm)
+        output_feature = layers.TimeDistributed(dense_features, name='output_feature')(lstm)
         outputs = layers.concatenate([output_encodings_correct, output_encodings_wrong, output_feature])
-        super(NLP_DKTModel, self).__init__(inputs=(input_encoding_correct, input_features, input_encoding_wrong),
-                                           outputs=outputs,
+        dense_class = layers.Dense(1, activation='sigmoid')
+        output_class = layers.TimeDistributed(dense_class, name='output_class')(outputs)
+        outputs_with_class = layers.concatenate([output_encodings_correct, output_encodings_wrong, output_feature,
+                                                 output_class])
+
+        super(NLP_DKTModel, self).__init__(inputs=[input_encoding_correct, input_encoding_wrong, input_features],
+                                           outputs=outputs_with_class,
                                            name="DKT_NLP_Model")
         self.nb_encodings = nb_encodings
         self.nb_features = nb_features
@@ -58,7 +63,7 @@ class NLP_DKTModel(Model):
         """
 
         def custom_loss(y_true, y_pred):
-            y_true, y_pred = get_target(y_true, y_pred, nb_encodings=self.nb_encodings, nb_features=self.nb_features)
+            y_true, y_pred = NLP_get_target(y_true, y_pred, nb_encodings=self.nb_encodings, nb_features=self.nb_features)
             return losses.binary_crossentropy(y_true, y_pred)
 
         super(NLP_DKTModel, self).compile(

@@ -11,12 +11,13 @@ def main():
     optimizer = "adam"  # Optimizer to use
     lstm_units = 100  # Number of LSTM units
     batch_size = 32  # Batch size
-    epochs = 10  # Number of epochs to train
+    epochs = 30  # Number of epochs to train
     dropout_rate = 0.3  # Dropout rate
     test_fraction = 0.2  # Portion of data to be used for testing
     validation_fraction = 0.2  # Portion of training data to be used for validation
 
-    dataset, length, nb_features, encoding_depth = dt_utils.load_dataset_NLP_skills(fn=fn, batch_size=batch_size, shuffle=True)
+    dataset, length, nb_features, encoding_depth = dt_utils.load_dataset_NLP_skills(fn=fn, batch_size=batch_size,
+                                                                                    shuffle=True)
 
     train_set, test_set, val_set = utils.split_dataset(dataset=dataset, total_size=length, test_fraction=test_fraction,
                                                        val_fraction=validation_fraction)
@@ -49,12 +50,13 @@ def main():
         ])
 
     student_model.summary()
-
     history = student_model.fit(dataset=train_set,
                                 epochs=epochs,
                                 verbose=verbose,
                                 validation_data=val_set,
                                 callbacks=[
+                                    tf.keras.callbacks.EarlyStopping(monitor='val_binary_accuracy:', mode='max',
+                                                                     patience=5, restore_best_weights=True),
                                     tf.keras.callbacks.CSVLogger(f"{log_dir}/train.log"),
                                     tf.keras.callbacks.ModelCheckpoint(best_model_weights,
                                                                        save_best_only=True,
