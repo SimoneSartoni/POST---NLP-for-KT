@@ -47,9 +47,11 @@ class count_vectorizer(base_model):
         self.problem_id_to_index = {}
         self.problem_ids = None
         self.texts = None
+        self.vector_size = 0
 
     def fit(self, interacted_and_text_problems, problem_id_to_index, texts):
         self.problem_ids = interacted_and_text_problems
+        print(interacted_and_text_problems)
         self.texts = []
         index = 0
         for p in self.problem_ids:
@@ -63,6 +65,7 @@ class count_vectorizer(base_model):
         self.words_unique = self.count_vectorizer.get_feature_names()
         # Save sparse matrix in current directory
         data_folder = './'
+        self.vector_size = self.vectors.shape[1]
 
         sps.save_npz(os.path.join(data_folder, '../pro_words.npz'), tfidf_vectorizer_vectors)
 
@@ -146,6 +149,11 @@ class count_vectorizer(base_model):
             x = np.array(self.vectors.getrow(self.problem_id_to_index[target_problem]).todense()).squeeze()
             target_encoding = target_encoding + x
         encoding = np.concatenate((pos_mean_encoding, neg_mean_encoding, target_encoding), axis=0)
+        return encoding
+
+    def get_encoding(self, problem):
+        index = self.problem_id_to_index[problem]
+        encoding = np.array(self.vectors.getrow(index).todense()).squeeze()
         return encoding
 
     def get_serializable_params(self):

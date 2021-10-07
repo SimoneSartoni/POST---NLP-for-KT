@@ -55,7 +55,7 @@ def main():
                                 verbose=verbose,
                                 validation_data=val_set,
                                 callbacks=[
-                                    tf.keras.callbacks.EarlyStopping(monitor='val_binary_accuracy:', mode='max',
+                                    tf.keras.callbacks.EarlyStopping(monitor='val_binary_accuracy', mode='max',
                                                                      patience=5, restore_best_weights=True),
                                     tf.keras.callbacks.CSVLogger(f"{log_dir}/train.log"),
                                     tf.keras.callbacks.ModelCheckpoint(best_model_weights,

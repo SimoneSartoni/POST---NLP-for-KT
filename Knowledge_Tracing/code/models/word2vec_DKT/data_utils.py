@@ -18,8 +18,7 @@ def generate_encodings(df, encode_model):
         wrongs = []
         feats = np.array([], dtype=np.int)
         labels = np.array([], dtype=np.int)
-        for problem, correct, feat, label in list(zip(r['problem_id'], r['correct'], r['skill_with_answer'],
-                                                      r['correct'])):
+        for problem, correct, label in list(zip(r['problem_id'], r['correct'], r['correct'])):
             if correct:
                 encoding = np.asarray(encode_model.get_encoding(problem)).astype('float32')
                 encoding = np.expand_dims(encoding, axis=0)
@@ -32,19 +31,16 @@ def generate_encodings(df, encode_model):
                 zeros = np.zeros(shape=(1, encode_model.vector_size), dtype=np.float)
                 corrects.append(zeros)
                 wrongs.append(encoding)
-            feats = np.append(feats, feat)
             labels = np.append(labels, label)
         corrects = np.concatenate(corrects, axis=0)
         wrongs = np.concatenate(wrongs, axis=0)
         i_corr = corrects[:-1]
         i_wrong = wrongs[:-1]
-        i_feat = feats[:-1]
         o_corr = corrects[1:]
         o_wrong = wrongs[1:]
-        o_feat = feats[1:]
         o_label = labels[1:]
-        inputs = (i_corr, i_wrong, i_feat)
-        outputs = (o_corr, o_wrong, o_feat, o_label)
+        inputs = (i_corr, i_wrong)
+        outputs = (o_corr, o_wrong, o_label)
         inputs_generator.append(inputs)
         outputs_generator.append(outputs)
     return inputs_generator, outputs_generator
@@ -103,25 +99,11 @@ def load_dataset_NLP_skills(fn, batch_size=32, shuffle=True):
             yield i, o
 
     encoding_depth = encode_model.vector_size
-    skill_depth = df['skill'].max() + 1
-    features_depth = df['skill_with_answer'].max() + 1
-    # Step 4 - Convert to a sequence per user id and shift features 1 timestep
-    """seq = df.groupby('user_id').apply(
-        lambda r: (
-            np.concatenate(np.expand_dims(r['encodings_correct'].values, axis=0), axis=0)[:-1],
-            np.concatenate(np.expand_dims(r['encodings_wrong'].values, axis=0), axis=0),
-            tf.one_hot(r['skill_with_answer'].values[:-1], depth=features_depth),
-            np.concatenate(np.expand_dims(r['encodings_correct'].values, axis=0), axis=0)[1:],
-            np.concatenate(np.expand_dims(r['encodings_wrong'].values, axis=0), axis=0)[1:],
-            tf.one_hot(r['skill_with_answer'][1:], depth=features_depth),
-            tf.constant(r['correct'][1:], dtype=tf.int32)
-        )
-    )"""
 
-    types = ((tf.float32, tf.float32, tf.int32),
-             (tf.float32, tf.float32, tf.int32, tf.int32))
-    shapes = (([None, encode_model.vector_size], [None, encode_model.vector_size], [None]),
-              ([None, encode_model.vector_size], [None, encode_model.vector_size], [None], [None]))
+    types = ((tf.float32, tf.float32),
+             (tf.float32, tf.float32, tf.int32))
+    shapes = (([None, encode_model.vector_size], [None, encode_model.vector_size]),
+              ([None, encode_model.vector_size], [None, encode_model.vector_size], [None]))
     # Step 5 - Get Tensorflow Dataset
     dataset = tf.data.Dataset.from_generator(
         generator=generator,
@@ -129,15 +111,6 @@ def load_dataset_NLP_skills(fn, batch_size=32, shuffle=True):
         output_shapes=shapes
     )
 
-    """output_signature=(
-            tf.TensorSpec(shape=(None, encode_model.vector_size), dtype=tf.float32),
-            tf.TensorSpec(shape=(None, encode_model.vector_size), dtype=tf.float32),
-            tf.TensorSpec(shape=(None, features_depth), dtype=tf.int32),
-            tf.TensorSpec(shape=(None, encode_model.vector_size), dtype=tf.float32),
-            tf.TensorSpec(shape=(None, encode_model.vector_size), dtype=tf.float32),
-            tf.TensorSpec(shape=(None, features_depth), dtype=tf.int32),
-            tf.TensorSpec(shape=(None, 1), dtype=tf.int32),
-        )"""
     nb_users = len(df.groupby('user_id'))
     if shuffle:
         dataset = dataset.shuffle(buffer_size=nb_users)
@@ -145,12 +118,11 @@ def load_dataset_NLP_skills(fn, batch_size=32, shuffle=True):
     print(dataset)
     dataset = dataset.map(
         lambda inputs, outputs: (
-            (inputs[0], inputs[1], tf.cast(tf.one_hot(inputs[2], depth=features_depth), dtype=tf.float32)),
+            (inputs[0], inputs[1]),
             tf.concat(values=[
                 outputs[0],
                 outputs[1],
-                tf.cast(tf.one_hot(outputs[2], depth=features_depth), dtype=tf.float32),
-                tf.cast(tf.expand_dims(outputs[3], axis=-1), dtype=tf.float32)],
+                tf.cast(tf.expand_dims(outputs[2], axis=-1), dtype=tf.float32)],
                 axis=-1)
         )
     )
@@ -166,23 +138,18 @@ def load_dataset_NLP_skills(fn, batch_size=32, shuffle=True):
         padding_values=(-1.0),
         drop_remainder=True
     )
-    """padded_shapes=({'input_correct': [None], 'input_skill': [None, None],
-                            'input_encoding': [None, encoding_depth]},
-                           {'output_correct': [None], 'output_skill': [None, None],
-                            'output_encoding': [None, encoding_depth]}),"""
+
     print(dataset)
 
     length = nb_users // batch_size
-    return dataset, length, features_depth, encoding_depth
+    return dataset, length, encoding_depth
 
 
-def get_target(y_true, y_pred, nb_encodings=300, nb_features=286):
+def get_target(y_true, y_pred, nb_encodings=300):
     # Get skills and labels from y_true
 
-    corrects_true, wrong_true, features_true, y_true = tf.split(y_true, num_or_size_splits=[nb_encodings, nb_encodings,
-                                                                                            nb_features, 1], axis=-1)
-    corrects_pred, wrong_pred, features_pred, y_pred = tf.split(y_pred, num_or_size_splits=[nb_encodings, nb_encodings,
-                                                                                            nb_features, 1], axis=-1)
+    corrects_true, wrong_true, y_true = tf.split(y_true, num_or_size_splits=[nb_encodings, nb_encodings, 1], axis=-1)
+    corrects_pred, wrong_pred, y_pred = tf.split(y_pred, num_or_size_splits=[nb_encodings, nb_encodings, 1], axis=-1)
 
     return y_true, y_pred
 

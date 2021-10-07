@@ -78,7 +78,8 @@ def load_dataset_NLP_skills(fn, batch_size=32, shuffle=True):
     # Step 3.1 - Generate NLP extracted encoding for problems
     loaded_dataset = dt(name="assistments_2009", path="/Knowledge_Tracing/intermediate_files", prefix="clean_datasets/")
     loaded_dataset.load_saved_texts()
-    encode_model = pretrained_word2vec(load=True)
+    encode_model = pretrained_word2vec(load=False)
+
     encode_model.fit()
     encode_model.encode_problems(loaded_dataset.problem_id_to_index, loaded_dataset.texts_list)
 

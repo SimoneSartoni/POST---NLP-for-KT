@@ -1,4 +1,3 @@
-import tensorflow as tf
 
 
 from Knowledge_Tracing.code.models.word2vec_DKT.data_utils import *
@@ -11,6 +10,8 @@ class BinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
                                                  y_pred=pred,
                                                  sample_weight=sample_weight)
 
+
+# from nltk.stem import WordNetLemmatizer
 
 class AUC(tf.keras.metrics.AUC):
     def update_state(self, y_true, y_pred, sample_weight=None):

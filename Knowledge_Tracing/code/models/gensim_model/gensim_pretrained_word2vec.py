@@ -22,7 +22,7 @@ class pretrained_word2vec(base_model):
             print("download")
             if load:
                 self.wordvectors = KeyedVectors.load(
-                    "C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/code/models/DKT_NLPforSkills/vectors.kv")
+                    "C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/code/models/word2vec_DKT/vectors.kv")
             else:
                 self.wordvectors = downloader.load(pretrained)
             self.wordvectors.save('vectors.kv')
