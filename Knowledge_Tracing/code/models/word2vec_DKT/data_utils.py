@@ -46,7 +46,7 @@ def generate_encodings(df, encode_model):
     return inputs_generator, outputs_generator
 
 
-def load_dataset_NLP_skills(fn, batch_size=32, shuffle=True):
+def load_dataset_NLP_skills(fn, batch_size=32, shuffle=True, repository=""):
     df = pd.read_csv(fn, encoding="ISO-8859-1")
 
     if "skill_id" not in df.columns:
@@ -72,7 +72,7 @@ def load_dataset_NLP_skills(fn, batch_size=32, shuffle=True):
     df['skill_with_answer'] = df['skill'] * 2 + df['correct']
 
     # Step 3.1 - Generate NLP extracted encoding for problems
-    loaded_dataset = dt(name="assistments_2009", path="/Knowledge_Tracing/intermediate_files", prefix="clean_datasets/")
+    loaded_dataset = dt(name="assistments_2009", path=repository, prefix="clean_datasets/")
     loaded_dataset.load_saved_texts()
     encode_model = pretrained_word2vec(load=True)
     encode_model.fit()

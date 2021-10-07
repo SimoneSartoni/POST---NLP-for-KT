@@ -18,7 +18,7 @@ from Knowledge_Tracing.code.utils.utils import try_parsing_date
 
 
 class dataset:
-    def __init__(self, name, path, prefix=''):
+    def __init__(self, name, path="C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/intermediate_files/", prefix=''):
         self.name = name
         self.path = path
         self.prefix = prefix
@@ -121,7 +121,7 @@ class dataset:
         df.to_csv(path, sep=',', quoting=csv.QUOTE_ALL)
 
     def load_interactions(self, standard_timestamps=True):
-        path = "C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/intermediate_files/" + self.prefix +  \
+        path = self.path + self.prefix +  \
                self.name + "/interactions.csv"
         data = pd.read_csv(filepath_or_buffer=path)
         problems, labels, lengths, timestamps = data["problems"], data["labels"], data["lengths"], data["timestamps"]
