@@ -184,12 +184,11 @@ class dataset:
         log_artifact(file)
 
     def load_saved_texts(self):
-        path = "C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/intermediate_files/"
-        file = path + self.prefix + self.name + "/texts_list.json"
+        file = self.path + self.prefix + self.name + "/texts_list.json"
         with open(file, "r") as f:
             self.texts_list = json.load(f)
 
-        file = path + self.prefix + self.name + "/problem_id_to_index.json"
+        file = self.path + self.prefix + self.name + "/problem_id_to_index.json"
         with open(file, "r") as f:
             x = json.load(f)
         self.problem_id_to_index = {}

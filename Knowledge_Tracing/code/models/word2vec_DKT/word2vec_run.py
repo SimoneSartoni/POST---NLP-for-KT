@@ -15,8 +15,10 @@ def main():
     dropout_rate = 0.3  # Dropout rate
     test_fraction = 0.2  # Portion of data to be used for testing
     validation_fraction = 0.2  # Portion of training data to be used for validation
+    repository = "C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/intermediate_files/"
 
-    dataset, length, encoding_depth = dt_utils.load_dataset_NLP_skills(fn=fn, batch_size=batch_size, shuffle=True)
+    dataset, length, encoding_depth = dt_utils.load_dataset_NLP_skills(fn=fn, batch_size=batch_size, shuffle=True,
+                                                                       repository=repository)
 
     train_set, test_set, val_set = utils.split_dataset(dataset=dataset, total_size=length, test_fraction=test_fraction,
                                                        val_fraction=validation_fraction)
