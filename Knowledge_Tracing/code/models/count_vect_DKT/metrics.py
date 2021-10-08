@@ -1,6 +1,4 @@
-
-
-from code.models.count_vect_DKT.data_utils import *
+from Knowledge_Tracing.code.models.count_vect_DKT.data_utils import *
 
 
 class BinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
