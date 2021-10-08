@@ -9,14 +9,16 @@ def main():
     best_model_weights = "weights/bestmodel"  # File to save the model.
     log_dir = "logs"  # Path to save the logs.
     optimizer = "adam"  # Optimizer to use
-    lstm_units = 100  # Number of LSTM units
+    lstm_units = 256  # Number of LSTM units
     batch_size = 32  # Batch size
     epochs = 30  # Number of epochs to train
     dropout_rate = 0.3  # Dropout rate
     test_fraction = 0.2  # Portion of data to be used for testing
     validation_fraction = 0.2  # Portion of training data to be used for validation
+    repository = "C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/intermediate_files/"
 
-    dataset, length, encoding_depth = data_utils.load_dataset_NLP_skills(fn=fn, batch_size=batch_size, shuffle=True)
+    dataset, length, encoding_depth = data_utils.load_dataset_NLP_skills(fn=fn, batch_size=batch_size, shuffle=True,
+                                                                         repository=repository)
 
     train_set, test_set, val_set = split_dataset(dataset=dataset, total_size=length, test_fraction=test_fraction,
                                                        val_fraction=validation_fraction)

@@ -2,7 +2,7 @@ import pandas as pd
 import tensorflow as tf
 import numpy as np
 from Knowledge_Tracing.code.data_processing.dataset import dataset as dt
-from code.models.count_vectorizer.count_vectorizer import count_vectorizer
+from Knowledge_Tracing.code.models.count_vectorizer.count_vectorizer import count_vectorizer
 
 MASK_VALUE = -1.  # The masking value cannot be zero.
 
@@ -32,7 +32,7 @@ def generate_encodings(df, encode_model):
     return inputs_generator, outputs_generator
 
 
-def load_dataset_NLP_skills(fn, batch_size=32, shuffle=True):
+def load_dataset_NLP_skills(fn, batch_size=32, shuffle=True, repository="", keyedvectors=""):
     df = pd.read_csv(fn, encoding="ISO-8859-1")
 
     if "skill_id" not in df.columns:
@@ -49,7 +49,7 @@ def load_dataset_NLP_skills(fn, batch_size=32, shuffle=True):
     df = df.groupby('user_id').filter(lambda q: len(q) > 1).copy()
 
     # Step 3.1 - Generate NLP extracted encoding for problems
-    loaded_dataset = dt(name="assistments_2012", path="/Knowledge_Tracing/intermediate_files", prefix="clean_datasets/")
+    loaded_dataset = dt(name="assistments_2012", path=repository, prefix="clean_datasets/")
     loaded_dataset.load_interactions(standard_timestamps=False)
     loaded_dataset.load_saved_texts()
     loaded_dataset.compute_intersection_texts_and_interactions()
