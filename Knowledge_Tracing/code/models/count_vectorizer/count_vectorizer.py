@@ -51,7 +51,6 @@ class count_vectorizer(base_model):
 
     def fit(self, interacted_and_text_problems, problem_id_to_index, texts):
         self.problem_ids = interacted_and_text_problems
-        print(interacted_and_text_problems)
         self.texts = []
         index = 0
         for p in self.problem_ids:
