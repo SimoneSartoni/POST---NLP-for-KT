@@ -3,15 +3,15 @@ import tensorflow as tf
 import numpy as np
 from Knowledge_Tracing.code.data_processing.dataset import dataset as dt
 from Knowledge_Tracing.code.evaluation.predictors.logistic_regression import logistic_regressor
-from code.models.count_vectorizer.count_vectorizer import count_vectorizer
+from Knowledge_Tracing.code.models.count_vectorizer.count_vectorizer import count_vectorizer
 
 MASK_VALUE = -1.0  # The masking value cannot be zero.
 
 
-def load_dataset_NLP_skills(fn, batch_size=32, shuffle=True):
+def load_dataset_NLP_skills(fn, batch_size=32, shuffle=True, repository="", keyedvectors="", name="assistments_2009"):
 
     # Step 3.1 - Generate NLP extracted encoding for problems
-    loaded_dataset = dt(name="junyi", path="/Knowledge_Tracing/intermediate_files", prefix="clean_datasets/")
+    loaded_dataset = dt(name=name, path=repository, prefix="clean_datasets/", )
     loaded_dataset.load_interactions(standard_timestamps=False)
     loaded_dataset.load_saved_texts()
     loaded_dataset.compute_intersection_texts_and_interactions()
@@ -19,20 +19,6 @@ def load_dataset_NLP_skills(fn, batch_size=32, shuffle=True):
     encode_model.fit(loaded_dataset.interacted_with_text_problem_set, loaded_dataset.problem_id_to_index,
                      loaded_dataset.texts_list)
 
-    # Step 3.2 - Remove problems without encoding (because we do not have text)
-    """print("start_nlp")
-    nlp_encodings = [np.asarray(encode_model.get_encoding(problem)).astype('float32') for problem in df['problem_id']]
-
-    print("start_wrong")
-    df['encodings_wrong'] = [encoding if correct == 0 else
-                             np.zeros(shape=encode_model.vector_size, dtype=np.float)
-                             for encoding, correct in list(zip(nlp_encodings, df['correct']))]
-    print("start_correct")
-    df['encodings_correct'] = [encoding if correct else
-                               np.zeros(shape=encode_model.vector_size, dtype=np.float)
-                               for encoding, correct in list(zip(nlp_encodings, df['correct']))]"""
-
-    nb_encodings = 100
     max_value = encode_model.words_num
 
     print("number of words is: " + str(max_value))
