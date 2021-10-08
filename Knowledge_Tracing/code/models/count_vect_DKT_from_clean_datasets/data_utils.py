@@ -18,7 +18,11 @@ def load_dataset_NLP_skills(fn, batch_size=32, shuffle=True, repository="", keye
     encode_model = count_vectorizer(min_df=min_df, max_df=max_df, binary=False)
     encode_model.fit(loaded_dataset.interacted_with_text_problem_set, loaded_dataset.problem_id_to_index,
                      loaded_dataset.texts_list)
-
+    for min_df_ in [2, 5, 10, 15]:
+        encode_model = count_vectorizer(min_df=min_df_, max_df=max_df, binary=False)
+        encode_model.fit(loaded_dataset.interacted_with_text_problem_set, loaded_dataset.problem_id_to_index,
+                         loaded_dataset.texts_list)
+        print(encode_model.words_num)
     max_value = encode_model.words_num
 
     print("number of words is: " + str(max_value))
