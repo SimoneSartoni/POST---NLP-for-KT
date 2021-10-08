@@ -32,7 +32,7 @@ def generate_encodings(df, encode_model):
     return inputs_generator, outputs_generator
 
 
-def load_dataset_NLP_skills(fn, batch_size=32, shuffle=True, repository="", keyedvectors=""):
+def load_dataset_NLP_skills(fn, batch_size=32, shuffle=True, repository="", keyedvectors="", name="assistments_2009"):
     df = pd.read_csv(fn, encoding="ISO-8859-1")
 
     if "skill_id" not in df.columns:
@@ -49,7 +49,7 @@ def load_dataset_NLP_skills(fn, batch_size=32, shuffle=True, repository="", keye
     df = df.groupby('user_id').filter(lambda q: len(q) > 1).copy()
 
     # Step 3.1 - Generate NLP extracted encoding for problems
-    loaded_dataset = dt(name="assistments_2012", path=repository, prefix="clean_datasets/")
+    loaded_dataset = dt(name=name, path=repository, prefix="clean_datasets/")
     loaded_dataset.load_interactions(standard_timestamps=False)
     loaded_dataset.load_saved_texts()
     loaded_dataset.compute_intersection_texts_and_interactions()
