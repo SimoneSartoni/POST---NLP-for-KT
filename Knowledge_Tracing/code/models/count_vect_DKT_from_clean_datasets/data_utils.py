@@ -8,14 +8,14 @@ from Knowledge_Tracing.code.models.count_vectorizer.count_vectorizer import coun
 MASK_VALUE = -1.0  # The masking value cannot be zero.
 
 
-def load_dataset_NLP_skills(fn, batch_size=32, shuffle=True, repository="", keyedvectors="", name="assistments_2009"):
+def load_dataset_NLP_skills(fn, batch_size=32, shuffle=True, repository="", keyedvectors="", name="assistments_2009", min_df=2, max_df=1.0):
 
     # Step 3.1 - Generate NLP extracted encoding for problems
     loaded_dataset = dt(name=name, path=repository, prefix="clean_datasets/", )
     loaded_dataset.load_interactions(standard_timestamps=False)
     loaded_dataset.load_saved_texts()
     loaded_dataset.compute_intersection_texts_and_interactions()
-    encode_model = count_vectorizer(min_df=1, max_df=1.0, binary=False)
+    encode_model = count_vectorizer(min_df=min_df, max_df=max_df, binary=False)
     encode_model.fit(loaded_dataset.interacted_with_text_problem_set, loaded_dataset.problem_id_to_index,
                      loaded_dataset.texts_list)
 
