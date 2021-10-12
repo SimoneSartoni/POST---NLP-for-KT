@@ -3,7 +3,7 @@ from Knowledge_Tracing.code.models.complex_models.models.ltmti import LTMTI
 from Knowledge_Tracing.code.models.complex_models.models.utmti import UTMTI
 from Knowledge_Tracing.code.models.complex_models.models.saint import SAINT
 from Knowledge_Tracing.code.models.complex_models.models.ssakt import SSAKT
-from Knowledge_Tracing.code.models.complex_models.dataset import DKTDataset, get_dataloaders
+from Knowledge_Tracing.code.models.complex_models.dataset import get_dataloaders
 
 import torch
 from torch import nn
@@ -32,6 +32,10 @@ class SAKTModel(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         inputs, target_ids, target = batch
+        if config.device == 'cuda':
+            inputs = inputs.cuda()
+            target_ids = target_ids.cuda()
+            target = target.cuda()
         output = self(inputs["input_ids"], inputs["input_skills"], target_ids, inputs["input_rtime"])
         target_mask = (target_ids != 0)
         output = torch.masked_select(output.squeeze(), target_mask)
@@ -41,6 +45,10 @@ class SAKTModel(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         inputs, target_ids, target = batch
+        if config.device == 'cuda':
+            inputs = inputs.cuda()
+            target_ids = target_ids.cuda()
+            target = target.cuda()
         output = self(inputs["input_ids"], inputs["input_skills"], target_ids, inputs["input_rtime"])
         target_mask = (target_ids != 0)
         output = torch.masked_select(output.squeeze(), target_mask)
