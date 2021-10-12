@@ -76,6 +76,8 @@ checkpoint = ModelCheckpoint(filename="{epoch}_model",
                              monitor="val_loss")
 
 sakt_model = SAKTModel(model="ltmti", model_args=ARGS)
+if config.device == 'cuda':
+    sakt_model.cuda()
 trainer = pl.Trainer(progress_bar_refresh_rate=21,
                      max_epochs=1, callbacks=[checkpoint])
 trainer.fit(model=sakt_model,
