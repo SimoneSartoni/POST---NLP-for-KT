@@ -23,6 +23,8 @@ class SAKTModel(pl.LightningModule):
             self.model = SSAKT(**model_args)
         elif model == "saint":
             self.model = SAINT(**model_args)
+        if config.device == 'cuda':
+            self.model = self.model.cuda()
 
     def forward(self, exercise, category, response, etime):
         return self.model(exercise, category, response, etime)

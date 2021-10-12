@@ -45,8 +45,7 @@ class MultiHeadWithFFN(nn.Module):
         out_atten, weights_attent = self.multihead_attention(query=query_norm,
                                                              key=kv_norm,
                                                              value=kv_norm,
-                                                             attn_mask=mask,
-                                                             device=config.device)
+                                                             attn_mask=mask)
         out_atten += query_norm
         out_atten = out_atten.permute(1, 0, 2)
         output_norm = self.layer_norm2(out_atten)
