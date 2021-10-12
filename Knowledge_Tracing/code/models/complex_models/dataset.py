@@ -10,9 +10,8 @@ from sklearn.model_selection import train_test_split
 
 
 class DKTDataset(Dataset):
-    def __init__(self, group, n_skills, max_seq=100):
+    def __init__(self, group, max_seq=100):
         self.samples = group
-        self.n_skills = n_skills
         self.max_seq = max_seq
         self.data = []
 
@@ -105,12 +104,14 @@ def get_dataloaders():
     print("no. of skills: ", n_skills)
     print("shape after exclusion:", train_df.shape)
 
+    train_df['content_id'] = pd.factorize(train_df['problem_id'], sort=True)
+
     # grouping based on user_id to get the data supply
     print("Grouping users...")
     group = train_df[
-        ["user_id", "problem_id", "correct", "prior_question_elapsed_time", "skill"]] \
+        ["user_id", "content_id", "correct", "prior_question_elapsed_time", "skill"]] \
         .groupby("user_id") \
-        .apply(lambda r: (r.problem_id.values, r.correct.values, r.prior_question_elapsed_time.values, r.skill.values))
+        .apply(lambda r: (r.content_id.values, r.correct.values, r.prior_question_elapsed_time.values, r.skill.values))
 
     print(group)
 
@@ -118,8 +119,8 @@ def get_dataloaders():
     train, val = train_test_split(group, test_size=0.2)
     print("train size: ", train.shape, "validation size: ", val.shape)
     print()
-    train_dataset = DKTDataset(train.values, n_skills=n_skills, max_seq=config.MAX_SEQ)
-    val_dataset = DKTDataset(val.values, n_skills=n_skills, max_seq=config.MAX_SEQ)
+    train_dataset = DKTDataset(train.values, max_seq=config.MAX_SEQ)
+    val_dataset = DKTDataset(val.values, max_seq=config.MAX_SEQ)
     print(train_dataset)
     train_loader = DataLoader(train_dataset,
                               batch_size=config.BATCH_SIZE,

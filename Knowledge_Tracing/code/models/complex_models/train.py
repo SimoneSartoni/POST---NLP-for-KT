@@ -32,7 +32,7 @@ class SAKTModel(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         inputs, target_ids, target = batch
-        output = self(inputs["input_ids"], inputs["input_cat"], target_ids, inputs["input_rtime"])
+        output = self(inputs["input_ids"], inputs["input_skill"], target_ids, inputs["input_rtime"])
         target_mask = (target_ids != 0)
         output = torch.masked_select(output.squeeze(), target_mask)
         target = torch.masked_select(target, target_mask)
@@ -41,7 +41,7 @@ class SAKTModel(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         inputs, target_ids, target = batch
-        output = self(inputs["input_ids"], inputs["input_cat"], target_ids, inputs["input_rtime"])
+        output = self(inputs["input_ids"], inputs["input_skill"], target_ids, inputs["input_rtime"])
         target_mask = (target_ids != 0)
         output = torch.masked_select(output.squeeze(), target_mask)
         target = torch.masked_select(target, target_mask)
