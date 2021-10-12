@@ -1,6 +1,6 @@
 from Knowledge_Tracing.code.models.complex_models.multihead_ffn import MultiHeadWithFFN
 from Knowledge_Tracing.code.models.complex_models.utils import pos_encode, get_clones, ut_mask
-import Knowledge_Tracing.code.models.complex_models.config
+from Knowledge_Tracing.code.models.complex_models import config
 
 import torch
 from torch import nn
@@ -87,7 +87,7 @@ class DecoderBlock(nn.Module):
         # assert out_embed.size(0)==n_dims, "input dimention should be (seq_len,batch_size,dims)"
         out_norm = self.layer_norm(out)
         mask = ut_mask(out_norm.size(0))
-        if device == "cuda":
+        if config.device == "cuda":
             mask = mask.cuda()
         out_atten, weights_attent = self.multihead_attention(query=out_norm,
                                                              key=out_norm,

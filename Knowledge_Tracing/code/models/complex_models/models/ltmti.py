@@ -1,6 +1,6 @@
 from Knowledge_Tracing.code.models.complex_models.multihead_ffn import MultiHeadWithFFN
 from Knowledge_Tracing.code.models.complex_models.utils import pos_encode, get_clones, ut_mask
-import Knowledge_Tracing.code.models.complex_models.config
+from Knowledge_Tracing.code.models.complex_models import config
 
 import torch
 from torch import nn
@@ -28,7 +28,7 @@ class LTMTI(nn.Module):
 
     def forward(self, in_exercise, in_category, in_response, in_etime):
         first_block = True
-        exercies_ids = in_exercise
+        exercise_ids = in_exercise
         categories = in_category
         for n in range(self.n_encoder):
             if n >= 1:
@@ -43,9 +43,9 @@ class LTMTI(nn.Module):
         for n in range(self.n_decoder):
             if n >= 1:
                 first_block = False
-            dec = self.decoder[n](exercies_ids, encoder_output=in_exercise, category=categories,
+            dec = self.decoder[n](exercise_ids, encoder_output=in_exercise, category=categories,
                                   first_block=first_block)
-            exercies_ids = dec
+            exercise_ids = dec
         return torch.sigmoid(self.fc(dec))
 
 

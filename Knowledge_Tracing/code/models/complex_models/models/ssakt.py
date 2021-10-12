@@ -1,6 +1,6 @@
 from Knowledge_Tracing.code.models.complex_models.multihead_ffn import MultiHeadWithFFN
 from Knowledge_Tracing.code.models.complex_models.utils import pos_encode, get_clones, ut_mask
-import Knowledge_Tracing.code.models.complex_models.config
+from Knowledge_Tracing.code.models.complex_models import config
 
 import torch
 from torch import nn
