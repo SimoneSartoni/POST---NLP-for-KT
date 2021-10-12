@@ -57,7 +57,7 @@ class DKTDataset(Dataset):
 
         input_cat = exe_cat[:-1].copy()
 
-        input = {"input_ids": input_ids, "input_rtime": input_rtime.astype(np.int), "input_cat": input_cat}
+        input = {"input_ids": input_ids, "input_rtime": input_rtime.astype(np.int), "input_skills": input_cat}
 
         return input, target_qids, label
 
