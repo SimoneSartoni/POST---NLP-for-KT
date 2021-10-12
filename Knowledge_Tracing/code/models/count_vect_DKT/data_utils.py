@@ -125,7 +125,8 @@ def load_dataset_NLP_skills(fn, batch_size=32, shuffle=True, repository="", keye
 
 def get_target(y_true, y_pred, nb_encodings=300):
     # Get skills and labels from y_true
-
+    print(y_true.shape)
+    print(y_pred.shape)
     mask = 1 - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
     y_true = y_true * mask
     encodings_true, y_true = tf.split(y_true, num_or_size_splits=[-1, 1], axis=-1)
