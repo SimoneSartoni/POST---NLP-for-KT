@@ -52,13 +52,10 @@ class DKTDataset(Dataset):
         target_qids = q_ids[1:]
         label = ans[1:]
 
-        input_ids = np.zeros(self.max_seq - 1, dtype=int)
         input_ids = q_ids[:-1].copy()
 
-        input_rtime = np.zeros(self.max_seq - 1, dtype=int)
         input_rtime = r_time[:-1].copy()
 
-        input_cat = np.zeros(self.max_seq - 1, dtype=int)
         input_cat = exe_cat[:-1].copy()
 
         input = {"input_ids": input_ids, "input_rtime": input_rtime.astype(np.int), "input_cat": input_cat}
