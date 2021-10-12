@@ -55,7 +55,7 @@ class EncoderBlock(nn.Module):
         self.seq_len = seq_len
         self.exercise_embed = nn.Embedding(total_ex, n_dims)
         self.category_embed = nn.Embedding(total_cat, n_dims)
-        self.position_embed = nn.Embedding(seq_len, n_dims, device=config.device)
+        self.position_embed = nn.Embedding(seq_len, n_dims)
         self.response_embed = nn.Embedding(total_ex, n_dims)
         self.elapsetime_embed = nn.Embedding(time_width, n_dims)
         self.layer_norm = nn.LayerNorm(n_dims)
