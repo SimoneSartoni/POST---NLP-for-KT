@@ -1,4 +1,4 @@
-device = "cpu"
+device = "gpu"
 MAX_SEQ = 100
 EMBED_DIMS = 128
 ENC_HEADS = DEC_HEADS = 8
