@@ -55,7 +55,7 @@ class EncoderBlock(nn.Module):
         self.seq_len = seq_len
         self.exercise_embed = nn.Embedding(total_ex, n_dims)
         self.category_embed = nn.Embedding(total_cat, n_dims)
-        self.position_embed = nn.Embedding(seq_len, n_dims)
+        self.position_embed = nn.Embedding(seq_len, n_dims, device=config.device)
         self.response_embed = nn.Embedding(total_ex, n_dims)
         self.elapsetime_embed = nn.Embedding(time_width, n_dims)
         self.layer_norm = nn.LayerNorm(n_dims)
@@ -71,6 +71,9 @@ class EncoderBlock(nn.Module):
             _etime = self.elapsetime_embed(elapse_time)
             _response = self.response_embed(response)
             position_encoded = pos_encode(self.seq_len - 1)
+            if config.device == "cuda":
+                position_encoded = position_encoded.cuda()
+
             _pos = self.position_embed(position_encoded)
 
             interaction = _cat + _exe + _etime + _response + _pos
