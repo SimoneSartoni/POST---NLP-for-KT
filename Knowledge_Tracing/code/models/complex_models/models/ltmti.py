@@ -72,10 +72,7 @@ class EncoderBlock(nn.Module):
             _response = self.response_embed(response)
             position_encoded = pos_encode(self.seq_len - 1)
             if config.device == 'cuda':
-                print("cuda!")
                 position_encoded = position_encoded.cuda()
-            print(self.position_embed)
-            print(position_encoded)
             _pos = self.position_embed(position_encoded)
 
             interaction = _cat + _exe + _etime + _response + _pos
@@ -104,6 +101,8 @@ class DecoderBlock(nn.Module):
             _exe = self.exercise_embed(input_e)
             _cat = self.category_embed(category)
             position_encoded = pos_encode(self.seq_len - 1)
+            if config.device == 'cuda':
+                position_encoded = position_encoded.cuda()
             _pos = self.position_embed(position_encoded)
             exercise = _exe + _cat + _pos
         else:
