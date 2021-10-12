@@ -104,7 +104,7 @@ def get_dataloaders():
     print("no. of skills: ", n_skills)
     print("shape after exclusion:", train_df.shape)
 
-    train_df['content_id'] = pd.factorize(train_df['problem_id'], sort=True)
+    train_df['content_id'], _ = pd.factorize(train_df['problem_id'], sort=True)
 
     # grouping based on user_id to get the data supply
     print("Grouping users...")
