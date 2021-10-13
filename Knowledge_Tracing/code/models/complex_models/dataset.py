@@ -62,7 +62,7 @@ class DKTDataset(Dataset):
         return input, target_qids, label
 
 
-def get_dataloaders(nrows=10000):
+def get_dataloaders(nrows=10000, max_seq=100):
     dtypes = {'user_id': 'int32', 'problem_id': 'int64',
               'correct': 'float64', 'skill': "string",
               'start_time': "string", 'end_time': "string"}
@@ -120,9 +120,9 @@ def get_dataloaders(nrows=10000):
     train, val = train_test_split(train, test_size=0.2)
     print("train size: ", train.shape, "validation size: ", val.shape)
     print()
-    train_dataset = DKTDataset(train.values, max_seq=config.MAX_SEQ)
-    val_dataset = DKTDataset(val.values, max_seq=config.MAX_SEQ)
-    test_dataset = DKTDataset(test.values, max_seq=config.MAX_SEQ)
+    train_dataset = DKTDataset(train.values, max_seq=max_seq)
+    val_dataset = DKTDataset(val.values, max_seq=max_seq)
+    test_dataset = DKTDataset(test.values, max_seq=max_seq)
     train_loader = DataLoader(train_dataset,
                               batch_size=config.BATCH_SIZE,
                               num_workers=2,
