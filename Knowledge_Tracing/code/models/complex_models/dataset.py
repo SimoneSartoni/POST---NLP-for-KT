@@ -62,13 +62,13 @@ class DKTDataset(Dataset):
         return input, target_qids, label
 
 
-def get_dataloaders():
+def get_dataloaders(nrows=10000):
     dtypes = {'user_id': 'int32', 'problem_id': 'int64',
               'correct': 'float64', 'skill': "string",
               'start_time': "string", 'end_time': "string"}
 
     print("loading csv.....")
-    train_df = pd.read_csv(config.TRAIN_FILE, dtype=dtypes, nrows=10000)
+    train_df = pd.read_csv(config.TRAIN_FILE, dtype=dtypes, nrows=nrows)
     print("shape of dataframe :", train_df.shape)
 
     train_df.fillna("no_skill", inplace=True)

@@ -56,6 +56,7 @@ class SAKTModel(pl.LightningModule):
         output = torch.masked_select(output.squeeze(), target_mask)
         target = torch.masked_select(target, target_mask)
         loss = nn.BCEWithLogitsLoss()(output.float(), target.float())
+
         return {"val_loss": loss, "output": output, "target": target}
 
 
@@ -76,6 +77,7 @@ checkpoint = ModelCheckpoint(filename="{epoch}_model",
                              verbose=True,
                              save_top_k=1,
                              monitor="val_loss")
+
 
 sakt_model = SAKTModel(model="ltmti", model_args=ARGS)
 if config.device == 'cuda':
