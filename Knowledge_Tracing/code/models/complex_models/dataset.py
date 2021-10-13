@@ -116,12 +116,13 @@ def get_dataloaders(nrows=10000):
     print(group)
 
     print("splitting")
-    train, val = train_test_split(group, test_size=0.2)
+    train, test = train_test_split(group, test_size=0.2)
+    train, val = train_test_split(train, test_size=0.2)
     print("train size: ", train.shape, "validation size: ", val.shape)
     print()
     train_dataset = DKTDataset(train.values, max_seq=config.MAX_SEQ)
     val_dataset = DKTDataset(val.values, max_seq=config.MAX_SEQ)
-    print(train_dataset)
+    test_dataset = DKTDataset(test.values, max_seq=config.MAX_SEQ)
     train_loader = DataLoader(train_dataset,
                               batch_size=config.BATCH_SIZE,
                               num_workers=2,
@@ -130,6 +131,10 @@ def get_dataloaders(nrows=10000):
                             batch_size=config.BATCH_SIZE,
                             num_workers=2,
                             shuffle=False)
-    del train_dataset, val_dataset
+    test_loader = DataLoader(test_dataset,
+                             batch_size=config.BATCH_SIZE,
+                             num_workers=2,
+                             shuffle=False)
+    del train_dataset, val_dataset, test_dataset
     gc.collect()
-    return train_loader, val_loader
+    return train_loader, val_loader, test_loader

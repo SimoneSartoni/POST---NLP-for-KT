@@ -60,7 +60,7 @@ class SAKTModel(pl.LightningModule):
         return {"val_loss": loss, "output": output, "target": target}
 
 
-train_loader, val_loader = get_dataloaders()
+train_loader, val_loader, test_loader = get_dataloaders(nrows=None)
 
 ARGS = {"n_dims": config.EMBED_DIMS,
         'n_encoder': config.NUM_ENCODER,
