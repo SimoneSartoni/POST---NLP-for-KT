@@ -30,7 +30,7 @@ class SAKTModel(pl.LightningModule):
         return self.model(exercise, category, response, etime)
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=1e-3)
+        return torch.optim.Adam(self.parameters(), lr=1e-3).cuda()
 
     def training_step(self, batch, batch_idx):
         inputs, target_ids, target = batch
