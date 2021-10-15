@@ -18,7 +18,7 @@ class SAINT(nn.Module):
 
     def forward(self, input, target):
         first_block = True
-        in_exercise, in_category, in_response = input['input_ids'], input['input_skill'], input['input_label']
+        in_exercise, in_category, in_response = input['input_id'], input['input_skill'], input['input_label']
         for n in range(self.n_encoder):
             if n >= 1:
                 first_block = False

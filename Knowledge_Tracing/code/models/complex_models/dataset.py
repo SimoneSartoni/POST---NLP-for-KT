@@ -59,9 +59,9 @@ class DKTDataset(Dataset):
 
         label = ans[1:]
 
-        input = {"input_ids": input_ids, "input_rtime": input_rtime.astype(np.int), "input_skills": input_skill,
+        input = {"input_id": input_ids, "input_rtime": input_rtime.astype(np.int), "input_skill": input_skill,
                  "input_label": input_label}
-        target = {"target_ids": target_ids, "target_skill": target_skill}
+        target = {"target_id": target_ids, "target_skill": target_skill}
 
         return input, target, label
 
