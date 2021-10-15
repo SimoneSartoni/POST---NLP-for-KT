@@ -36,6 +36,7 @@ class DKTDataset(Dataset):
         ans = np.zeros(self.max_seq, dtype=int)
         r_time = np.zeros(self.max_seq, dtype=int)
         exe_cat = np.zeros(self.max_seq, dtype=int)
+        input_label = np.zeros(self.max_seq, dtype=int)
 
         if seq_len >= self.max_seq:
             q_ids[:] = content_ids[-self.max_seq:]
@@ -48,18 +49,21 @@ class DKTDataset(Dataset):
             r_time[-seq_len:] = response_time
             exe_cat[-seq_len:] = exe_category
 
-        target_qids = q_ids[1:]
+        input_ids = q_ids
+        input_rtime = r_time[:-1].copy()
+        input_skill = exe_cat
+        input_label[1:] = ans[:-1]
+
+        target_ids = input_ids[1:]
+        target_skill = input_skill[1:]
+
         label = ans[1:]
 
-        input_ids = q_ids[:-1].copy()
+        input = {"input_ids": input_ids, "input_rtime": input_rtime.astype(np.int), "input_skills": input_skill,
+                 "input_label": input_label}
+        target = {"target_ids": target_ids, "target_skill": target_skill}
 
-        input_rtime = r_time[:-1].copy()
-
-        input_cat = exe_cat[:-1].copy()
-
-        input = {"input_ids": input_ids, "input_rtime": input_rtime.astype(np.int), "input_skills": input_cat}
-
-        return input, target_qids, label
+        return input, target, label
 
 
 def get_dataloaders(nrows=10000, max_seq=100):
@@ -104,14 +108,14 @@ def get_dataloaders(nrows=10000, max_seq=100):
     print("no. of skills: ", n_skills)
     print("shape after exclusion:", train_df.shape)
 
-    train_df['content_id'], _ = pd.factorize(train_df['problem_id'], sort=True)
+    train_df['question_id'], _ = pd.factorize(train_df['problem_id'], sort=True)
 
     # grouping based on user_id to get the data supply
     print("Grouping users...")
     group = train_df[
-        ["user_id", "content_id", "correct", "prior_question_elapsed_time", "skill"]] \
+        ["user_id", "question_id", "correct", "prior_question_elapsed_time", "skill"]] \
         .groupby("user_id") \
-        .apply(lambda r: (r.content_id.values, r.correct.values, r.prior_question_elapsed_time.values, r.skill.values))
+        .apply(lambda r: (r.question_id.values, r.correct.values, r.prior_question_elapsed_time.values, r.skill.values))
 
     print(group)
 

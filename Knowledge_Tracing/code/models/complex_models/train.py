@@ -30,15 +30,16 @@ class SAKTModel(pl.LightningModule):
         return self.model(exercise, category, response, etime)
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=1e-3).cuda()
+        return torch.optim.Adam(self.parameters(), lr=1e-3)
 
     def training_step(self, batch, batch_idx):
-        inputs, target_ids, target = batch
+        inputs, target, target = batch
+        target_ids = target['target_ids']
         if config.device == 'cuda':
             inputs = inputs.cuda()
             target_ids = target_ids.cuda()
             target = target.cuda()
-        output = self(inputs["input_ids"], inputs["input_skills"], target_ids, inputs["input_rtime"])
+        output = self(inputs, target)
         target_mask = (target_ids != 0)
         output = torch.masked_select(output.squeeze(), target_mask)
         target = torch.masked_select(target, target_mask)
