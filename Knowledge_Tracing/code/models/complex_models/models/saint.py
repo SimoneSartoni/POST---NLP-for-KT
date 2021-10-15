@@ -54,7 +54,7 @@ class EncoderBlock(nn.Module):
         if first_block:
             _exe = self.exercise_embed(input_e)
             _cat = self.category_embed(category)
-            position_encoded = pos_encode(self.seq_len - 1).cuda()
+            position_encoded = pos_encode(self.seq_len).cuda()
             _pos = self.position_embed(position_encoded)
             out = _cat + _exe + _pos
         else:
