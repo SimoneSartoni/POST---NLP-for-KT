@@ -18,8 +18,8 @@ print(torch.cuda.is_available())
 dt = datetime.utcnow()
 
 
-def get_corr_data_assistments(pro_num):
-    pro_pro_sparse = sparse.load_npz('../input/assesments-12-13-precessed-data/pro_pro_existing_words_only.npz')
+def get_corr_data_assistments(pro_num, filepath='../input/assesments-12-13-precessed-data/pro_pro_existing_words_only.npz'):
+    pro_pro_sparse = sparse.load_npz(filepath)
     pro_pro_coo = pro_pro_sparse.tocoo()
     # print(pro_skill_csr)
     pro_pro_dense = pro_pro_coo.toarray()
