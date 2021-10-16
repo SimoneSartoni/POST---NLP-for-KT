@@ -42,7 +42,7 @@ class EncoderBlock(nn.Module):
     def __init__(self, n_heads, n_dims, total_ex, total_cat, seq_len):
         super(EncoderBlock, self).__init__()
         self.seq_len = seq_len
-        self.exercise_embed = nn.Embedding(total_ex, n_dims)
+        # self.exercise_embed = nn.Embedding(total_ex, n_dims)
         self.category_embed = nn.Embedding(total_cat, n_dims)
         self.position_embed = nn.Embedding(seq_len, n_dims)
         self.layer_norm = nn.LayerNorm(n_dims)
@@ -52,11 +52,11 @@ class EncoderBlock(nn.Module):
 
     def forward(self, input_e, category, first_block=True):
         if first_block:
-            _exe = self.exercise_embed(input_e)
+            # _exe = self.exercise_embed(input_e)
             _cat = self.category_embed(category)
             position_encoded = pos_encode(self.seq_len).cuda()
             _pos = self.position_embed(position_encoded)
-            out = _cat + _exe + _pos
+            out = _cat + _pos
         else:
             out = input_e
         output = self.multihead(q_input=out, kv_input=out)
