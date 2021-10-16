@@ -1,3 +1,4 @@
+import gc
 import os
 import copy
 import numpy as np
@@ -6,6 +7,8 @@ import psutil
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from sklearn.metrics import accuracy_score, roc_auc_score
+
 from Knowledge_Tracing.code.evaluation.metrics.metrics_RKT import metrics_RKT
 
 from Knowledge_Tracing.code.models.RKT.multi_head_attention import MultiHeadedAttention
@@ -21,7 +24,7 @@ def clone(module, num):
 
 
 class RKT(nn.Module):
-    def __init__(self, num_items,  embed_size, num_attn_layers, num_heads,
+    def __init__(self, num_items, embed_size, num_attn_layers, num_heads,
                  encode_pos, max_pos, drop_prob, l1, l2):
         """Self-attentive knowledge tracing.
         Arguments:
@@ -38,13 +41,13 @@ class RKT(nn.Module):
         self.embed_size = embed_size
         self.encode_pos = encode_pos
 
-        self.item_embeds = nn.Embedding(num_items + 1, embed_size , padding_idx=0)
+        self.item_embeds = nn.Embedding(num_items + 1, embed_size, padding_idx=0)
         # self.skill_embeds = nn.Embedding(num_skills + 1, embed_size // 2, padding_idx=0)
 
         self.pos_key_embeds = nn.Embedding(max_pos, embed_size // num_heads)
         self.pos_value_embeds = nn.Embedding(max_pos, embed_size // num_heads)
 
-        self.lin_in = nn.Linear(2*embed_size, embed_size)
+        self.lin_in = nn.Linear(2 * embed_size, embed_size)
         self.attn_layers = clone(MultiHeadedAttention(embed_size, num_heads, drop_prob), num_attn_layers)
         self.dropout = nn.Dropout(p=drop_prob)
         self.lin_out = nn.Linear(embed_size, 1)
@@ -82,11 +85,12 @@ class RKT(nn.Module):
         if inputs.is_cuda:
             mask = mask.cuda()
         outputs, attn = self.attn_layers[0](query, inputs, inputs, rel, self.l1, self.l2, timestamp, self.encode_pos,
-                                                   self.pos_key_embeds, self.pos_value_embeds, mask)
+                                            self.pos_key_embeds, self.pos_value_embeds, mask)
         outputs = self.dropout(outputs)
         for l in self.attn_layers[1:]:
-            residual, attn = l(query, outputs, outputs, rel, self.l1, self.l2, self.encode_pos, timestamp, self.pos_key_embeds,
-                         self.pos_value_embeds, mask)
+            residual, attn = l(query, outputs, outputs, rel, self.l1, self.l2, self.encode_pos, timestamp,
+                               self.pos_key_embeds,
+                               self.pos_value_embeds, mask)
             outputs = self.dropout(outputs + F.relu(residual))
 
         return self.lin_out(outputs), attn
@@ -169,7 +173,7 @@ class RKT(nn.Module):
                 item_inputs, label_inputs, item_ids, timestamp = data
                 # rel = compute_corr(item_inputs, item_ids, corr_data)
                 rel = torch.Tensor(corr_data[(item_ids - 1).cpu().unsqueeze(1).repeat(1, item_ids.shape[-1], 1), (
-                            item_inputs - 1).cpu().unsqueeze(-1).repeat(1, 1, item_inputs.shape[-1])]).cuda()
+                        item_inputs - 1).cpu().unsqueeze(-1).repeat(1, 1, item_inputs.shape[-1])]).cuda()
                 time = computeRePos(timestamp, timespan)
                 with torch.no_grad():
                     preds, weights = model(item_inputs, label_inputs, item_ids, rel, time)
@@ -190,3 +194,41 @@ class RKT(nn.Module):
                 break
 
 
+def train_test_split(data, labels, split=0.8):
+    n_samples = len(data)
+    # x is your dataset
+    training_data, test_data = data[:int(n_samples * split)], data[int(n_samples * split):]
+    training_labels, test_labels = labels[:int(n_samples * split)], labels[int(n_samples * split):]
+    return training_data, test_data, training_labels, test_labels
+
+
+def compute_auc(preds, labels):
+    preds = preds[labels >= 0].flatten()
+    labels = labels[labels >= 0].float()
+    if len(torch.unique(labels)) == 1:  # Only one class
+        auc = accuracy_score(labels, preds.round())
+        acc = auc
+    else:
+        auc = roc_auc_score(labels, preds)
+        acc = accuracy_score(labels, preds.round())
+    return auc, acc
+
+
+def compute_loss(preds, labels, criterion):
+    preds = preds[labels >= 0].flatten()
+    labels = labels[labels >= 0].float()
+    return criterion(preds, labels)
+
+
+def computeRePos(time_seq, time_span):
+    batch_size = time_seq.shape[0]
+    size = time_seq.shape[1]
+
+    time_matrix = (
+        torch.abs(torch.unsqueeze(time_seq, axis=1).repeat(1, size, 1).reshape((batch_size, size * size, 1)) - \
+                  torch.unsqueeze(time_seq, axis=-1).repeat(1, 1, size, ).reshape((batch_size, size * size, 1))))
+
+    # time_matrix[time_matrix>time_span] = time_span
+    time_matrix = time_matrix.reshape((batch_size, size, size))
+
+    return (time_matrix)

@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-from Knowledge_Tracing.code.evaluation.metrics import metric
+from Knowledge_Tracing.code.evaluation.metrics.metrics import metric
 
 
-class metrics_RKT(metric):
+class metrics_RKT():
     """Keep track of metrics over time in a dictionary.
     """
 
