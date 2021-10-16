@@ -16,9 +16,9 @@ class SAINT(nn.Module):
         self.decoder = get_clones(DecoderBlock(dec_heads, n_dims, total_responses, seq_len), n_decoder)
         self.fc = nn.Linear(n_dims, 1)
 
-    def forward(self, input, target):
+    def forward(self, inputs, target):
         first_block = True
-        in_exercise, in_category, in_response = input['input_id'], input['input_skill'], input['input_label']
+        in_exercise, in_category, in_response = inputs['input_id'], inputs['input_skill'], inputs['input_label']
         for n in range(self.n_encoder):
             if n >= 1:
                 first_block = False

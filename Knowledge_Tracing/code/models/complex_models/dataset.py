@@ -55,7 +55,7 @@ class DKTDataset(Dataset):
         input_label[1:] = ans[:-1]
 
         target_ids = input_ids[:]
-        target_skill = input_skill[1:]
+        target_skill = input_skill[:]
 
         label = ans
 
