@@ -135,7 +135,7 @@ class DataProcess:
                     f.write(str(d) + '\n')
 
     def read_user_sequence(self, filename, max_len=200, min_len=3, shuffle_flag=True):
-        with open(filename, 'r') as f:
+        with open(os.path.join(self.output_folder, filename), 'r') as f:
             lines = f.readlines()
         with open(os.path.join(self.output_folder, 'skill_id_dict.txt'), 'r') as f:
             skill_id_dict = eval(f.read())
