@@ -35,7 +35,7 @@ def get_corr_data(pro_num):
     return pro_pro_dense
 
 
-def get_data_assistments(batch_size=64):
+def get_data_assistments(batch_size=64, filepath="../input/assesments-12-13-precessed-data/2012-2013-data-with-predictions-4-final.csv.npz"):
     """Extract sequences from dataframe.
     Arguments:
         batch_size (int): batch_size
@@ -45,7 +45,7 @@ def get_data_assistments(batch_size=64):
               'shuffle': True}
     process = psutil.Process(os.getpid())
     gc.enable()
-    data = np.load('../input/assesments-12-13-precessed-data/2012-2013-data-with-predictions-4-final.csv.npz')
+    data = np.load(filepath)
     y, skill, problem, timestamps, real_len = data['y'], data['skill'], data['problem'], data['time'], data['real_len']
     skill_num, pro_num = data['skill_num'], data['problem_num']
     print(pro_num)

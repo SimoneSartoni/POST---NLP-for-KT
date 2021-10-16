@@ -8,12 +8,13 @@ import numpy as np
 from scipy import sparse
 
 
-class DataProcess():
-    def __init__(self, data_folder='./', file_name='skill_builder_data_corrected_collapsed.csv', min_inter_num=3):
+class DataProcess:
+    def __init__(self, data_folder='./', output_folder='./', file_name='skill_builder_data_corrected_collapsed.csv', min_inter_num=3):
         print("Process Dataset %s" % data_folder)
         self.min_inter_num = min_inter_num
         self.data_folder = data_folder
         self.file_name = file_name
+        self.output_folder = output_folder
 
     def process_csv(self):
         # pre-process original csv file for assist dataset
@@ -43,7 +44,7 @@ class DataProcess():
         print('After deleting some users, records number %d' % len(df))
         # print('features: ', df['assistment_id'].unique(), df['answer_type'].unique())
 
-        df.to_csv(os.path.join(self.data_folder, '%s_processed.csv' % self.file_name))
+        df.to_csv(os.path.join(self.output_folder, '%s_processed.csv' % self.file_name))
 
     def pro_skill_graph(self):
         df = pd.read_csv(os.path.join(self.data_folder, '%s_processed.csv' % self.file_name), low_memory=False,
@@ -97,7 +98,7 @@ class DataProcess():
         self.save_dict(skill_id_dict, os.path.join(self.data_folder, 'skill_id_dict.txt'))
 
         # save pro_feat_arr
-        np.savez(os.path.join(self.data_folder, 'pro_feat.npz'), pro_feat=pro_feat)
+        np.savez(os.path.join(self.output_folder, 'pro_feat.npz'), pro_feat=pro_feat)
 
     def generate_user_sequence(self, seq_file):
         # generate user interaction sequence
@@ -118,7 +119,7 @@ class DataProcess():
             tmp_end_time = list(tmp_inter['end_time'])
             user_inters.append([[len(tmp_inter)], tmp_skills, tmp_problems, tmp_ans, tmp_end_time])
 
-        write_file = os.path.join(self.data_folder, seq_file)
+        write_file = os.path.join(self.output_folder, seq_file)
         self.write_txt(write_file, user_inters)
 
     def save_dict(self, dict_name, file_name):
@@ -183,13 +184,15 @@ class DataProcess():
         print(np.max(skill), np.min(skill))
         print(np.max(problem), np.min(problem))
 
-        np.savez(os.path.join(self.data_folder, "%s.npz" % self.file_name), problem=problem, y=y, skill=skill,
+        np.savez(os.path.join(self.output_folder, "%s.npz" % self.file_name), problem=problem, y=y, skill=skill,
                  time=timestamp, real_len=real_len, skill_num=skill_num, problem_num=pro_num)
 
 
 def execute(data_folder='C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/data/assistments/2012_2013/',
+            output_folder='C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/intermediate_files/'
+                          'assistments/2012_2013/',
             file_name='2012-2013-data-with-predictions-4-final.csv', min_inter_num=3):
-    DP = DataProcess(data_folder, file_name, min_inter_num)
+    DP = DataProcess(data_folder, output_folder, file_name, min_inter_num)
     DP.process_csv()
     DP.pro_skill_graph()
     DP.generate_user_sequence('data.txt')
