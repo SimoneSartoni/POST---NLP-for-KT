@@ -9,7 +9,8 @@ from scipy import sparse
 
 
 class DataProcess:
-    def __init__(self, data_folder='./', output_folder='./', file_name='skill_builder_data_corrected_collapsed.csv', min_inter_num=3):
+    def __init__(self, data_folder='./', output_folder='./', file_name='skill_builder_data_corrected_collapsed.csv',
+                 min_inter_num=3):
         print("Process Dataset %s" % data_folder)
         self.min_inter_num = min_inter_num
         self.data_folder = data_folder
@@ -47,7 +48,7 @@ class DataProcess:
         df.to_csv(os.path.join(self.output_folder, '%s_processed.csv' % self.file_name))
 
     def pro_skill_graph(self):
-        df = pd.read_csv(os.path.join(self.data_folder, '%s_processed.csv' % self.file_name), low_memory=False,
+        df = pd.read_csv(os.path.join(self.output_folder, '%s_processed.csv' % self.file_name), low_memory=False,
                          encoding="ISO-8859-1")
         problems = df['problem_id'].unique()
         pro_id_dict = dict(zip(problems, range(len(problems))))
@@ -91,11 +92,11 @@ class DataProcess:
         pro_skill_sparse = sparse.coo_matrix(
             (pro_skill_adj[:, 2].astype(np.float32), (pro_skill_adj[:, 0], pro_skill_adj[:, 1])),
             shape=(pro_num, skill_num))
-        sparse.save_npz(os.path.join(self.data_folder, 'pro_skill_sparse.npz'), pro_skill_sparse)
+        sparse.save_npz(os.path.join(self.output_folder, 'pro_skill_sparse.npz'), pro_skill_sparse)
 
         # save pro-id-dict, skill-id-dict
-        self.save_dict(pro_id_dict, os.path.join(self.data_folder, 'pro_id_dict.txt'))
-        self.save_dict(skill_id_dict, os.path.join(self.data_folder, 'skill_id_dict.txt'))
+        self.save_dict(pro_id_dict, os.path.join(self.output_folder, 'pro_id_dict.txt'))
+        self.save_dict(skill_id_dict, os.path.join(self.output_folder, 'skill_id_dict.txt'))
 
         # save pro_feat_arr
         np.savez(os.path.join(self.output_folder, 'pro_feat.npz'), pro_feat=pro_feat)
@@ -104,7 +105,7 @@ class DataProcess:
         # generate user interaction sequence
         # and write to data.txt
 
-        df = pd.read_csv(os.path.join(self.data_folder, '%s_processed.csv' % self.file_name), low_memory=False,
+        df = pd.read_csv(os.path.join(self.output_folder, '%s_processed.csv' % self.file_name), low_memory=False,
                          encoding="ISO-8859-1")
         ui_df = df.groupby(['user_id'], as_index=True)
         print('user number %d' % len(ui_df))
@@ -125,7 +126,7 @@ class DataProcess:
     def save_dict(self, dict_name, file_name):
         f = open(file_name, 'w')
         f.write(str(dict_name))
-        f.close
+        f.close()
 
     def write_txt(self, file, data):
         with open(file, 'w') as f:
@@ -136,9 +137,9 @@ class DataProcess:
     def read_user_sequence(self, filename, max_len=200, min_len=3, shuffle_flag=True):
         with open(filename, 'r') as f:
             lines = f.readlines()
-        with open(os.path.join(self.data_folder, 'skill_id_dict.txt'), 'r') as f:
+        with open(os.path.join(self.output_folder, 'skill_id_dict.txt'), 'r') as f:
             skill_id_dict = eval(f.read())
-        with open(os.path.join(self.data_folder, 'pro_id_dict.txt'), 'r') as f:
+        with open(os.path.join(self.output_folder, 'pro_id_dict.txt'), 'r') as f:
             pro_id_dict = eval(f.read())
 
         y, skill, problem, real_len, timestamp = [], [], [], [], []
