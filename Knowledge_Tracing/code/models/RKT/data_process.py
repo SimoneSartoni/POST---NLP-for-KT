@@ -197,5 +197,5 @@ def execute(data_folder='C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_T
     DP.process_csv()
     DP.pro_skill_graph()
     DP.generate_user_sequence('data.txt')
-    DP.read_user_sequence(os.path.join(data_folder, 'data.txt'))
+    DP.read_user_sequence('data.txt')
     return DP
