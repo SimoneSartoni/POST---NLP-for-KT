@@ -1,20 +1,14 @@
-import argparse
+import os
+
+import numpy as np
 import psutil
 import gc
-import pandas as pd
-from random import shuffle
 from sklearn.metrics import roc_auc_score, accuracy_score
 from scipy import sparse
-import torch.nn as nn
-from torch.optim import Adam
-from torch.nn.utils import clip_grad_norm_
-from torch.nn.utils.rnn import pad_sequence
-from collections import defaultdict
-from sys import getsizeof
-from datetime import datetime
 import torch
+from torch.nn.utils.rnn import pad_sequence
+from datetime import datetime
 
-from Knowledge_Tracing.code.models.RKT.utils import *
 from Knowledge_Tracing.code.models.RKT.dataset import Dataset
 
 start = torch.cuda.Event(enable_timing=True)
@@ -44,9 +38,7 @@ def get_corr_data(pro_num):
 def get_data_assistments(batch_size=64):
     """Extract sequences from dataframe.
     Arguments:
-        df (pandas Dataframe): output by prepare_data.py
-        max_length (int): maximum length of a sequence chunk
-        train_split (float): proportion of data to use for training
+        batch_size (int): batch_size
     """
 
     params = {'batch_size': batch_size,
