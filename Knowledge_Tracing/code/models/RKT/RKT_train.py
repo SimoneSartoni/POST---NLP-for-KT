@@ -93,9 +93,12 @@ def train(train_data, val_data, pro_num, corr_data, timestamp, timespan, models,
         for i in range(len(models)):
             models[i].train()
             # Save model
+            stop = saver.save(average_metrics['auc/val'], model)
             metrics = metrics_list[i]
             average_metrics = metrics.average()
             logger.log_scalars(average_metrics, step)
             print(average_metrics)
+            if stop:
+                break
 
 

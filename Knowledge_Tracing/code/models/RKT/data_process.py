@@ -10,12 +10,13 @@ from scipy import sparse
 
 class DataProcess:
     def __init__(self, data_folder='./', output_folder='./', file_name='skill_builder_data_corrected_collapsed.csv',
-                 min_inter_num=3):
+                 min_inter_num=3, dataset_name='assistment_2012'):
         print("Process Dataset %s" % data_folder)
         self.min_inter_num = min_inter_num
         self.data_folder = data_folder
         self.file_name = file_name
         self.output_folder = output_folder
+        self.dataset_name = dataset_name
 
     def process_csv(self):
         # pre-process original csv file for assist dataset
@@ -150,8 +151,10 @@ class DataProcess:
         while index < len(lines):
             num = eval(lines[index])[0]
             tmp_skills = eval(lines[index + 1])[:max_len]
-            # tmp_skills = [skill_id_dict[ele]+1 for ele in tmp_skills]     # for assist09
-            tmp_skills = [ele + 1 for ele in tmp_skills]  # for assist12
+            if self.dataset_name == 'assistment_2012':
+                tmp_skills = [ele + 1 for ele in tmp_skills]  # for assist12
+            if self.dataset_name == 'assistment_2009':
+                tmp_skills = [skill_id_dict[ele]+1 for ele in tmp_skills]     # for assist09
             tmp_pro = eval(lines[index + 2])[:max_len]
             tmp_pro = [pro_id_dict[ele] + 1 for ele in tmp_pro]
             tmp_ans = eval(lines[index + 3])[:max_len]
