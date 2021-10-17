@@ -68,7 +68,7 @@ def train(train_data, val_data, pro_num, corr_data, timestamp, timespan, models,
                 clip_grad_norm_(model.parameters(), grad_clip)
                 optimizer.step()
                 step += 1
-                metrics.store({'loss/train/': loss.item()})
+                metrics.store({'loss/train': loss.item()})
                 metrics.store({'auc/train': train_auc})
 
         # Logging
@@ -88,7 +88,7 @@ def train(train_data, val_data, pro_num, corr_data, timestamp, timespan, models,
                     preds, weights = model(item_inputs, label_inputs, item_ids, rel, time)
                     preds = torch.sigmoid(preds).cpu()
                 val_auc, val_acc = compute_auc(preds, labels.cpu())
-                metrics.store({'auc/val/': val_auc, 'acc/val': val_acc})
+                metrics.store({'auc/val': val_auc, 'acc/val': val_acc})
                 gc.collect()
         for i in range(len(models)):
             models[i].train()
