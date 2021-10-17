@@ -68,16 +68,15 @@ def get_data_assistments(batch_size=64, use_skills=True,
     inputs_and_ids = [pad_sequence(seqs, batch_first=True, padding_value=0)
                       for seqs in seq_lists[0:-1]]
     labels = pad_sequence(seq_lists[-1], batch_first=True, padding_value=-1)  # Pad labels with -1
-    train_data, test_data, training_labels, test_labels = train_test_split(data=list(zip(*inputs_and_ids)),
+    train_data, test_data, train_labels, test_labels = train_test_split(data=list(zip(*inputs_and_ids)),
                                                                            labels=labels, split=0.8)
-    training_set = Dataset(train_data, training_labels)
-    # training_generator = torch.utils.data.DataLoader(training_set, **params)
+    train_data, val_data, train_labels, val_labels = train_test_split(data=train_data,
+                                                                           labels=train_labels, split=0.8)
+    training_set = Dataset(train_data, train_labels)
     test_set = Dataset(test_data, test_labels)
-    # test_generator = torch.utils.data.DataLoader(test_set, **params)
-    # validation_set = Dataset(val_data, val_labels)
-    # validation_generator = torch.utils.data.DataLoader(validation_set, **params)
+    validation_set = Dataset(val_data, val_labels)
 
-    return training_set, test_set, pro_num, timestamps
+    return training_set, validation_set, test_set, pro_num, timestamps
 
 
 def train_test_split(data, labels, split=0.8):

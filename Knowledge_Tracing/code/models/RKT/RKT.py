@@ -19,7 +19,7 @@ def clone(module, num):
 def attention(query, key, value, rel, l1, l2, timestamp, mask=None, dropout=None):
     """Compute scaled dot product attention.
     """
-    rel = rel * mask.to(torch.float) # future masking of correlation matrix.
+    rel = rel * mask.to(torch.float)  # future masking of correlation matrix.
     rel_attn = rel.masked_fill(rel == 0, -10000)
     rel_attn = nn.Softmax(dim=-1)(rel_attn)
     scores = torch.matmul(query, key.transpose(-2, -1))
@@ -27,17 +27,16 @@ def attention(query, key, value, rel, l1, l2, timestamp, mask=None, dropout=None
     if mask is not None:
         scores = scores.masked_fill(mask, -1e9)
 
-        time_stamp= torch.exp(-torch.abs(timestamp.float()))
+        time_stamp = torch.exp(-torch.abs(timestamp.float()))
         #
-        time_stamp=time_stamp.masked_fill(mask,-np.inf)
-
+        time_stamp = time_stamp.masked_fill(mask, -np.inf)
 
     prob_attn = F.softmax(scores, dim=-1)
-    time_attn = F.softmax(time_stamp,dim=-1)
-    prob_attn = (1-l2)*prob_attn+l2*time_attn
+    time_attn = F.softmax(time_stamp, dim=-1)
+    prob_attn = (1 - l2) * prob_attn + l2 * time_attn
     # prob_attn = F.softmax(prob_attn + rel_attn, dim=-1)
 
-    prob_attn = (1-l1)*prob_attn + (l1)*rel_attn
+    prob_attn = (1 - l1) * prob_attn + l1 * rel_attn
     if dropout is not None:
         prob_attn = dropout(prob_attn)
     return torch.matmul(prob_attn, value), prob_attn
@@ -86,7 +85,8 @@ class MultiHeadedAttention(nn.Module):
         self.linear_layers = clone(nn.Linear(total_size, total_size), 3)
         self.dropout = nn.Dropout(p=drop_prob)
 
-    def forward(self, query, key, value, rel, l1, l2, timestamp, encode_pos, pos_key_embeds, pos_value_embeds, mask=None):
+    def forward(self, query, key, value, rel, l1, l2, timestamp, encode_pos, pos_key_embeds, pos_value_embeds,
+                mask=None):
         batch_size, seq_length = query.shape[:2]
 
         # Apply mask to all heads
@@ -94,15 +94,15 @@ class MultiHeadedAttention(nn.Module):
             mask = mask.unsqueeze(1)
 
         # Project inputs
-        rel = rel.unsqueeze(1).repeat(1,self.num_heads,1,1)
-        timestamp = timestamp.unsqueeze(1).repeat(1,self.num_heads,1,1)
+        rel = rel.unsqueeze(1).repeat(1, self.num_heads, 1, 1)
+        timestamp = timestamp.unsqueeze(1).repeat(1, self.num_heads, 1, 1)
         query, key, value = [l(x).view(batch_size, seq_length, self.num_heads, self.head_size).transpose(1, 2)
                              for l, x in zip(self.linear_layers, (query, key, value))]
 
         # Apply attention
         if encode_pos:
             out, self.prob_attn = relative_attention(
-                query, key, value, rel, l1, l2, timestamp, pos_key_embeds, pos_value_embeds,  mask, self.dropout)
+                query, key, value, rel, l1, l2, timestamp, pos_key_embeds, pos_value_embeds, mask, self.dropout)
         else:
             out, self.prob_attn = attention(query, key, value, rel, l1, l2, timestamp, mask, self.dropout)
 
@@ -111,7 +111,7 @@ class MultiHeadedAttention(nn.Module):
 
 
 class RKT(nn.Module):
-    def __init__(self, num_items,  embed_size, num_attn_layers, num_heads,
+    def __init__(self, num_items, embed_size, num_attn_layers, num_heads,
                  encode_pos, max_pos, drop_prob):
         """Self-attentive knowledge tracing.
         Arguments:
@@ -128,13 +128,13 @@ class RKT(nn.Module):
         self.embed_size = embed_size
         self.encode_pos = encode_pos
 
-        self.item_embeds = nn.Embedding(num_items + 1, embed_size , padding_idx=0)
+        self.item_embeds = nn.Embedding(num_items + 1, embed_size, padding_idx=0)
         # self.skill_embeds = nn.Embedding(num_skills + 1, embed_size // 2, padding_idx=0)
 
         self.pos_key_embeds = nn.Embedding(max_pos, embed_size // num_heads)
         self.pos_value_embeds = nn.Embedding(max_pos, embed_size // num_heads)
 
-        self.lin_in = nn.Linear(2*embed_size, embed_size)
+        self.lin_in = nn.Linear(2 * embed_size, embed_size)
         self.attn_layers = clone(MultiHeadedAttention(embed_size, num_heads, drop_prob), num_attn_layers)
         self.dropout = nn.Dropout(p=drop_prob)
         self.lin_out = nn.Linear(embed_size, 1)
@@ -167,12 +167,13 @@ class RKT(nn.Module):
         mask = future_mask(inputs.size(-2))
         if inputs.is_cuda:
             mask = mask.cuda()
-        outputs, attn  = self.attn_layers[0](query, inputs, inputs, rel, self.l1, self.l2, timestamp, self.encode_pos,
-                                                   self.pos_key_embeds, self.pos_value_embeds, mask)
+        outputs, attn = self.attn_layers[0](query, inputs, inputs, rel, self.l1, self.l2, timestamp, self.encode_pos,
+                                            self.pos_key_embeds, self.pos_value_embeds, mask)
         outputs = self.dropout(outputs)
         for l in self.attn_layers[1:]:
-            residual, attn = l(query, outputs, outputs, rel, self.l1, self.l2, self.encode_pos, timestamp, self.pos_key_embeds,
-                         self.pos_value_embeds, mask)
+            residual, attn = l(query, outputs, outputs, rel, self.l1, self.l2, self.encode_pos, timestamp,
+                               self.pos_key_embeds,
+                               self.pos_value_embeds, mask)
             outputs = self.dropout(outputs + F.relu(residual))
 
         return self.lin_out(outputs), attn
