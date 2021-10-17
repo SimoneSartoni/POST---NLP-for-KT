@@ -61,9 +61,9 @@ def get_data_assistments(batch_size=64, use_skills=True,
         skill_inputs = [torch.cat((torch.zeros(1, dtype=torch.long), s))[:-1] for s in skill_ids]
     label_inputs = [torch.cat((torch.zeros(1, dtype=torch.long).cuda(), l))[:-1] for l in labels]
     if use_skills:
-        batches = list(zip(item_inputs, label_inputs, item_ids, timestamp, labels))
-    else:
         batches = list(zip(item_inputs, skill_inputs, label_inputs, item_ids, skill_ids, timestamp, labels))
+    else:
+        batches = list(zip(item_inputs, label_inputs, item_ids, timestamp, labels))
     seq_lists = list(zip(*batches))
     inputs_and_ids = [pad_sequence(seqs, batch_first=True, padding_value=0)
                       for seqs in seq_lists[0:-1]]
