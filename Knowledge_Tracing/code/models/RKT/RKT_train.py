@@ -96,7 +96,6 @@ def train(train_data, val_data, pro_num, corr_data, timestamp, timespan, models,
             metrics = metrics_list[i]
             average_metrics = metrics.average()
             logger.log_scalars(average_metrics, step)
-            print(models[i].get_hyperparams())
             print(average_metrics)
 
 
