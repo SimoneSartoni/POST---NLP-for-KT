@@ -62,8 +62,6 @@ def train(train_data, val_data, pro_num, corr_data, timestamp, timespan, models,
                 outputs, weights = model(item_inputs, label_inputs, item_ids, rel, time)
                 loss = compute_loss(outputs, labels, criterion)
                 outputs = torch.sigmoid(outputs).detach().cpu()
-                print(outputs)
-                print(labels)
                 train_auc, train_acc = compute_metrics(outputs, labels.cpu())
                 model.zero_grad()
                 loss.backward()
