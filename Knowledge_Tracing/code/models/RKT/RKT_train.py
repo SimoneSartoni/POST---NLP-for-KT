@@ -8,7 +8,7 @@ import torch
 from torch import nn
 from torch.nn.utils import clip_grad_norm_
 
-from Knowledge_Tracing.code.models.RKT.get_data import computeRePos, compute_loss, compute_auc, get_corr_data_assistments
+from Knowledge_Tracing.code.models.RKT.get_data import computeRePos, compute_loss, compute_metrics, get_corr_data_assistments
 from Knowledge_Tracing.code.models.RKT.utils import Metrics
 
 
@@ -59,10 +59,12 @@ def train(train_data, val_data, pro_num, corr_data, timestamp, timespan, models,
                 model = models[i]
                 metrics = metrics_list[i]
                 optimizer = optimizers[i]
-                preds, weights = model(item_inputs, label_inputs, item_ids, rel, time)
-                loss = compute_loss(preds, labels, criterion)
-                preds = torch.sigmoid(preds).detach().cpu()
-                train_auc, train_acc = compute_auc(preds, labels.cpu())
+                outputs, weights = model(item_inputs, label_inputs, item_ids, rel, time)
+                loss = compute_loss(outputs, labels, criterion)
+                outputs = torch.sigmoid(outputs).detach().cpu()
+                print(outputs)
+                print(labels)
+                train_auc, train_acc = compute_metrics(outputs, labels.cpu())
                 model.zero_grad()
                 loss.backward()
                 clip_grad_norm_(model.parameters(), grad_clip)
@@ -85,9 +87,9 @@ def train(train_data, val_data, pro_num, corr_data, timestamp, timespan, models,
                             item_inputs - 1).cpu().unsqueeze(-1).repeat(1, 1, item_inputs.shape[-1])]).cuda()
                 time = computeRePos(timestamp, timespan)
                 with torch.no_grad():
-                    preds, weights = model(item_inputs, label_inputs, item_ids, rel, time)
-                    preds = torch.sigmoid(preds).cpu()
-                val_auc, val_acc = compute_auc(preds, labels.cpu())
+                    outputs, weights = model(item_inputs, label_inputs, item_ids, rel, time)
+                    outputs = torch.sigmoid(outputs).cpu()
+                val_auc, val_acc = compute_metrics(outputs, labels.cpu())
                 metrics.store({'auc/val': val_auc, 'acc/val': val_acc})
                 gc.collect()
         for i in range(len(models)):

@@ -69,9 +69,9 @@ def get_data_assistments(batch_size=64, use_skills=True,
                       for seqs in seq_lists[0:-1]]
     labels = pad_sequence(seq_lists[-1], batch_first=True, padding_value=-1)  # Pad labels with -1
     train_data, test_data, train_labels, test_labels = train_test_split(data=list(zip(*inputs_and_ids)),
-                                                                           labels=labels, split=0.8)
+                                                                        labels=labels, split=0.8)
     train_data, val_data, train_labels, val_labels = train_test_split(data=train_data,
-                                                                           labels=train_labels, split=0.8)
+                                                                      labels=train_labels, split=0.75)
     training_set = Dataset(train_data, train_labels)
     test_set = Dataset(test_data, test_labels)
     validation_set = Dataset(val_data, val_labels)
@@ -87,19 +87,17 @@ def train_test_split(data, labels, split=0.8):
     return training_data, test_data, training_labels, test_labels
 
 
-def compute_auc(predictions, labels):
-    predictions = predictions[labels >= 0].flatten()
+def compute_metrics(outputs, labels):
+    outputs = outputs[labels >= 0].float()
     labels = labels[labels >= 0].float()
     if len(torch.unique(labels)) == 1:  # Only one class
-        auc = accuracy_score(labels, predictions.round())
+        auc = accuracy_score(labels, outputs.round())
         acc = auc
+        print("wrong, it entered here")
     else:
-        preds2 = np.array(predictions, dtype=float)
-        preds2[preds2 >= 0.5] = 1.0
-        preds2[preds2 < 0.5] = 0.0
-        auc = roc_auc_score(y_true=labels, y_score=preds2)
-        acc = accuracy_score(labels, predictions.round())
-        # print(str(i)+str(acc))
+        predictions = [1.0 if output >= 0.5 else 0.0 for output in outputs]
+        auc = roc_auc_score(y_true=labels, y_score=outputs)
+        acc = accuracy_score(labels, predictions)
     return auc, acc
 
 
@@ -117,7 +115,7 @@ def computeRePos(time_seq, time_span=0):
         torch.abs(torch.unsqueeze(time_seq, axis=1).repeat(1, size, 1).reshape((batch_size, size * size, 1)) - \
                   torch.unsqueeze(time_seq, axis=-1).repeat(1, 1, size, ).reshape((batch_size, size * size, 1))))
 
-    if time_span>0:
-        time_matrix[time_matrix>time_span] = time_span
+    if time_span > 0:
+        time_matrix[time_matrix > time_span] = time_span
     time_matrix = time_matrix.reshape((batch_size, size, size))
     return time_matrix
