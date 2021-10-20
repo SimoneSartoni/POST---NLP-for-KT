@@ -165,6 +165,8 @@ class RKT(nn.Module):
         return query
 
     def forward(self, item_inputs, skill_inputs, label_inputs, item_ids, skill_ids, rel, timestamp):
+        print(item_inputs)
+        print(skill_inputs)
         inputs_ids, inputs_skills = self.get_inputs(item_inputs, skill_inputs, label_inputs)
         inputs_ids = F.relu(self.lin_in_items(inputs_ids))
         inputs_skills = F.relu(self.lin_in_skills(inputs_skills))
