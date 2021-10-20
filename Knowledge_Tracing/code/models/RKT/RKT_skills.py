@@ -134,10 +134,11 @@ class RKT(nn.Module):
         self.pos_key_embeds = nn.Embedding(max_pos, embed_size // num_heads)
         self.pos_value_embeds = nn.Embedding(max_pos, embed_size // num_heads)
 
-        self.lin_in = nn.Linear(4*embed_size, 2*embed_size)
-        self.attn_layers = clone(MultiHeadedAttention(embed_size, num_heads, drop_prob), num_attn_layers)
+        self.lin_in_items = nn.Linear(2*embed_size, embed_size)
+        self.lin_in_skills = nn.Linear(2*embed_size, embed_size)
+        self.attn_layers = clone(MultiHeadedAttention(2*embed_size, num_heads, drop_prob), num_attn_layers)
         self.dropout = nn.Dropout(p=drop_prob)
-        self.lin_out = nn.Linear(embed_size, 1)
+        self.lin_out = nn.Linear(2*embed_size, 1)
         self.l1 = nn.Parameter(torch.rand(1))
         self.l2 = nn.Parameter(torch.rand(1))
 
@@ -147,31 +148,35 @@ class RKT(nn.Module):
         label_inputs = label_inputs.unsqueeze(-1).float()
         print(item_inputs.shape)
         print(skill_inputs.shape)
-        inputs = torch.cat([item_inputs, item_inputs, skill_inputs, skill_inputs], dim=-1)
-        inputs[..., : self.embed_size] *= label_inputs
-        inputs[..., self.embed_size: 2*self.embed_size] *= 1 - label_inputs
-        inputs[..., 2*self.embed_size: 3*self.embed_size] *= label_inputs
-        inputs[..., 3*self.embed_size: 4*self.embed_size] *= 1 - label_inputs
-        return inputs
+        inputs_ids = torch.cat([item_inputs, item_inputs], dim=-1)
+        inputs_ids[..., : self.embed_size] *= label_inputs
+        inputs_ids[..., self.embed_size:] *= 1 - label_inputs
+        inputs_skills = torch.cat([item_inputs, item_inputs, skill_inputs, skill_inputs], dim=-1)
+        inputs_skills[..., : self.embed_size] *= label_inputs
+        inputs_skills[..., self.embed_size:] *= 1 - label_inputs
+        return inputs_ids, inputs_skills
 
     def get_query(self, item_ids, skill_ids):
         item_ids = self.item_embeds(item_ids)
         skill_ids = self.skill_embeds(skill_ids)
-        print(item_ids)
-        print(skill_ids)
+        print(item_ids.shape)
+        print(skill_ids.shape)
         query = torch.cat([item_ids, skill_ids], dim=-1)
         return query
 
     def forward(self, item_inputs, skill_inputs, label_inputs, item_ids, skill_ids, rel, timestamp):
-        inputs = self.get_inputs(item_inputs, skill_inputs, label_inputs)
-        print(inputs)
-        inputs = F.relu(self.lin_in(inputs))
+        inputs_ids, inputs_skills = self.get_inputs(item_inputs, skill_inputs, label_inputs)
+        inputs_ids = F.relu(self.lin_in_items(inputs_ids))
+        inputs_skills = F.relu(self.lin_in_skills(inputs_skills))
 
         query = self.get_query(item_ids, skill_ids)
-
-        mask = future_mask(inputs.size(-2))
-        if inputs.is_cuda:
-            mask = mask.cuda()
+        mask_items = future_mask(inputs_ids.size(-2))
+        mask_skills = future_mask(inputs_skills.size(-2))
+        if inputs_ids.is_cuda:
+            mask_items = mask_items.cuda()
+            mask_skills = mask_skills.cuda()
+        mask = torch.cat([mask_items, mask_skills], -1)
+        inputs = torch.cat([inputs_ids, inputs_skills], -1)
         outputs, attn = self.attn_layers[0](query, inputs, inputs, rel, self.l1, self.l2, timestamp, self.encode_pos,
                                             self.pos_key_embeds, self.pos_value_embeds, mask)
         outputs = self.dropout(outputs)
