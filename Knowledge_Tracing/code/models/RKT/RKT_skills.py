@@ -147,7 +147,6 @@ class RKT(nn.Module):
         label_inputs = label_inputs.unsqueeze(-1).float()
         print(item_inputs.shape)
         print(skill_inputs.shape)
-        print(label_inputs)
         inputs = torch.cat([item_inputs, item_inputs, skill_inputs, skill_inputs], dim=-1)
         inputs[..., : self.embed_size] *= label_inputs
         inputs[..., self.embed_size: 2*self.embed_size] *= 1 - label_inputs
