@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 from scipy import sparse
 
+from Knowledge_Tracing.code.data_processing.get_data_assistments_2012 import get_data_assistments_2012
 
 class DataProcess:
     def __init__(self, data_folder='./', output_folder='./', file_name='skill_builder_data_corrected_collapsed.csv',
@@ -20,32 +21,8 @@ class DataProcess:
 
     def process_csv(self):
         # pre-process original csv file for assist dataset
-
-        # read csv file
         data_path = os.path.join(self.data_folder, self.file_name)
-        df = pd.read_csv(data_path, low_memory=False, encoding="ISO-8859-1")
-        print('original records number %d' % len(df))
-
-        # delete empty skill_id
-        df = df.dropna(subset=['skill_id'])
-        df = df[~df['skill_id'].isin(['noskill'])]
-        print('After removing empty skill_id, records number %d' % len(df))
-
-        # delete scaffolding problems
-        df = df[df['original'].isin([1])]
-        print('After removing scaffolding problems, records number %d' % len(df))
-
-        # delete the users whose interaction number is less than min_inter_num
-        users = df.groupby(['user_id'], as_index=True)
-        delete_users = []
-        for u in users:
-            if len(u[1]) < self.min_inter_num:
-                delete_users.append(u[0])
-        print('deleted user number based min-inters %d' % len(delete_users))
-        df = df[~df['user_id'].isin(delete_users)]
-        print('After deleting some users, records number %d' % len(df))
-        # print('features: ', df['assistment_id'].unique(), df['answer_type'].unique())
-
+        df = get_data_assistments_2012(filepath=data_path)
         df.to_csv(os.path.join(self.output_folder, '%s_processed.csv' % self.file_name))
 
     def pro_skill_graph(self):

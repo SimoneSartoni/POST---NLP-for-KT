@@ -134,7 +134,7 @@ class RKT(nn.Module):
         self.pos_key_embeds = nn.Embedding(max_pos, embed_size // num_heads)
         self.pos_value_embeds = nn.Embedding(max_pos, embed_size // num_heads)
 
-        self.lin_in = nn.Linear(2*embed_size, embed_size)
+        self.lin_in = nn.Linear(4*embed_size, embed_size)
         self.attn_layers = clone(MultiHeadedAttention(embed_size, num_heads, drop_prob), num_attn_layers)
         self.dropout = nn.Dropout(p=drop_prob)
         self.lin_out = nn.Linear(embed_size, 1)
@@ -147,14 +147,14 @@ class RKT(nn.Module):
         label_inputs = label_inputs.unsqueeze(-1).float()
 
         inputs = torch.cat([item_inputs, skill_inputs, item_inputs, skill_inputs], dim=-1)
-        inputs[..., :2*self.embed_size] *= label_inputs
+        inputs[..., : 2*self.embed_size] *= label_inputs
         inputs[..., 2*self.embed_size:] *= 1 - label_inputs
         return inputs
 
     def get_query(self, item_ids, skill_ids):
         item_ids = self.item_embeds(item_ids)
         skill_ids = self.skill_embeds(skill_ids)
-        query = torch.cat([item_ids], dim=-1)
+        query = torch.cat([item_ids, skill_ids], dim=-1)
         return query
 
     def forward(self, item_inputs, skill_inputs, label_inputs, item_ids, skill_ids, rel, timestamp):
@@ -167,8 +167,8 @@ class RKT(nn.Module):
         mask = future_mask(inputs.size(-2))
         if inputs.is_cuda:
             mask = mask.cuda()
-        outputs, attn  = self.attn_layers[0](query, inputs, inputs, rel, self.l1, self.l2, timestamp, self.encode_pos,
-                                                   self.pos_key_embeds, self.pos_value_embeds, mask)
+        outputs, attn = self.attn_layers[0](query, inputs, inputs, rel, self.l1, self.l2, timestamp, self.encode_pos,
+                                            self.pos_key_embeds, self.pos_value_embeds, mask)
         outputs = self.dropout(outputs)
         for l in self.attn_layers[1:]:
             residual, attn = l(query, outputs, outputs, rel, self.l1, self.l2, self.encode_pos, timestamp, self.pos_key_embeds,
