@@ -147,12 +147,12 @@ class RKT(nn.Module):
         label_inputs = label_inputs.unsqueeze(-1).float()
         print(item_inputs.shape)
         print(skill_inputs.shape)
+        print(label_inputs)
         inputs = torch.cat([item_inputs, item_inputs, skill_inputs, skill_inputs], dim=-1)
         inputs[..., : self.embed_size] *= label_inputs
         inputs[..., self.embed_size: 2*self.embed_size] *= 1 - label_inputs
         inputs[..., 2*self.embed_size: 3*self.embed_size] *= label_inputs
         inputs[..., 3*self.embed_size: 4*self.embed_size] *= 1 - label_inputs
-        print(inputs)
         return inputs
 
     def get_query(self, item_ids, skill_ids):
@@ -165,7 +165,7 @@ class RKT(nn.Module):
 
     def forward(self, item_inputs, skill_inputs, label_inputs, item_ids, skill_ids, rel, timestamp):
         inputs = self.get_inputs(item_inputs, skill_inputs, label_inputs)
-
+        print(inputs)
         inputs = F.relu(self.lin_in(inputs))
 
         query = self.get_query(item_ids, skill_ids)
