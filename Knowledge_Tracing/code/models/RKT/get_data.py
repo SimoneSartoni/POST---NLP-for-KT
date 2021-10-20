@@ -76,6 +76,8 @@ def get_data_assistments(batch_size=64, use_skills=True,
     test_set = Dataset(test_data, test_labels)
     validation_set = Dataset(val_data, val_labels)
 
+    if use_skills:
+        return training_set, validation_set, test_set, pro_num, skill_num, timestamps
     return training_set, validation_set, test_set, pro_num, timestamps
 
 
