@@ -151,7 +151,7 @@ class RKT(nn.Module):
         inputs_ids = torch.cat([item_inputs, item_inputs], dim=-1)
         inputs_ids[..., : self.embed_size] *= label_inputs
         inputs_ids[..., self.embed_size:] *= 1 - label_inputs
-        inputs_skills = torch.cat([item_inputs, item_inputs, skill_inputs, skill_inputs], dim=-1)
+        inputs_skills = torch.cat([skill_inputs, skill_inputs], dim=-1)
         inputs_skills[..., : self.embed_size] *= label_inputs
         inputs_skills[..., self.embed_size:] *= 1 - label_inputs
         return inputs_ids, inputs_skills
