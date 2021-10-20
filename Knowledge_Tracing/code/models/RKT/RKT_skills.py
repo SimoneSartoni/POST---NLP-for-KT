@@ -134,7 +134,7 @@ class RKT(nn.Module):
         self.pos_key_embeds = nn.Embedding(max_pos, embed_size // num_heads)
         self.pos_value_embeds = nn.Embedding(max_pos, embed_size // num_heads)
 
-        self.lin_in = nn.Linear(4*embed_size, embed_size)
+        self.lin_in = nn.Linear(4*embed_size, 2*embed_size)
         self.attn_layers = clone(MultiHeadedAttention(embed_size, num_heads, drop_prob), num_attn_layers)
         self.dropout = nn.Dropout(p=drop_prob)
         self.lin_out = nn.Linear(embed_size, 1)
@@ -146,9 +146,11 @@ class RKT(nn.Module):
         skill_inputs = self.skill_embeds(skill_inputs)
         label_inputs = label_inputs.unsqueeze(-1).float()
 
-        inputs = torch.cat([item_inputs, skill_inputs, item_inputs, skill_inputs], dim=-1)
-        inputs[..., : 2*self.embed_size] *= label_inputs
-        inputs[..., 2*self.embed_size:] *= 1 - label_inputs
+        inputs = torch.cat([item_inputs, item_inputs, skill_inputs, skill_inputs], dim=-1)
+        inputs[..., : self.embed_size] *= label_inputs
+        inputs[..., self.embed_size: 2*self.embed_size] *= 1 - label_inputs
+        inputs[..., 2*self.embed_size: 3*self.embed_size] *= label_inputs
+        inputs[..., 3*self.embed_size: 4*self.embed_size] *= 1 - label_inputs
         return inputs
 
     def get_query(self, item_ids, skill_ids):
