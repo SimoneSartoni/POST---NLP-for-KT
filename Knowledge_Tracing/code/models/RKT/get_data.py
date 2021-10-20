@@ -58,7 +58,7 @@ def get_data_assistments(batch_size=64, use_skills=True,
     labels = [torch.tensor(i).type(torch.cuda.LongTensor) for i in y]
     item_inputs = [torch.cat((torch.zeros(1, dtype=torch.long).cuda(), i))[:-1] for i in item_ids]
     if use_skills:
-        skill_inputs = [torch.cat((torch.zeros(1, dtype=torch.long), s))[:-1] for s in skill_ids]
+        skill_inputs = [torch.cat((torch.zeros(1, dtype=torch.long).cuda(), s))[:-1] for s in skill_ids]
     label_inputs = [torch.cat((torch.zeros(1, dtype=torch.long).cuda(), l))[:-1] for l in labels]
     if use_skills:
         batches = list(zip(item_inputs, skill_inputs, label_inputs, item_ids, skill_ids, timestamp, labels))
