@@ -1,4 +1,3 @@
-import tensorflow as tf
 
 from Knowledge_Tracing.code.models.DKT.data_utils import *
 
@@ -14,9 +13,7 @@ class BinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
 class AUC(tf.keras.metrics.AUC):
     def update_state(self, y_true, y_pred, sample_weight=None):
         true, pred = get_target(y_true, y_pred)
-        super(AUC, self).update_state(y_true=true,
-                                                 y_pred=pred,
-                                                 sample_weight=sample_weight)
+        super(AUC, self).update_state(y_true=true, y_pred=pred, sample_weight=sample_weight)
 
 
 class Precision(tf.keras.metrics.Precision):

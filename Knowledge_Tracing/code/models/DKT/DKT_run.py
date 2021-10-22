@@ -1,7 +1,7 @@
 import tensorflow as tf
 from Knowledge_Tracing.code.models.DKT import deepkt, data_utils, metrics
 
-fn = "C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/data/assistments/2009_2010/skill_builder_data_corrected_collapsed.csv"  # Dataset path
+fn = ""  # Dataset path
 verbose = 1  # Verbose = {0,1,2}
 best_model_weights = "weights/bestmodel"  # File to save the model.
 log_dir = "logs"  # Path to save the logs.

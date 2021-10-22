@@ -22,7 +22,7 @@ class DataProcess:
     def process_csv(self):
         # pre-process original csv file for assist dataset
         data_path = os.path.join(self.data_folder, self.file_name)
-        df = get_data_assistments_2012(filepath=data_path)
+        df = get_data_assistments_2012(interactions_filepath=data_path)
         df.to_csv(os.path.join(self.output_folder, '%s_processed.csv' % self.file_name))
 
     def pro_skill_graph(self):
