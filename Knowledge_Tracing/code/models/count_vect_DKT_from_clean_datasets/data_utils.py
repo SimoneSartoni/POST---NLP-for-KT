@@ -9,9 +9,12 @@ from Knowledge_Tracing.code.data_processing.get_data_assistments_2012 import get
 MASK_VALUE = -1.0  # The masking value cannot be zero.
 
 
-def load_dataset_NLP_skills(fn, batch_size=32, shuffle=True, repository="", keyedvectors="", name="assistments_2009", min_df=2, max_df=1.0):
+def load_dataset_NLP_skills(fn, batch_size=32, shuffle=True,
+                            interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final.csv",
+                            texts_filepath='../input/', min_df=2, max_df=1.0):
 
-    df, loaded_dataset = get_data_assistments_2012(fn)
+    df, loaded_dataset = get_data_assistments_2012(fn, interactions_filepath=interactions_filepath,
+                                                   texts_filepath=texts_filepath)
 
     # Step 3.1 - Generate NLP extracted encoding for problems
     encode_model = count_vectorizer(min_df=min_df, max_df=max_df, binary=False)
