@@ -27,7 +27,11 @@ def get_data_assistments_2012(min_questions=2, max_questions=50, interactions_fi
     print("shape of dataframe :", train_df.shape)
 
     # Step 1 - Remove users with less than a certain number of answers
-    train_df = train_df.groupby('user_id').filter(lambda q: max_questions >= len(q) >= min_questions).copy()
+    train_df = train_df.groupby('user_id').apply(lambda q: q.tail(max_questions) if len(q) > max_questions else q)
+    print("shape after at least 2 interactions:", train_df.shape)
+
+    # Step 1 - Remove users with less than a certain number of answers
+    train_df = train_df.groupby('user_id').filter(lambda q: len(q) >= min_questions).copy()
     print("shape after at least 2 interactions:", train_df.shape)
 
     # Step 2.1 - Fill no skilled question with "no_skill" token
@@ -48,7 +52,7 @@ def get_data_assistments_2012(min_questions=2, max_questions=50, interactions_fi
                                 list(zip(train_df['start_time'], train_df['end_time']))]
     train_df["elapsed_time"].fillna(300, inplace=True)
     train_df["elapsed_time"].clip(lower=0, upper=300, inplace=True)
-    train_df["elapsed_time"] = train_df["prior_question_elapsed_time"].astype(np.int)
+    train_df["elapsed_time"] = train_df["elapsed_time"].astype(np.int)
 
     # Step 3.2 - Generate timestamps from start time
     train_df["timestamp"] = [datetime.strptime(start, '%Y-%m-%d %H:%M:%S').timestamp()
