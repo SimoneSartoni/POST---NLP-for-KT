@@ -10,10 +10,12 @@ MASK_VALUE = -1.0  # The masking value cannot be zero.
 
 
 def load_dataset_NLP_skills(batch_size=32, shuffle=True,
-                            interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final.csv",
-                            texts_filepath='../input/', min_df=2, max_df=1.0):
+                            interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
+                                                  ".csv",
+                            texts_filepath='../input/', min_df=2, max_df=1.0, min_questions=2, max_questions=25):
 
-    df, loaded_dataset = get_data_assistments_2012(min_questions=2, interactions_filepath=interactions_filepath,
+    df, loaded_dataset = get_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
+                                                   interactions_filepath=interactions_filepath,
                                                    texts_filepath=texts_filepath)
 
     # Step 3.1 - Generate NLP extracted encoding for problems

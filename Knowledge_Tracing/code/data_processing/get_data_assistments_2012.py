@@ -15,7 +15,7 @@ from Knowledge_Tracing.code.utils.utils import try_parsing_date
 from Knowledge_Tracing.code.data_processing.dataset import dataset as dt
 
 
-def get_data_assistments_2012(min_questions=2, interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final.csv",
+def get_data_assistments_2012(min_questions=2, max_questions=50, interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final.csv",
                               texts_filepath='../input/'):
     dtypes = {'user_id': 'int32', 'problem_id': 'int64',
               'correct': 'float64', 'skill': "string",
@@ -27,7 +27,7 @@ def get_data_assistments_2012(min_questions=2, interactions_filepath="../input/a
     print("shape of dataframe :", train_df.shape)
 
     # Step 1 - Remove users with less than a certain number of answers
-    train_df = train_df.groupby('user_id').filter(lambda q: len(q) > min_questions).copy()
+    train_df = train_df.groupby('user_id').filter(lambda q: max_questions >= len(q) >= min_questions).copy()
     print("shape after at least 2 interactions:", train_df.shape)
 
     # Step 2.1 - Fill no skilled question with "no_skill" token
