@@ -26,23 +26,6 @@ def get_data_assistments_2012(min_questions=2, max_questions=50, interactions_fi
     train_df = pd.read_csv(interactions_filepath, dtype=dtypes)
     print("shape of dataframe :", train_df.shape)
 
-    # Step 1 - Remove users with less than a certain number of answers
-    train_df = train_df.groupby('user_id').apply(lambda q: q.tail(max_questions) if len(q) > max_questions else q)
-    print("shape after at least 2 interactions:", train_df.shape)
-
-    # Step 1 - Remove users with less than a certain number of answers
-    train_df = train_df.groupby('user_id').filter(lambda q: len(q) >= min_questions)
-    print("shape after at least 2 interactions:", train_df.shape)
-
-    # Step 2.1 - Fill no skilled question with "no_skill" token
-    train_df.fillna("no_skill", inplace=True)
-    print("shape after drop no skill:", train_df.shape)
-
-    # Step 2.2 - Enumerate skill ids and question ids
-    train_df['skill'], _ = pd.factorize(train_df['skill'], sort=True)
-    train_df['question_id'], _ = pd.factorize(train_df['problem_id'], sort=True)
-    print("shape after factorize:", train_df.shape)
-
     # Step 3.1 - Define start, end and elapsed time, fill no timed elapsed time and cap values under a max
     train_df['start_time'] = [try_parsing_date(x) for x in train_df['start_time']]
     train_df['end_time'] = [try_parsing_date(x) for x in train_df['end_time']]
@@ -60,6 +43,25 @@ def get_data_assistments_2012(min_questions=2, max_questions=50, interactions_fi
 
     # Step 4 - Sort interactions according to timestamp
     train_df = train_df.sort_values(["timestamp"], ascending=True).reset_index(drop=True)
+
+    # Step 1 - Remove users with less than a certain number of answers
+    train_df = train_df.groupby('user_id').tail(max_questions)
+    print("shape after at least 2 interactions:", train_df.shape)
+
+    # Step 1 - Remove users with less than a certain number of answers
+    train_df = train_df.groupby('user_id').filter(lambda q: len(q) >= min_questions).copy()
+    print("shape after at least 2 interactions:", train_df.shape)
+
+    # Step 2.1 - Fill no skilled question with "no_skill" token
+    train_df.fillna("no_skill", inplace=True)
+    print("shape after drop no skill:", train_df.shape)
+
+    # Step 2.2 - Enumerate skill ids and question ids
+    train_df['skill'], _ = pd.factorize(train_df['skill'], sort=True)
+    train_df['question_id'], _ = pd.factorize(train_df['problem_id'], sort=True)
+    print("shape after factorize:", train_df.shape)
+
+
 
     # Step 5 - Compute number of unique skills ids and number of unique question ids
     questions_ids = train_df['problem_id'].unique()
