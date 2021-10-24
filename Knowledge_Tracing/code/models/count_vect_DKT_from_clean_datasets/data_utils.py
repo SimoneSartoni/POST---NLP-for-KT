@@ -50,7 +50,7 @@ def load_dataset_NLP_skills(batch_size=32, shuffle=True,
         o_label = labels[1:]
         inputs = (i_doc, i_label)
         outputs = (o_doc, o_label)
-        return inputs, outputs
+        yield inputs, outputs
 
     seq = df.groupby('user_id').apply(
         lambda r: (

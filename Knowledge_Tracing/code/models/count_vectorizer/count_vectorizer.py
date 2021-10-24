@@ -51,7 +51,7 @@ class count_vectorizer(base_model):
         self.texts = None
         self.vector_size = 0
 
-    def fit(self, interacted_and_text_problems, problem_id_to_index, texts):
+    def fit(self, interacted_and_text_problems, problem_id_to_index, texts, save_filepath='./'):
         self.problem_ids = interacted_and_text_problems
         self.texts = []
         index = 0
@@ -61,20 +61,15 @@ class count_vectorizer(base_model):
             index += 1
         tfidf_vectorizer_vectors = self.count_vectorizer.fit_transform(self.texts)
         self.vectors = tfidf_vectorizer_vectors
-        df_tf_idf = pd.DataFrame.sparse.from_spmatrix(tfidf_vectorizer_vectors)
-        dataframe_tf_idf = df_tf_idf
+
         self.words_unique = self.count_vectorizer.get_feature_names()
         # Save sparse matrix in current directory
-        data_folder = './'
         self.vector_size = self.vectors.shape[1]
 
-        sps.save_npz(os.path.join(data_folder, '../pro_words.npz'), tfidf_vectorizer_vectors)
+        sps.save_npz(os.path.join(save_filepath, '../pro_words.npz'), self.vectors)
 
-        self.words_dict = {}
-        for i in range(0, len(self.words_unique)):
-            self.words_dict[str(i)] = self.words_unique[i]
-        self.pro_num = dataframe_tf_idf.shape[0]
-        self.words_num = dataframe_tf_idf.shape[1]
+        self.pro_num = self.vectors.shape[0]
+        self.words_num = self.vectors.shape[1]
 
     def write_words_unique(self, data_folder):
         write_txt(os.path.join(data_folder, 'words_set.txt'), self.words_unique)
