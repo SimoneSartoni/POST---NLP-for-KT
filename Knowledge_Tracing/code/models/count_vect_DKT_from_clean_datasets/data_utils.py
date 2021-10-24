@@ -19,7 +19,7 @@ def load_dataset_NLP_skills(batch_size=32, shuffle=True,
                                                    texts_filepath=texts_filepath)
 
     # Step 3.1 - Generate NLP extracted encoding for problems
-    encode_model = count_vectorizer(min_df=min_df, max_df=max_df, binary=False)
+    encode_model = count_vectorizer(min_df=min_df, max_df=max_df, max_features=10000, binary=False)
     encode_model.fit(loaded_dataset.problems_with_text_known_list, loaded_dataset.problem_id_to_index,
                      loaded_dataset.texts_list)
     for min_df_ in [2, 5, 10, 15]:
