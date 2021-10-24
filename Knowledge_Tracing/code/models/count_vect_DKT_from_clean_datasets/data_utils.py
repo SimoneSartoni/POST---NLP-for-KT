@@ -50,7 +50,7 @@ def load_dataset_NLP_skills(batch_size=32, shuffle=True,
         o_label = labels[1:]
         inputs = (i_doc, i_label)
         outputs = (o_doc, o_label)
-        yield inputs, outputs
+        return inputs, outputs
 
     seq = df.groupby('user_id').apply(
         lambda r: (
@@ -70,7 +70,7 @@ def load_dataset_NLP_skills(batch_size=32, shuffle=True,
               ([None, encode_model.vector_size], [None]))
     # Step 5 - Get Tensorflow Dataset
     dataset = tf.data.Dataset.from_generator(
-        generator=seq,
+        generator=lambda: seq,
         output_types=types,
         output_shapes=shapes
     )
