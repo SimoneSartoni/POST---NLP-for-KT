@@ -20,7 +20,7 @@ def identity_tokenizer(text):
 
 
 class count_vectorizer(base_model):
-    def __init__(self, max_df, min_df, binary):
+    def __init__(self, max_df, min_df, binary, max_features=None):
         super().__init__("count_vectorizer", "NLP")
         self.count_vectorizer = CountVectorizer(
             analyzer='word',
@@ -29,11 +29,13 @@ class count_vectorizer(base_model):
             token_pattern=None,
             max_df=max_df,
             min_df=min_df,
-            binary=binary
+            binary=binary,
+            max_features=max_features
         )
         self.min_df = min_df
         self.max_df = max_df
         self.binary = binary
+        self.max_features = max_features
         self.similarity_matrix = None
         self.words_unique = None
         self.pro_num = None
