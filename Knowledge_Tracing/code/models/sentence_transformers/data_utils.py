@@ -5,6 +5,7 @@ from Knowledge_Tracing.code.data_processing.dataset import dataset as dt
 from Knowledge_Tracing.code.evaluation.predictors.logistic_regression import logistic_regressor
 from Knowledge_Tracing.code.models.count_vectorizer.count_vectorizer import count_vectorizer
 from Knowledge_Tracing.code.data_processing.get_data_assistments_2012 import get_data_assistments_2012
+from Knowledge_Tracing.code.models.sentence_transformers.sentence_transformers import sentence_transformer
 from Knowledge_Tracing.code.data_processing.get_data_assistments_2009 import get_data_assistments_2009
 
 MASK_VALUE = -1.0  # The masking value cannot be zero.
@@ -28,17 +29,9 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
     df = df[['user_id', 'problem_id', 'correct']]
     print(df)
     # Step 3.1 - Generate NLP extracted encoding for problems
-    encode_model = count_vectorizer(min_df=min_df, max_df=max_df, binary=False, max_features=max_features)
+    encode_model = sentence_transformer()
     encode_model.fit(loaded_dataset.problems_with_text_known_list, loaded_dataset.problem_id_to_index,
                      loaded_dataset.texts_list, save_filepath)
-    """for min_df_ in [2, 5, 10, 15]:
-        encode_model = count_vectorizer(min_df=min_df_, max_df=max_df, binary=False)
-        encode_model.fit(loaded_dataset.interacted_with_text_problem_set, loaded_dataset.problem_id_to_index,
-                         loaded_dataset.texts_list)
-        print(encode_model.words_num)"""
-    max_value = encode_model.words_num
-
-    print("number of words is: " + str(max_value))
 
     def generate_encodings(problems, corrects, lengths):
         document_to_term = []
@@ -73,6 +66,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
              (tf.float32, tf.float32))
     shapes = (([None, encode_model.vector_size], [None]),
               ([None, encode_model.vector_size], [None]))
+
     # Step 5 - Get Tensorflow Dataset
     dataset = tf.data.Dataset.from_generator(
         generator=lambda: seq,

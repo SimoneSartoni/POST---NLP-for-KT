@@ -1,44 +1,29 @@
 import pandas as pd
 import tensorflow as tf
 import numpy as np
-from Knowledge_Tracing.code.data_processing.dataset import dataset as dt
-from Knowledge_Tracing.code.evaluation.predictors.logistic_regression import logistic_regressor
-from Knowledge_Tracing.code.models.count_vectorizer.count_vectorizer import count_vectorizer
 from Knowledge_Tracing.code.data_processing.get_data_assistments_2012 import get_data_assistments_2012
-from Knowledge_Tracing.code.data_processing.get_data_assistments_2009 import get_data_assistments_2009
+from Knowledge_Tracing.code.models.BERTTopic.BERTopic_model import BERTTopic
 
 MASK_VALUE = -1.0  # The masking value cannot be zero.
 
 
-def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
-                 interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
-                                       ".csv",
-                 save_filepath='/kaggle/working/', texts_filepath='../input/', min_df=2, max_df=1.0,
-                 min_questions=2, max_features=1000, max_questions=25, n_rows=None):
-    if dataset_name == 'assistment_2012':
-        df, loaded_dataset = get_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
-                                                       interactions_filepath=interactions_filepath,
-                                                       texts_filepath=texts_filepath, n_rows=n_rows)
-    elif dataset_name == 'assistment_2009':
-        df, loaded_dataset = get_data_assistments_2009(min_questions=min_questions, max_questions=max_questions,
-                                                       interactions_filepath=interactions_filepath,
-                                                       texts_filepath=texts_filepath, n_rows=n_rows)
+def load_dataset_NLP_skills(batch_size=32, shuffle=True,
+                            interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
+                                                  ".csv",
+                            save_filepath='/kaggle/working/', texts_filepath='../input/', min_df=2, max_df=1.0,
+                            min_questions=2, max_features=1000, max_questions=25, n_rows=None):
+
+    df, loaded_dataset = get_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
+                                                   interactions_filepath=interactions_filepath,
+                                                   texts_filepath=texts_filepath, n_rows=n_rows)
 
     print(df)
     df = df[['user_id', 'problem_id', 'correct']]
     print(df)
     # Step 3.1 - Generate NLP extracted encoding for problems
-    encode_model = count_vectorizer(min_df=min_df, max_df=max_df, binary=False, max_features=max_features)
+    encode_model = BERTTopic()
     encode_model.fit(loaded_dataset.problems_with_text_known_list, loaded_dataset.problem_id_to_index,
                      loaded_dataset.texts_list, save_filepath)
-    """for min_df_ in [2, 5, 10, 15]:
-        encode_model = count_vectorizer(min_df=min_df_, max_df=max_df, binary=False)
-        encode_model.fit(loaded_dataset.interacted_with_text_problem_set, loaded_dataset.problem_id_to_index,
-                         loaded_dataset.texts_list)
-        print(encode_model.words_num)"""
-    max_value = encode_model.words_num
-
-    print("number of words is: " + str(max_value))
 
     def generate_encodings(problems, corrects, lengths):
         document_to_term = []
@@ -73,6 +58,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
              (tf.float32, tf.float32))
     shapes = (([None, encode_model.vector_size], [None]),
               ([None, encode_model.vector_size], [None]))
+
     # Step 5 - Get Tensorflow Dataset
     dataset = tf.data.Dataset.from_generator(
         generator=lambda: seq,

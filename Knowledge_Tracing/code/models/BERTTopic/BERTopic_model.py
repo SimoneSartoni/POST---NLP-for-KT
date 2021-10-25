@@ -4,11 +4,12 @@ import os
 import scipy
 from scipy import sparse as sps
 from sentence_transformers import SentenceTransformer
-
 from Knowledge_Tracing.code.Similarity.Compute_Similarity import Compute_Similarity
 
 from sklearn.feature_extraction.text import CountVectorizer
 from Knowledge_Tracing.code.models.base_model import base_model
+from bertopic import BERTopic
+import hdbscan
 
 
 def write_txt(file, data):
@@ -21,10 +22,21 @@ def identity_tokenizer(text):
     return text
 
 
-class sentence_transformer(base_model):
-    def __init__(self):
+class BERTopic_model(base_model):
+    def __init__(self, n_neighbors=15, n_components=5, metric='cosine', min_cluster_size=15, metric='euclidean',
+                 cluster_selection_method='eom'):
         super().__init__("sentence_transformers", "NLP")
-        self.sentence_transformer = SentenceTransformer('bert-large-nli-mean-tokens')
+        """self.sentence_transformer = SentenceTransformer('bert-large-nli-mean-tokens')
+        self.embeddings = None
+        self.umap_embeddings = None
+        self.umap = umap.UMAP(n_neighbors=n_neighbors,
+                            n_components=n_components,
+                            metric=metric)
+        self.hdbscan = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size,
+                                  metric=metric,
+                                  cluster_selection_method=cluster_selection_method)"""
+        self.bert_topic = BERTopic(embedding_model='bert-large-nli-mean-tokens', language="english")
+        self.topics, self.probabilities = None, None
         self.similarity_matrix = None
         self.words_unique = None
         self.pro_num = None
@@ -48,9 +60,9 @@ class sentence_transformer(base_model):
             self.problem_id_to_index[p] = index
             self.texts.append(texts[problem_id_to_index[p]])
             index += 1
-        self.vectors = self.sentence_transformer.encode(sentences=self.texts, show_progress_bar=False)
-
-
+        self.topics, self.probabilities = self.bert_topic.fit_transform(self.texts)
+        print(self.topics[0:100])
+        print(self.probabilities[0:100])
         # Save sparse matrix in current directory
         self.vector_size = self.vectors.shape[1]
 
@@ -58,6 +70,17 @@ class sentence_transformer(base_model):
 
         self.pro_num = self.vectors.shape[0]
         self.words_num = self.vectors.shape[1]
+
+    def visualize_umap():
+        result = pd.DataFrame(umap_data, columns=['x', 'y'])
+        result['labels'] = cluster.labels
+        # Visualize clusters
+        fig, ax = plt.subplots(figsize=(20, 10))
+        outliers = result.loc[result.labels == -1, :]
+        clustered = result.loc[result.labels != -1, :]
+        plt.scatter(outliers.x, outliers.y, color='#BDBDBD', s=0.05)
+        plt.scatter(clustered.x, clustered.y, c=clustered.labels, s=0.05, cmap='hsv_r')
+        plt.colorbar()
 
     def write_words_unique(self, data_folder):
         write_txt(os.path.join(data_folder, 'words_set.txt'), self.words_unique)

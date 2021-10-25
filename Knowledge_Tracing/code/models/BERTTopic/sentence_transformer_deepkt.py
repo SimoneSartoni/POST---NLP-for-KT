@@ -1,10 +1,10 @@
 from tensorflow.keras import Model, Input, layers, losses
 
-from Knowledge_Tracing.code.models.count_vect_DKT.data_utils import get_target as NLP_get_target
+from Knowledge_Tracing.code.models.sentence_transformers.data_utils import get_target as NLP_get_target
 
 
-class count_vect_DKTModel(Model):
-    """ The Deep Knowledge Tracing model.
+class sentence_transformer_deepkt(Model):
+    """ The sentence transformer Deep Knowledge Tracing model.
     Arguments in __init__:
         nb_skills: The number of skills in the dataset.
         hidden_units: Positive integer. The number of units of the LSTM layer.
@@ -34,9 +34,9 @@ class count_vect_DKTModel(Model):
 
         outputs = layers.concatenate([output_encodings, output_class])
 
-        super(count_vect_DKTModel, self).__init__(inputs=[input_encodings, input_labels],
-                                                  outputs=outputs,
-                                                  name="DKT_count_vect_Model")
+        super(sentence_transformer_deepkt, self).__init__(inputs=[input_encodings, input_labels],
+                                                        outputs=outputs,
+                                                        name="DKT_count_vect_Model")
         self.nb_encodings = nb_encodings
 
     def compile(self, optimizer, metrics=None):
@@ -61,7 +61,7 @@ class count_vect_DKTModel(Model):
             y_true, y_pred = NLP_get_target(y_true, y_pred, nb_encodings=self.nb_encodings)
             return losses.binary_crossentropy(y_true, y_pred)
 
-        super(count_vect_DKTModel, self).compile(
+        super(sentence_transformer_deepkt, self).compile(
               loss=custom_loss,
               optimizer=optimizer,
               metrics=metrics,
@@ -136,16 +136,16 @@ class count_vect_DKTModel(Model):
             ValueError: In case of mismatch between the provided input data
                 and what the model expects.
         """
-        return super(count_vect_DKTModel, self).fit(x=dataset,
-                                                    epochs=epochs,
-                                                    verbose=verbose,
-                                                    callbacks=callbacks,
-                                                    validation_data=validation_data,
-                                                    shuffle=shuffle,
-                                                    initial_epoch=initial_epoch,
-                                                    steps_per_epoch=steps_per_epoch,
-                                                    validation_steps=validation_steps,
-                                                    validation_freq=validation_freq)
+        return super(sentence_transformer_deepkt, self).fit(x=dataset,
+                                                          epochs=epochs,
+                                                          verbose=verbose,
+                                                          callbacks=callbacks,
+                                                          validation_data=validation_data,
+                                                          shuffle=shuffle,
+                                                          initial_epoch=initial_epoch,
+                                                          steps_per_epoch=steps_per_epoch,
+                                                          validation_steps=validation_steps,
+                                                          validation_freq=validation_freq)
 
     def custom_evaluate(self,
                         dataset,
@@ -177,10 +177,10 @@ class count_vect_DKTModel(Model):
         Raises:
             ValueError: in case of invalid arguments.
         """
-        return super(count_vect_DKTModel, self).evaluate(dataset,
-                                                         verbose=verbose,
-                                                         steps=steps,
-                                                         callbacks=callbacks)
+        return super(sentence_transformer_deepkt, self).evaluate(dataset,
+                                                               verbose=verbose,
+                                                               steps=steps,
+                                                               callbacks=callbacks)
 
     def evaluate_generator(self, *args, **kwargs):
         raise SyntaxError("Not supported")
