@@ -6,12 +6,16 @@ MASK_VALUE = -1.  # The masking value cannot be zero.
 from Knowledge_Tracing.code.data_processing.get_data_assistments_2012 import get_data_assistments_2012
 
 
-def load_dataset(fn, batch_size=32, shuffle=True):
-    df, loaded_dataset = get_data_assistments_2012(fn)
-    loaded_dataset = None
-    # Step 3 - Cross skill id with answer to form a synthetic feature
-    df['skill_with_answer'] = df['skill'] * 2 + df['correct']
-    print(df['skill_with_answer'])
+def load_dataset(batch_size=32, shuffle=True,
+                 interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
+                                       ".csv",
+                 save_filepath='/kaggle/working/', texts_filepath='../input/', min_df=2, max_df=1.0,
+                 min_questions=2, max_features=1000, max_questions=25, n_rows=None):
+    df, loaded_dataset = get_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
+                                                   interactions_filepath=interactions_filepath,
+                                                   texts_filepath=texts_filepath, n_rows=n_rows)
+
+    df = df[['user_id', 'problem_id', 'correct', 'skill_with_answer', 'skill']]
 
     # Step 4 - Convert to a sequence per user id and shift features 1 timestep
     seq = df.groupby('user_id').apply(
