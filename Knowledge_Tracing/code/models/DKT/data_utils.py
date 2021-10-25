@@ -7,13 +7,17 @@ from Knowledge_Tracing.code.data_processing.get_data_assistments_2012 import get
 
 
 def load_dataset(batch_size=32, shuffle=True,
-                 interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
-                                       ".csv",
-                 save_filepath='/kaggle/working/', texts_filepath='../input/', min_df=2, max_df=1.0,
-                 min_questions=2, max_features=1000, max_questions=25, n_rows=None):
+                            interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
+                                                  ".csv",
+                            save_filepath='/kaggle/working/', texts_filepath='../input/', min_df=2, max_df=1.0,
+                            min_questions=2, max_features=1000, max_questions=25, n_rows=None):
+
     df, loaded_dataset = get_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
                                                    interactions_filepath=interactions_filepath,
                                                    texts_filepath=texts_filepath, n_rows=n_rows)
+    # Step 3 - Cross skill id with answer to form a synthetic feature
+    df['skill_with_answer'] = df['skill'] * 2 + df['correct']
+    print(df['skill_with_answer'])
 
     df = df[['user_id', 'problem_id', 'correct', 'skill_with_answer', 'skill']]
 
