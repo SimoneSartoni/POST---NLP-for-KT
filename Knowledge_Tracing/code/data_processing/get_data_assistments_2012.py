@@ -16,14 +16,16 @@ from Knowledge_Tracing.code.data_processing.dataset import dataset as dt
 
 
 def get_data_assistments_2012(min_questions=2, max_questions=50, interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final.csv",
-                              texts_filepath='../input/'):
+                              texts_filepath='../input/', n_rows=None):
     dtypes = {'user_id': 'int32', 'problem_id': 'int64',
               'correct': 'float64', 'skill': "string",
               'start_time': "string", 'end_time': "string"}
 
     print("loading csv.....")
-
-    train_df = pd.read_csv(interactions_filepath, dtype=dtypes)
+    if n_rows:
+        train_df = pd.read_csv(interactions_filepath, dtype=dtypes, nrows=n_rows)
+    else:
+        train_df = pd.read_csv(interactions_filepath, dtype=dtypes)
     print("shape of dataframe :", train_df.shape)
 
     # Step 3.1 - Define start, end and elapsed time, fill no timed elapsed time and cap values under a max
