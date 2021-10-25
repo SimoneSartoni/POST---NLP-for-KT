@@ -74,8 +74,7 @@ def load_dataset_NLP_skills(batch_size=32, shuffle=True,
         output_types=types,
         output_shapes=shapes
     )
-
-    nb_users = len(loaded_dataset.problems)
+    nb_users = len(seq)
     if shuffle:
         dataset = dataset.shuffle(buffer_size=nb_users)
 
