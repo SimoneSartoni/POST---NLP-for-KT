@@ -17,6 +17,7 @@ def load_dataset(batch_size=32, shuffle=True,
                                                    texts_filepath=texts_filepath, n_rows=n_rows)
     # Step 3 - Cross skill id with answer to form a synthetic feature
     df['skill_with_answer'] = df['skill'] * 2 + df['correct']
+    df['skill_with_answer'].astype('int32')
     print(df['skill_with_answer'])
 
     df = df[['user_id', 'problem_id', 'correct', 'skill_with_answer', 'skill']]
