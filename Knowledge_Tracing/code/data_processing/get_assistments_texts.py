@@ -14,17 +14,17 @@ def preprocess_data(data, name):
     data[name] = data[name].str.lower()
     print(data[name])
     # Code to remove the Hashtags from the text
-    data[name]=data[name].apply(lambda x: re.sub(r'\B#\S+', '', str(x)))
+    data[name] = data[name].apply(lambda x: re.sub(r'\B#\S+', '', str(x)))
     # Code to remove the links from the text
-    data[name]=data[name].apply(lambda x: re.sub(r"http\S+", "", str(x)))
+    data[name] = data[name].apply(lambda x: re.sub(r"http\S+", "", str(x)))
     # Code to remove the Special characters from the text
-    data[name]=data[name].apply(lambda x: ' '.join(re.findall(r'\w+', str(x))))
+    data[name] = data[name].apply(lambda x: ' '.join(re.findall(r'\w+', str(x))))
     # Code to substitute the multiple spaces with single spaces
-    data[name]=data[name].apply(lambda x: re.sub(r'\s+', ' ', str(x), flags=re.I))
+    data[name] = data[name].apply(lambda x: re.sub(r'\s+', ' ', str(x), flags=re.I))
     # Code to remove all the single characters in the text
-    data[name]=data[name].apply(lambda x: re.sub(r'\s+[a-zA-Z]\s+', '', str(x)))
+    data[name] = data[name].apply(lambda x: re.sub(r'\s+[a-zA-Z]\s+', '', str(x)))
     # Remove the twitter handlers
-    data[name]=data[name].apply(lambda x: re.sub(r'@[^\s]+', '', str(x)))
+    data[name] = data[name].apply(lambda x: re.sub(r'@[^\s]+', '', str(x)))
 
 
 # This function is to remove stopwords from a particular column and to tokenize it

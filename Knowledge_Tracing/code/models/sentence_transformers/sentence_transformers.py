@@ -47,7 +47,7 @@ class sentence_transformer(base_model):
         # Save sparse matrix in current directory
         self.vector_size = self.vectors.shape[1]
 
-        sps.save_npz(os.path.join(save_filepath, '../pro_words.npz'), self.vectors)
+        np.save(save_filepath, self.vectors)
 
         self.pro_num = self.vectors.shape[0]
         self.words_num = self.vectors.shape[1]
