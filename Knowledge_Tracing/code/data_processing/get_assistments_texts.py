@@ -73,7 +73,7 @@ def make_sentences(data, name):
 
 def get_assistments_texts(texts_filepath='../input/'):
     input_types = {'problem_id': 'int64', 'body': "string"}
-    df = pd.read_csv(texts_filepath, low_memory=False, input_types=input_types)
+    df = pd.read_csv(texts_filepath, low_memory=False, dtype=input_types)
     # Using the preprocessing function to preprocess the tweet data
     print(df['body'].values[0:10])
     preprocess_data(df, 'body')
