@@ -1,9 +1,5 @@
-import pandas as pd
 import tensorflow as tf
 import numpy as np
-from Knowledge_Tracing.code.data_processing.dataset import dataset as dt
-from Knowledge_Tracing.code.evaluation.predictors.logistic_regression import logistic_regressor
-from Knowledge_Tracing.code.models.count_vectorizer.count_vectorizer import count_vectorizer
 from Knowledge_Tracing.code.data_processing.get_data_assistments_2012 import get_data_assistments_2012
 from Knowledge_Tracing.code.models.sentence_transformers.sentence_transformers import sentence_transformer
 from Knowledge_Tracing.code.data_processing.get_data_assistments_2009 import get_data_assistments_2009
@@ -17,11 +13,11 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
                  save_filepath='/kaggle/working/', texts_filepath='../input/', min_df=2, max_df=1.0,
                  min_questions=2, max_features=1000, max_questions=25, n_rows=None):
     if dataset_name == 'assistment_2012':
-        df, loaded_dataset = get_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
+        df, text_df = get_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
                                                        interactions_filepath=interactions_filepath,
                                                        texts_filepath=texts_filepath, n_rows=n_rows)
     elif dataset_name == 'assistment_2009':
-        df, loaded_dataset = get_data_assistments_2009(min_questions=min_questions, max_questions=max_questions,
+        df, text_df = get_data_assistments_2009(min_questions=min_questions, max_questions=max_questions,
                                                        interactions_filepath=interactions_filepath,
                                                        texts_filepath=texts_filepath, n_rows=n_rows)
 
@@ -30,8 +26,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
     print(df)
     # Step 3.1 - Generate NLP extracted encoding for problems
     encode_model = sentence_transformer()
-    encode_model.fit(loaded_dataset.problems_with_text_known_list, loaded_dataset.problem_id_to_index,
-                     loaded_dataset.texts_list, save_filepath)
+    encode_model.fit(text_df, save_filepath)
 
     def generate_encodings(problems, corrects, lengths):
         document_to_term = []

@@ -12,7 +12,7 @@ from torch.nn.utils.rnn import pad_sequence
 import torch
 
 from Knowledge_Tracing.code.utils.utils import try_parsing_date
-from Knowledge_Tracing.code.data_processing.dataset import dataset as dt
+from Knowledge_Tracing.code.data_processing.get_assistments_texts import get_assistments_texts
 
 
 def get_data_assistments_2009(min_questions=2, max_questions=50,
@@ -65,8 +65,8 @@ def get_data_assistments_2009(min_questions=2, max_questions=50,
     print("shape after exclusion:", train_df.shape)
 
     # Step 6 - Remove questions interactions we do not have text
-    loaded_dataset = dt(name="assistments_2009", path=texts_filepath, prefix="clean_datasets/")
-    loaded_dataset.load_saved_texts()
-    train_df = train_df.loc[train_df['problem_id'].isin(loaded_dataset.problem_id_to_index)]
+    # Step 6 - Remove questions interactions we do not have text
+    texts_df = get_assistments_texts(texts_filepath=texts_filepath)
+    train_df = train_df.loc[train_df['problem_id'].isin(texts_df['problem_id'])]
 
-    return train_df, loaded_dataset
+    return train_df, texts_df

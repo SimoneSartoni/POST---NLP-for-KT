@@ -40,16 +40,9 @@ class sentence_transformer(base_model):
         self.texts = None
         self.vector_size = 0
 
-    def fit(self, interacted_and_text_problems, problem_id_to_index, texts, save_filepath='./'):
-        self.problem_ids = interacted_and_text_problems
-        self.texts = []
-        index = 0
-        for p in self.problem_ids:
-            self.problem_id_to_index[p] = index
-            self.texts.append(texts[problem_id_to_index[p]])
-            index += 1
-        self.vectors = self.sentence_transformer.encode(sentences=self.texts, show_progress_bar=False)
-
+    def fit(self, texts_df, save_filepath='./'):
+        self.problem_ids = texts_df['problem_id'].values
+        self.vectors = self.sentence_transformer.encode(sentences=texts_df['body'], show_progress_bar=False)
 
         # Save sparse matrix in current directory
         self.vector_size = self.vectors.shape[1]
@@ -113,31 +106,27 @@ class sentence_transformer(base_model):
         neg_mean_encoding = np.zeros(shape=self.words_num, dtype=np.float)
         pos, neg = 0.0, 0.0
         for p, c in list(zip(input_problems, corrects)):
-            if p in self.problem_id_to_index.keys():
-                # and p not in unique_problems_set:
-                # unique_problems_set.add(p)
-                problem = self.problem_id_to_index[p]
-                x = np.array(self.vectors[problem])
-                if c > 0.0:
-                    pos += 1.0
-                    pos_mean_encoding = pos_mean_encoding + x
-                else:
-                    neg += 1.0
-                    neg_mean_encoding = neg_mean_encoding + x
+            # and p not in unique_problems_set:
+            # unique_problems_set.add(p)
+            x = np.array(self.vectors[p])
+            if c > 0.0:
+                pos += 1.0
+                pos_mean_encoding = pos_mean_encoding + x
+            else:
+                neg += 1.0
+                neg_mean_encoding = neg_mean_encoding + x
         if pos > 0.0:
             pos_mean_encoding = pos_mean_encoding / pos
         if neg > 0.0:
             neg_mean_encoding = neg_mean_encoding / neg
         target_encoding = np.zeros(shape=self.words_num, dtype=np.float)
-        if target_problem in self.problem_id_to_index.keys():
-            x = np.array(self.vectors[self.problem_id_to_index[target_problem]])
-            target_encoding = target_encoding + x
+        x = np.array(self.vectors[target_problem])
+        target_encoding = target_encoding + x
         encoding = np.concatenate((pos_mean_encoding, neg_mean_encoding, target_encoding), axis=0)
         return encoding
 
     def get_encoding(self, problem):
-        index = self.problem_id_to_index[problem]
-        encoding = np.array(self.vectors[index])
+        encoding = np.array(self.vectors[problem])
         return encoding
 
     def get_serializable_params(self):
