@@ -42,6 +42,12 @@ class sentence_transformer(base_model):
 
     def fit(self, texts_df, save_filepath='./'):
         self.problem_ids = texts_df['problem_id'].values
+        self.texts = []
+        index = 0
+        for p, text in list(zip(texts_df['problem_id'], texts_df['body'])):
+            self.problem_id_to_index[p] = index
+            self.texts.append(text)
+            index += 1
         self.vectors = self.sentence_transformer.encode(sentences=texts_df['body'], show_progress_bar=False)
 
         # Save sparse matrix in current directory
