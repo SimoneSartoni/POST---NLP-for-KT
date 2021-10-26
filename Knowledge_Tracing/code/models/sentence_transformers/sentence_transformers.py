@@ -114,7 +114,7 @@ class sentence_transformer(base_model):
         for p, c in list(zip(input_problems, corrects)):
             # and p not in unique_problems_set:
             # unique_problems_set.add(p)
-            x = np.array(self.vectors[p])
+            x = np.array(self.vectors[self.problem_id_to_index[p]])
             if c > 0.0:
                 pos += 1.0
                 pos_mean_encoding = pos_mean_encoding + x
@@ -126,13 +126,13 @@ class sentence_transformer(base_model):
         if neg > 0.0:
             neg_mean_encoding = neg_mean_encoding / neg
         target_encoding = np.zeros(shape=self.words_num, dtype=np.float)
-        x = np.array(self.vectors[target_problem])
+        x = np.array(self.vectors[self.problem_id_to_index[target_problem]])
         target_encoding = target_encoding + x
         encoding = np.concatenate((pos_mean_encoding, neg_mean_encoding, target_encoding), axis=0)
         return encoding
 
     def get_encoding(self, problem):
-        encoding = np.array(self.vectors[problem])
+        encoding = np.array(self.vectors[self.problem_id_to_index[problem]])
         return encoding
 
     def get_serializable_params(self):
