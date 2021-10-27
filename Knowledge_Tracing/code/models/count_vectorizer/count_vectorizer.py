@@ -52,7 +52,7 @@ class count_vectorizer(base_model):
         self.vector_size = 0
 
     def fit(self, texts_df, save_filepath='./'):
-        self.problem_ids = texts_df['problem_ids']
+        self.problem_ids = texts_df['problem_id']
         self.texts = []
         index = 0
         for p, text in list(zip(texts_df['problem_id'], texts_df['body'])):
