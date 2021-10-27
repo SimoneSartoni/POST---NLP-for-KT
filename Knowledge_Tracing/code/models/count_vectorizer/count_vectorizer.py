@@ -51,16 +51,13 @@ class count_vectorizer(base_model):
         self.texts = None
         self.vector_size = 0
 
-    def fit(self, interacted_and_text_problems, problem_id_to_index, texts, save_filepath='./'):
-        self.problem_ids = interacted_and_text_problems
+    def fit(self, texts_df, save_filepath='./'):
+        self.problem_ids = texts_df['problem_ids']
         self.texts = []
         index = 0
-        for p in self.problem_ids:
+        for p, text in list(zip(texts_df['problem_id'], texts_df['body'])):
             self.problem_id_to_index[p] = index
-            if problem_id_to_index:
-                self.texts.append(texts[problem_id_to_index[p]])
-            else:
-                self.texts.append(texts[p])
+            self.texts.append(text)
             index += 1
         tfidf_vectorizer_vectors = self.count_vectorizer.fit_transform(self.texts)
         self.vectors = tfidf_vectorizer_vectors
