@@ -69,7 +69,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
               ([None, encode_model.vector_size], [None]))
     # Step 5 - Get Tensorflow Dataset
     dataset = tf.data.Dataset.from_generator(
-        generator=lambda: generate_encodings,
+        generator=generate_encodings,
         output_types=types,
         output_shapes=shapes
     )
