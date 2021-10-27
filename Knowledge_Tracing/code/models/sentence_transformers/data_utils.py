@@ -11,7 +11,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
                  interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
                                        ".csv",
                  save_filepath='/kaggle/working/', texts_filepath='../input/', min_df=2, max_df=1.0,
-                 min_questions=2, max_features=1000, max_questions=25, n_rows=None,  n_texts=None):
+                 min_questions=2, max_features=1000, max_questions=25, n_rows=None,  n_texts=None, encoding_model='all-mpnet-base-v2 000000000'):
     if dataset_name == 'assistment_2012':
         df, text_df = get_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
                                                        interactions_filepath=interactions_filepath,
@@ -25,7 +25,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
     df = df[['user_id', 'problem_id', 'correct']]
     print(df)
     # Step 3.1 - Generate NLP extracted encoding for problems
-    encode_model = sentence_transformer()
+    encode_model = sentence_transformer(encoding_model=encoding_model)
     encode_model.fit(text_df, save_filepath)
 
     def generate_encodings(problems, corrects, lengths):

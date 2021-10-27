@@ -22,9 +22,9 @@ def identity_tokenizer(text):
 
 
 class sentence_transformer(base_model):
-    def __init__(self):
+    def __init__(self, encoding_model='all-mpnet-base-v2 '):
         super().__init__("sentence_transformers", "NLP")
-        self.sentence_transformer = SentenceTransformer('bert-large-nli-mean-tokens')
+        self.sentence_transformer = SentenceTransformer(encoding_model)
         self.similarity_matrix = None
         self.words_unique = None
         self.pro_num = None
@@ -48,7 +48,7 @@ class sentence_transformer(base_model):
             self.problem_id_to_index[p] = index
             self.texts.append(text)
             index += 1
-        self.vectors = self.sentence_transformer.encode(sentences=texts_df['body'], show_progress_bar=False)
+        self.vectors = self.sentence_transformer.encode(sentences=texts_df['body'], show_progress_bar=True)
 
         # Save sparse matrix in current directory
         self.vector_size = self.vectors.shape[1]

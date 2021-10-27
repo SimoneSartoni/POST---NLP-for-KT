@@ -52,15 +52,16 @@ class BERTopic_model(base_model):
         self.texts = None
         self.vector_size = 0
 
-    def fit(self, interacted_and_text_problems, problem_id_to_index, texts, save_filepath='./'):
-        self.problem_ids = interacted_and_text_problems
+    def fit(self, texts_df, save_filepath='./'):
+        self.problem_ids = texts_df['problem_id'].values
         self.texts = []
         index = 0
-        for p in self.problem_ids:
+        for p, text in list(zip(texts_df['problem_id'], texts_df['body'])):
             self.problem_id_to_index[p] = index
-            self.texts.append(texts[problem_id_to_index[p]])
+            self.texts.append(text)
             index += 1
         self.topics, self.probabilities = self.bert_topic.fit_transform(self.texts)
+
         print(self.topics[0:100])
         print(self.probabilities[0:100])
         # Save sparse matrix in current directory
@@ -71,16 +72,6 @@ class BERTopic_model(base_model):
         self.pro_num = self.vectors.shape[0]
         self.words_num = self.vectors.shape[1]
 
-    def visualize_umap():
-        result = pd.DataFrame(umap_data, columns=['x', 'y'])
-        result['labels'] = cluster.labels
-        # Visualize clusters
-        fig, ax = plt.subplots(figsize=(20, 10))
-        outliers = result.loc[result.labels == -1, :]
-        clustered = result.loc[result.labels != -1, :]
-        plt.scatter(outliers.x, outliers.y, color='#BDBDBD', s=0.05)
-        plt.scatter(clustered.x, clustered.y, c=clustered.labels, s=0.05, cmap='hsv_r')
-        plt.colorbar()
 
     def write_words_unique(self, data_folder):
         write_txt(os.path.join(data_folder, 'words_set.txt'), self.words_unique)
