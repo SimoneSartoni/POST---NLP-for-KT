@@ -28,6 +28,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
     encode_model = sentence_transformer(encoding_model=encoding_model)
     encode_model.fit(text_df, save_filepath)
 
+    print(encode_model.get_encoding())
     def generate_encodings(problems, corrects, lengths):
         document_to_term = []
         labels = np.array([], dtype=np.int)

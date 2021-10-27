@@ -31,7 +31,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
     print(df)
     # Step 3.1 - Generate NLP extracted encoding for problems
     encode_model = count_vectorizer(min_df=min_df, max_df=max_df, binary=False, max_features=max_features)
-    encode_model.fit(text_df['problem_ids'].values, None, text_df['body'].values, save_filepath)
+    encode_model.fit(text_df['problem_id'].values, None, text_df['body'].values, save_filepath)
 
     max_value = encode_model.words_num
 
