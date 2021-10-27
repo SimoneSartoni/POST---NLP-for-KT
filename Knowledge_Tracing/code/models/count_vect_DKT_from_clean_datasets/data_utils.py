@@ -40,32 +40,26 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
     gc.collect()
     print("number of words is: " + str(max_value))
 
-    def generate_encodings(problems, corrects, lengths):
-        document_to_term = []
-        labels = np.array([], dtype=np.int)
-        for index in range(0, lengths):
-            encoding = encode_model.get_encoding(problems[index])
-            encoding = np.expand_dims(encoding, axis=0)
-            document_to_term.append(encoding)
-            labels = np.append(labels, corrects[index])
-        document_to_term = np.concatenate(document_to_term, axis=0)
-        i_doc = document_to_term[:-1]
-        o_doc = document_to_term[1:]
-        i_label = labels[:-1]
-        o_label = labels[1:]
-        inputs = (i_doc, i_label)
-        outputs = (o_doc, o_label)
-        return inputs, outputs
-
-    seq = df.groupby('user_id').apply(
-        lambda r: (
-            generate_encodings(
-                r['problem_id'].values,
-                r['correct'].values,
-                len(r['problem_id'])
-            )
-        )
-    )
+    def generate_encodings():
+        for r in df.groupby('user_id'):
+            problems = r['problem_id'].values
+            corrects = r['correct'].values,
+            lengths = len(r['problem_id'])
+            document_to_term = []
+            labels = np.array([], dtype=np.int)
+            for index in range(0, lengths):
+                encoding = encode_model.get_encoding(problems[index])
+                encoding = np.expand_dims(encoding, axis=0)
+                document_to_term.append(encoding)
+                labels = np.append(labels, corrects[index])
+            document_to_term = np.concatenate(document_to_term, axis=0)
+            i_doc = document_to_term[:-1]
+            o_doc = document_to_term[1:]
+            i_label = labels[:-1]
+            o_label = labels[1:]
+            inputs = (i_doc, i_label)
+            outputs = (o_doc, o_label)
+            yield inputs, outputs
 
     encoding_depth = encode_model.vector_size
 
@@ -75,11 +69,11 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
               ([None, encode_model.vector_size], [None]))
     # Step 5 - Get Tensorflow Dataset
     dataset = tf.data.Dataset.from_generator(
-        generator=lambda: seq,
+        generator=lambda: generate_encodings,
         output_types=types,
         output_shapes=shapes
     )
-    nb_users = len(seq)
+    nb_users = len(df.groupby('user_id'))
     if shuffle:
         dataset = dataset.shuffle(buffer_size=nb_users)
 
