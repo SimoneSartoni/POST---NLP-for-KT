@@ -19,7 +19,7 @@ def get_data_assistments_2009(min_questions=2, max_questions=50,
                               interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final.csv",
                               texts_filepath='../input/', n_rows=None, n_texts=None):
     dtypes = {'user_id': 'int32', 'problem_id': 'int64',
-              'correct': 'float64', 'skill': "string",
+              'correct': 'float64', 'skill_id': "string",
               'order_id': "string"}
 
     print("loading csv.....")
@@ -52,7 +52,7 @@ def get_data_assistments_2009(min_questions=2, max_questions=50,
     print("shape after drop no skill:", train_df.shape)
 
     # Step 2.2 - Enumerate skill ids and question ids
-    train_df['skill'], _ = pd.factorize(train_df['skill'], sort=True)
+    train_df['skill'], _ = pd.factorize(train_df['skill_id'], sort=True)
     train_df['question_id'], _ = pd.factorize(train_df['problem_id'], sort=True)
     print("shape after factorize:", train_df.shape)
 
