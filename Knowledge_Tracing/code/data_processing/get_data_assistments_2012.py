@@ -17,7 +17,7 @@ from Knowledge_Tracing.code.data_processing.get_assistments_texts import get_ass
 
 
 def get_data_assistments_2012(min_questions=2, max_questions=50, interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final.csv",
-                              texts_filepath='../input/', n_rows=None,  n_texts=None, make_sentences_flag=True):
+                              texts_filepath='../input/', n_rows=None,  n_texts=None, personal_cleaning=True, make_sentences_flag=True):
     dtypes = {'user_id': 'int32', 'problem_id': 'int64',
               'correct': 'float64', 'skill': "string",
               'start_time': "string", 'end_time': "string"}
@@ -75,7 +75,7 @@ def get_data_assistments_2012(min_questions=2, max_questions=50, interactions_fi
     print("shape after exclusion:", train_df.shape)
 
     # Step 6 - Remove questions interactions we do not have text
-    texts_df = get_assistments_texts(texts_filepath=texts_filepath, n_texts=n_texts, make_sentences_flag=make_sentences_flag)
+    texts_df = get_assistments_texts(personal_cleaning=personal_cleaning, texts_filepath=texts_filepath, n_texts=n_texts, make_sentences_flag=make_sentences_flag)
     train_df = train_df.loc[train_df['problem_id'].isin(texts_df['problem_id'])]
 
     return train_df, texts_df

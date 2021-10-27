@@ -6,6 +6,8 @@ import nltk
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
+from Knowledge_Tracing.code.data_processing.data_processing import remove_stopwords, remove_issues, remove_duplications, \
+    escape_values
 
 
 # Function to preprocess the tweets data
@@ -66,12 +68,12 @@ def lemmatize_all(data, name):
 # Function to make it back into a sentence
 def make_sentences(data, name):
 
-    data[name]=data[name].apply(lambda x: ' '.join([i+' ' for i in x]))
+    data[name] = data[name].apply(lambda x: ' '.join([i+' ' for i in x]))
     # Removing double spaces if created
-    data[name]=data[name].apply(lambda x: re.sub(r'\s+', ' ', x, flags=re.I))
+    data[name] = data[name].apply(lambda x: re.sub(r'\s+', ' ', x, flags=re.I))
 
 
-def get_assistments_texts(texts_filepath='../input/', n_texts=None, make_sentences_flag=True):
+def get_assistments_texts(personal_cleaning=True, texts_filepath='../input/', n_texts=None, make_sentences_flag=True):
     input_types = {'problem_id': 'int64', 'body': "string"}
     if n_texts:
         df = pd.read_csv(texts_filepath, low_memory=False, dtype=input_types, nrows=n_texts)
@@ -79,9 +81,12 @@ def get_assistments_texts(texts_filepath='../input/', n_texts=None, make_sentenc
         df = pd.read_csv(texts_filepath, low_memory=False, dtype=input_types)
     # Using the preprocessing function to preprocess the tweet data
     print(df['body'].values[0:10])
-    preprocess_data(df, 'body')
-    # Using tokenizer and removing the stopwords
-    rem_stopwords_tokenize(df, 'body')
+    if personal_cleaning:
+        df['body'] = df['body'].apply(lambda x: remove_issues(remove_stopwords(escape_values(x))))
+    else:
+        preprocess_data(df, 'body')
+        # Using tokenizer and removing the stopwords
+        rem_stopwords_tokenize(df, 'body')
     # Converting all the texts back to sentences
     if make_sentences_flag:
         make_sentences(df, 'body')
