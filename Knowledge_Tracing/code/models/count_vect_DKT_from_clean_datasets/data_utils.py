@@ -1,3 +1,5 @@
+import gc
+
 import pandas as pd
 import tensorflow as tf
 import numpy as np
@@ -34,7 +36,8 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
     encode_model.fit(text_df, save_filepath)
 
     max_value = encode_model.words_num
-
+    del text_df
+    gc.collect()
     print("number of words is: " + str(max_value))
 
     def generate_encodings(problems, corrects, lengths):
