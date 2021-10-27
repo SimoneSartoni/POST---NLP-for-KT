@@ -14,28 +14,25 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
                  interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
                                        ".csv",
                  save_filepath='/kaggle/working/', texts_filepath='../input/', min_df=2, max_df=1.0,
-                 min_questions=2, max_features=1000, max_questions=25, n_rows=None):
+                 min_questions=2, max_features=1000, max_questions=25, n_rows=None, n_texts=None):
     if dataset_name == 'assistment_2012':
-        df, loaded_dataset = get_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
-                                                       interactions_filepath=interactions_filepath,
-                                                       texts_filepath=texts_filepath, n_rows=n_rows)
+        df, text_df = get_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
+                                                interactions_filepath=interactions_filepath,
+                                                texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
+                                                make_sentences_flag=False)
     elif dataset_name == 'assistment_2009':
-        df, loaded_dataset = get_data_assistments_2009(min_questions=min_questions, max_questions=max_questions,
-                                                       interactions_filepath=interactions_filepath,
-                                                       texts_filepath=texts_filepath, n_rows=n_rows)
+        df, text_df = get_data_assistments_2009(min_questions=min_questions, max_questions=max_questions,
+                                                interactions_filepath=interactions_filepath,
+                                                texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
+                                                make_sentences_flag=False)
 
     print(df)
     df = df[['user_id', 'problem_id', 'correct']]
     print(df)
     # Step 3.1 - Generate NLP extracted encoding for problems
     encode_model = count_vectorizer(min_df=min_df, max_df=max_df, binary=False, max_features=max_features)
-    encode_model.fit(loaded_dataset.problems_with_text_known_list, loaded_dataset.problem_id_to_index,
-                     loaded_dataset.texts_list, save_filepath)
-    """for min_df_ in [2, 5, 10, 15]:
-        encode_model = count_vectorizer(min_df=min_df_, max_df=max_df, binary=False)
-        encode_model.fit(loaded_dataset.interacted_with_text_problem_set, loaded_dataset.problem_id_to_index,
-                         loaded_dataset.texts_list)
-        print(encode_model.words_num)"""
+    encode_model.fit(text_df['problem_ids'].values, None, text_df['body'].values, save_filepath)
+
     max_value = encode_model.words_num
 
     print("number of words is: " + str(max_value))

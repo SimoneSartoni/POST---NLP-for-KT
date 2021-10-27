@@ -57,7 +57,10 @@ class count_vectorizer(base_model):
         index = 0
         for p in self.problem_ids:
             self.problem_id_to_index[p] = index
-            self.texts.append(texts[problem_id_to_index[p]])
+            if self.problem_id_to_index:
+                self.texts.append(texts[problem_id_to_index[p]])
+            else:
+                self.texts.append(texts[p])
             index += 1
         tfidf_vectorizer_vectors = self.count_vectorizer.fit_transform(self.texts)
         self.vectors = tfidf_vectorizer_vectors
