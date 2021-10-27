@@ -57,7 +57,7 @@ class count_vectorizer(base_model):
         index = 0
         for p in self.problem_ids:
             self.problem_id_to_index[p] = index
-            if self.problem_id_to_index:
+            if problem_id_to_index:
                 self.texts.append(texts[problem_id_to_index[p]])
             else:
                 self.texts.append(texts[p])
