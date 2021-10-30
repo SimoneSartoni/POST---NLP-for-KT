@@ -16,7 +16,8 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
                  interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
                                        ".csv",
                  save_filepath='/kaggle/working/', texts_filepath='../input/', min_df=2, max_df=1.0,
-                 min_questions=2, max_features=1000, max_questions=25, n_rows=None, n_texts=None, personal_cleaning=True):
+                 min_questions=2, max_features=1000, max_questions=25, n_rows=None, n_texts=None,
+                 personal_cleaning=True):
     if dataset_name == 'assistment_2012':
         df, text_df = get_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
                                                 interactions_filepath=interactions_filepath,
@@ -26,7 +27,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         df, text_df = get_data_assistments_2009(min_questions=min_questions, max_questions=max_questions,
                                                 interactions_filepath=interactions_filepath,
                                                 texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
-                                                make_sentences_flag=False, personal_cleaning=personal_cleaning,)
+                                                make_sentences_flag=False, personal_cleaning=personal_cleaning, )
 
     print(df)
     df = df[['user_id', 'problem_id', 'correct']]
@@ -39,17 +40,18 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
     del text_df
     gc.collect()
     print("number of words is: " + str(max_value))
+
     def generate_encodings():
-        for r in df.groupby('user_id'):
-            print(r)
-            lengths = len(r)
+        for name, group in df.groupby('user_id'):
+            print(name)
+            print(group)
             document_to_term = []
             labels = np.array([], dtype=np.int)
-            for index in range(0, lengths):
-                encoding = encode_model.get_encoding(r[index]['problem_id'])
+            for row in group:
+                encoding = encode_model.get_encoding(row['problem_id'])
                 encoding = np.expand_dims(encoding, axis=0)
                 document_to_term.append(encoding)
-                labels = np.append(labels, r[index]['correct'])
+                labels = np.append(labels, row['correct'])
             document_to_term = np.concatenate(document_to_term, axis=0)
             i_doc = document_to_term[:-1]
             o_doc = document_to_term[1:]
