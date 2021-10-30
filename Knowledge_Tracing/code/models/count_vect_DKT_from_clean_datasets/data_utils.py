@@ -47,11 +47,12 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             print(group)
             document_to_term = []
             labels = np.array([], dtype=np.int)
-            for row in group:
-                encoding = encode_model.get_encoding(row['problem_id'])
+            for problem, label in group['problem_id'], group['correct']:
+                print(problem)
+                encoding = encode_model.get_encoding(problem)
                 encoding = np.expand_dims(encoding, axis=0)
                 document_to_term.append(encoding)
-                labels = np.append(labels, row['correct'])
+                labels = np.append(labels, label)
             document_to_term = np.concatenate(document_to_term, axis=0)
             i_doc = document_to_term[:-1]
             o_doc = document_to_term[1:]
