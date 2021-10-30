@@ -39,19 +39,17 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
     del text_df
     gc.collect()
     print("number of words is: " + str(max_value))
-
     def generate_encodings():
         for r in df.groupby('user_id'):
-            problems = r['problem_id'].values
-            corrects = r['correct'].values,
-            lengths = len(r['problem_id'])
+            print(r)
+            lengths = len(r)
             document_to_term = []
             labels = np.array([], dtype=np.int)
             for index in range(0, lengths):
-                encoding = encode_model.get_encoding(problems[index])
+                encoding = encode_model.get_encoding(r[index]['problem_id'])
                 encoding = np.expand_dims(encoding, axis=0)
                 document_to_term.append(encoding)
-                labels = np.append(labels, corrects[index])
+                labels = np.append(labels, r[index]['correct'])
             document_to_term = np.concatenate(document_to_term, axis=0)
             i_doc = document_to_term[:-1]
             o_doc = document_to_term[1:]
