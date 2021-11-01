@@ -57,16 +57,26 @@ def get_data_assistments_2009(min_questions=2, max_questions=50,
     print("shape after factorize:", train_df.shape)
 
     # Step 5 - Compute number of unique skills ids and number of unique question ids
-    questions_ids = train_df['problem_id'].unique()
+    questions_ids = train_df['question_id'].unique()
     n_ids = len(questions_ids)
     n_skills = len(train_df['skill'].unique())
     print("no. of problems :", n_ids)
     print("no. of skills: ", n_skills)
     print("shape after exclusion:", train_df.shape)
 
-    # Step 6 - Remove questions interactions we do not have text
+    print("Get texts, intersection...")
+
     # Step 6 - Remove questions interactions we do not have text
     texts_df = get_assistments_texts(personal_cleaning=personal_cleaning, texts_filepath=texts_filepath, n_texts=n_texts, make_sentences_flag=make_sentences_flag)
     train_df = train_df.loc[train_df['problem_id'].isin(texts_df['problem_id'])]
+
+    texts_df = texts_df.loc[texts_df['problem_id'].isin(train_df['problem_id'])]
+
+    questions_ids = train_df['problem_id'].unique()
+    n_ids = len(questions_ids)
+    n_skills = len(train_df['skill'].unique())
+    print("no. of problems :", n_ids)
+    print("no. of skills: ", n_skills)
+    print("shape after exclusion:", train_df.shape)
 
     return train_df, texts_df
