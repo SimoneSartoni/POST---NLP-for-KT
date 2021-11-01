@@ -80,7 +80,6 @@ def get_assistments_texts(personal_cleaning=True, texts_filepath='../input/', n_
     else:
         df = pd.read_csv(texts_filepath, low_memory=False, dtype=input_types)
     # Using the preprocessing function to preprocess the tweet data
-    print(df['body'].values[0:10])
     if personal_cleaning:
         df['body'] = df['body'].apply(lambda x: remove_issues(remove_stopwords(escape_values(x))))
     else:
@@ -90,5 +89,4 @@ def get_assistments_texts(personal_cleaning=True, texts_filepath='../input/', n_
     # Converting all the texts back to sentences
     if make_sentences_flag:
         make_sentences(df, 'body')
-    print(df['body'].values[0:10])
     return df
