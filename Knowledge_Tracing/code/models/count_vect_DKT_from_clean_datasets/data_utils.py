@@ -43,12 +43,9 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
 
     def generate_encodings():
         for name, group in df.groupby('user_id'):
-            print(name)
-            print(group)
             document_to_term = []
             labels = np.array([], dtype=np.int)
             for problem, label in list(zip(group['problem_id'].values, group['correct'].values)):
-                print(problem)
                 encoding = encode_model.get_encoding(problem)
                 encoding = np.expand_dims(encoding, axis=0)
                 document_to_term.append(encoding)
