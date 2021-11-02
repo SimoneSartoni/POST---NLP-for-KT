@@ -32,32 +32,24 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
     encode_model = sentence_transformer(encoding_model=encoding_model)
     encode_model.fit(text_df, save_filepath)
 
-    def generate_encodings(problems, corrects, lengths):
-        document_to_term = []
-        labels = np.array([], dtype=np.int)
-        for index in range(0, lengths):
-            encoding = encode_model.get_encoding(problems[index])
-            encoding = np.expand_dims(encoding, axis=0)
-            document_to_term.append(encoding)
-            labels = np.append(labels, corrects[index])
-        document_to_term = np.concatenate(document_to_term, axis=0)
-        i_doc = document_to_term[:-1]
-        o_doc = document_to_term[1:]
-        i_label = labels[:-1]
-        o_label = labels[1:]
-        inputs = (i_doc, i_label)
-        outputs = (o_doc, o_label)
-        return inputs, outputs
 
-    seq = df.groupby('user_id').apply(
-        lambda r: (
-            generate_encodings(
-                r['problem_id'].values,
-                r['correct'].values,
-                len(r['problem_id'])
-            )
-        )
-    )
+    def generate_encodings():
+        for name, group in df.groupby('user_id'):
+            document_to_term = []
+            labels = np.array([], dtype=np.int)
+            for problem, label in list(zip(group['problem_id'].values, group['correct'].values)):
+                encoding = encode_model.get_encoding(problem)
+                encoding = np.expand_dims(encoding, axis=0)
+                document_to_term.append(encoding)
+                labels = np.append(labels, label)
+            document_to_term = np.concatenate(document_to_term, axis=0)
+            i_doc = document_to_term[:-1]
+            o_doc = document_to_term[1:]
+            i_label = labels[:-1]
+            o_label = labels[1:]
+            inputs = (i_doc, i_label)
+            outputs = (o_doc, o_label)
+            yield inputs, outputs
 
     encoding_depth = encode_model.vector_size
 
@@ -65,14 +57,14 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
              (tf.float32, tf.float32))
     shapes = (([None, encode_model.vector_size], [None]),
               ([None, encode_model.vector_size], [None]))
-
     # Step 5 - Get Tensorflow Dataset
     dataset = tf.data.Dataset.from_generator(
-        generator=lambda: seq,
+        generator=generate_encodings,
         output_types=types,
         output_shapes=shapes
     )
-    nb_users = len(seq)
+
+    nb_users = len(df.groupby('user_id'))
     if shuffle:
         dataset = dataset.shuffle(buffer_size=nb_users)
 
