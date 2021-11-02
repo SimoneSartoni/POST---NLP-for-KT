@@ -28,7 +28,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
                                                 make_sentences_flag=False, personal_cleaning=personal_cleaning, )
 
     print(df)
-    df = df[['user_id', 'problem_id', 'correct']]
+    df = df[['user_id', 'problem_id', 'correct', 'skill']]
     print(df)
     # Step 3.1 - Generate NLP extracted encoding for problems
     encode_model = count_vectorizer(min_df=min_df, max_df=max_df, binary=False, max_features=max_features)
