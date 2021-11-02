@@ -2,7 +2,7 @@ import pandas as pd
 import tensorflow as tf
 import numpy as np
 from Knowledge_Tracing.code.data_processing.get_data_assistments_2012 import get_data_assistments_2012
-from Knowledge_Tracing.code.models.BERTTopic.BERTopic_model import BERTTopic
+from Knowledge_Tracing.code.models.BERTTopic.BERTopic_model import BERTopic_model
 
 MASK_VALUE = -1.0  # The masking value cannot be zero.
 
@@ -21,7 +21,7 @@ def load_dataset_NLP_skills(batch_size=32, shuffle=True,
     df = df[['user_id', 'problem_id', 'correct']]
     print(df)
     # Step 3.1 - Generate NLP extracted encoding for problems
-    encode_model = BERTTopic()
+    encode_model = BERTopic_model()
     encode_model.fit(loaded_dataset.problems_with_text_known_list, loaded_dataset.problem_id_to_index,
                      loaded_dataset.texts_list, save_filepath)
 
