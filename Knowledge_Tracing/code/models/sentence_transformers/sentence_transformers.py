@@ -22,7 +22,7 @@ def identity_tokenizer(text):
 
 
 class sentence_transformer(base_model):
-    def __init__(self, encoding_model='all-mpnet-base-v2 '):
+    def __init__(self, encoding_model='all-mpnet-base-v2'):
         super().__init__("sentence_transformers", "NLP")
         self.sentence_transformer = SentenceTransformer(encoding_model)
         self.similarity_matrix = None
