@@ -21,7 +21,7 @@ def identity_tokenizer(text):
 
 class BERTopic_model(base_model):
     def __init__(self, n_neighbors=15, n_components=5, min_cluster_size=15, metric='euclidean',
-                 cluster_selection_method='eom'):
+                 calculate_probabilities=True, cluster_selection_method='eom'):
         super().__init__("sentence_transformers", "NLP")
         """self.sentence_transformer = SentenceTransformer('bert-large-nli-mean-tokens')
         self.embeddings = None
@@ -32,7 +32,9 @@ class BERTopic_model(base_model):
         self.hdbscan = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size,
                                   metric=metric,
                                   cluster_selection_method=cluster_selection_method)"""
-        self.bert_topic = BERTopic(embedding_model='bert-large-nli-mean-tokens', language="english")
+        self.bert_topic = BERTopic(embedding_model='bert-large-nli-mean-tokens', language="english",
+                                   calculate_probabilities=calculate_probabilities)
+        self.topic_model = None
         self.topics, self.probabilities = None, None
         self.similarity_matrix = None
         self.words_unique = None
@@ -57,12 +59,11 @@ class BERTopic_model(base_model):
             self.problem_id_to_index[p] = index
             self.texts.append(text)
             index += 1
-        self.topics, self.probabilities = self.bert_topic.fit_transform(self.texts)
-
-        print(self.topics[0:100])
-        print(self.probabilities[0:100])
+        self.topic_model = self.bert_topic.fit(self.texts)
+        print("topic model created")
+        self.words_num = len(self.topic_model.get_topic_freq())
+        print(self.topic_model.transform(self.texts[0]))
         # Save sparse matrix in current directory
-        self.vector_size = self.vectors.shape[1]
 
         sps.save_npz(os.path.join(save_filepath, '../pro_words.npz'), self.vectors)
 

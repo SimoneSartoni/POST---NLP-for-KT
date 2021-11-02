@@ -1,6 +1,6 @@
 import tensorflow as tf
 from Knowledge_Tracing.code.models.word2vec_DKT import word2vec_deepkt, data_utils as dt_utils, metrics
-from Knowledge_Tracing.code.models.DKT import data_utils as utils
+from code.models.DKT_models.DKT import data_utils as utils
 
 
 def main():

@@ -1,8 +1,3 @@
-
-
-from Knowledge_Tracing.code.models.count_vect_plus_skills_DKT.data_utils import *
-
-
 class BinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
     def update_state(self, y_true, y_pred, sample_weight=None):
         true, pred = get_target(y_true, y_pred)

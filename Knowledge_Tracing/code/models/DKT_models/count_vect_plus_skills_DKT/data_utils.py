@@ -1,9 +1,8 @@
 import gc
 
-import pandas as pd
 import tensorflow as tf
 import numpy as np
-from Knowledge_Tracing.code.models.count_vectorizer.count_vectorizer import count_vectorizer
+from code.models.encoding_models.count_vectorizer import count_vectorizer
 from Knowledge_Tracing.code.data_processing.get_data_assistments_2012 import get_data_assistments_2012
 from Knowledge_Tracing.code.data_processing.get_data_assistments_2009 import get_data_assistments_2009
 

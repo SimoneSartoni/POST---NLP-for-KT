@@ -1,9 +1,9 @@
 from tensorflow.keras import Model, Input, layers, losses
 
-from Knowledge_Tracing.code.models.count_vect_plus_skills_DKT.data_utils import get_target as NLP_get_target
+from code.models.DKT_models.complete_DKT.data_utils import get_target as NLP_get_target
 
 
-class count_vect_plus_skill_DKTModel(Model):
+class complete_DKTModel(Model):
     """ The Deep Knowledge Tracing model.
     Arguments in __init__:
         nb_skills: The number of skills in the dataset.
@@ -14,37 +14,47 @@ class count_vect_plus_skill_DKTModel(Model):
             and what the model expects.
     """
 
-    def __init__(self, nb_encodings, nb_skills, hidden_units=100, dropout_rate=0.2):
-        input_encodings = Input(shape=[None, nb_encodings], name='input_encodings')
+    def __init__(self, encoding_sizes=[], nb_skills=None, hidden_units=100, output_units_per_encoding=50, dropout_rate=0.2):
         input_labels = Input(shape=[None, 1], name='input_labels')
-        input_skills = Input(shape=[None, nb_skills], name='input_skills')
-
-        mask_encodings = layers.Masking(mask_value=-1.0)(input_encodings)
         mask_labels = layers.Masking(mask_value=-1.0)(input_labels)
-        mask_skills = layers.Masking(mask_value=-1.0)(input_skills)
-        mask_encodings_labels = layers.concatenate([mask_encodings, mask_labels], axis=-1)
-        mask_skills_labels = layers.concatenate([mask_skills, mask_labels], axis=-1)
+        dense_units = 0
+        inputs = []
+        if len(encoding_sizes) > 0:
+            lstm_encodings = []
+            for index in range(0, len(encoding_sizes)):
+                input_encoding = Input(shape=[None, encoding_sizes[index]], name='input_encoding_'+str(index))
+                inputs.append(input_encoding)
+                mask_encoding = layers.Masking(mask_value=-1.0)(input_encoding)
+                mask_encoding_labels = layers.concatenate([mask_encoding, mask_labels], axis=-1)
+                lstm_encoding = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_encoding_labels)
+                lstm_encodings.append(lstm_encoding)
+                dense_units = len(encoding_sizes) * output_units_per_encoding
+        if nb_skills:
+            input_skills = Input(shape=[None, nb_skills], name='input_skills')
+            inputs.append(input_skills)
+            mask_skills = layers.Masking(mask_value=-1.0)(input_skills)
+            mask_skills_labels = layers.concatenate([mask_skills, mask_labels], axis=-1)
+            lstm_skill = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_skills_labels)
 
-        lstm_encodings = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_encodings_labels)
-        lstm_skill = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_skills_labels)
-        lstm = layers.concatenate([lstm_encodings, lstm_skill])
+        inputs.append(input_labels)
 
-        dense_encodings = layers.Dense(nb_encodings, activation='sigmoid')
-        dense_skills = layers.Dense(nb_skills, activation='sigmoid')
+        lstm = layers.concatenate(lstm_encodings.append(lstm_skill))
 
-        output_encodings = layers.TimeDistributed(dense_encodings, name='output_encodings')(lstm)
-        output_skills = layers.TimeDistributed(dense_skills, name='output_skills')(lstm)
-        outputs_encodings_skills = layers.concatenate([output_encodings, output_skills])
+        if nb_skills:
+            dense_units += output_units_per_encoding
+
+        dense_layer = layers.Dense(dense_units, activation='sigmoid')
+
+        dense_outputs = layers.TimeDistributed(dense_layer, name='output_encodings')(lstm)
 
         dense_label = layers.Dense(1, activation='sigmoid')
 
-        output_label = layers.TimeDistributed(dense_label, name='output_class')(outputs_encodings_skills)
-        outputs = layers.concatenate([outputs_encodings_skills, output_label])
+        output_label = layers.TimeDistributed(dense_label, name='output_class')(dense_outputs)
+        outputs = layers.concatenate([dense_outputs, output_label])
 
-        super(count_vect_plus_skill_DKTModel, self).__init__(inputs=[input_encodings, input_skills, input_labels],
-                                                             outputs=outputs,
-                                                             name="count_vect_plus_skill_DKTModel")
-        self.nb_encodings = nb_encodings
+
+        super(complete_DKTModel, self).__init__(inputs=inputs, outputs=outputs, name="count_vect_plus_skill_DKTModel")
+        self.encoding_sizes = encoding_sizes
         self.nb_skills = nb_skills
 
     def compile(self, optimizer, metrics=None):
@@ -66,10 +76,10 @@ class count_vect_plus_skill_DKTModel(Model):
         """
 
         def custom_loss(y_true, y_pred):
-            y_true, y_pred = NLP_get_target(y_true, y_pred, nb_encodings=self.nb_encodings, nb_skills=self.nb_skills)
+            y_true, y_pred = NLP_get_target(y_true, y_pred, nb_skills=self.nb_skills)
             return losses.binary_crossentropy(y_true, y_pred)
 
-        super(count_vect_plus_skill_DKTModel, self).compile(
+        super(complete_DKTModel, self).compile(
             loss=custom_loss,
             optimizer=optimizer,
             metrics=metrics,
@@ -144,7 +154,7 @@ class count_vect_plus_skill_DKTModel(Model):
             ValueError: In case of mismatch between the provided input data
                 and what the model expects.
         """
-        return super(count_vect_plus_skill_DKTModel, self).fit(x=dataset,
+        return super(complete_DKTModel, self).fit(x=dataset,
                                                                epochs=epochs,
                                                                verbose=verbose,
                                                                callbacks=callbacks,
@@ -185,7 +195,7 @@ class count_vect_plus_skill_DKTModel(Model):
         Raises:
             ValueError: in case of invalid arguments.
         """
-        return super(count_vect_plus_skill_DKTModel, self).evaluate(dataset,
+        return super(complete_DKTModel, self).evaluate(dataset,
                                                                     verbose=verbose,
                                                                     steps=steps,
                                                                     callbacks=callbacks)

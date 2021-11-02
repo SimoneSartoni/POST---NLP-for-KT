@@ -1,9 +1,9 @@
 from tensorflow.keras import Model, Input, layers, losses
 
-from Knowledge_Tracing.code.models.BERTTopic.data_utils import get_target as NLP_get_target
+from code.models.DKT_models.BERTTopic_DKT.data_utils import get_target as NLP_get_target
 
 
-class sentence_transformer_deepkt(Model):
+class BERTopic_DKTModel(Model):
     """ The sentence transformer Deep Knowledge Tracing model.
     Arguments in __init__:
         nb_skills: The number of skills in the dataset.
@@ -34,7 +34,7 @@ class sentence_transformer_deepkt(Model):
 
         outputs = layers.concatenate([output_encodings, output_class])
 
-        super(sentence_transformer_deepkt, self).__init__(inputs=[input_encodings, input_labels],
+        super(BERTopic_DKTModel, self).__init__(inputs=[input_encodings, input_labels],
                                                         outputs=outputs,
                                                         name="DKT_count_vect_Model")
         self.nb_encodings = nb_encodings
@@ -61,7 +61,7 @@ class sentence_transformer_deepkt(Model):
             y_true, y_pred = NLP_get_target(y_true, y_pred, nb_encodings=self.nb_encodings)
             return losses.binary_crossentropy(y_true, y_pred)
 
-        super(sentence_transformer_deepkt, self).compile(
+        super(BERTopic_DKTModel, self).compile(
               loss=custom_loss,
               optimizer=optimizer,
               metrics=metrics,
@@ -136,7 +136,7 @@ class sentence_transformer_deepkt(Model):
             ValueError: In case of mismatch between the provided input data
                 and what the model expects.
         """
-        return super(sentence_transformer_deepkt, self).fit(x=dataset,
+        return super(BERTopic_DKTModel, self).fit(x=dataset,
                                                           epochs=epochs,
                                                           verbose=verbose,
                                                           callbacks=callbacks,
@@ -177,7 +177,7 @@ class sentence_transformer_deepkt(Model):
         Raises:
             ValueError: in case of invalid arguments.
         """
-        return super(sentence_transformer_deepkt, self).evaluate(dataset,
+        return super(BERTopic_DKTModel, self).evaluate(dataset,
                                                                verbose=verbose,
                                                                steps=steps,
                                                                callbacks=callbacks)

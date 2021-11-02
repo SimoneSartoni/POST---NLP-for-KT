@@ -1,20 +1,16 @@
-import gc
-
-import pandas as pd
 import tensorflow as tf
 import numpy as np
-from Knowledge_Tracing.code.data_processing.dataset import dataset as dt
-from Knowledge_Tracing.code.evaluation.predictors.logistic_regression import logistic_regressor
-from Knowledge_Tracing.code.models.count_vectorizer.count_vectorizer import count_vectorizer
 from Knowledge_Tracing.code.data_processing.get_data_assistments_2012 import get_data_assistments_2012
 from Knowledge_Tracing.code.data_processing.get_data_assistments_2009 import get_data_assistments_2009
+from code.models.encoding_models.BERTopic_model import BERTopic_model
 
 MASK_VALUE = -1.0  # The masking value cannot be zero.
 
 
-def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
+def load_dataset_NLP_skills(batch_size=32, shuffle=True, dataset_name='assistment_2012',
                  interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
                                        ".csv",
+                 encoding_model='all-mpnet-base-v2',
                  save_filepath='/kaggle/working/', texts_filepath='../input/', min_df=2, max_df=1.0,
                  min_questions=2, max_features=1000, max_questions=25, n_rows=None, n_texts=None,
                  personal_cleaning=True):
@@ -22,24 +18,19 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         df, text_df = get_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
                                                 interactions_filepath=interactions_filepath,
                                                 texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
-                                                make_sentences_flag=False, personal_cleaning=personal_cleaning)
+                                                make_sentences_flag=True, personal_cleaning=personal_cleaning)
     elif dataset_name == 'assistment_2009':
         df, text_df = get_data_assistments_2009(min_questions=min_questions, max_questions=max_questions,
                                                 interactions_filepath=interactions_filepath,
                                                 texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
-                                                make_sentences_flag=False, personal_cleaning=personal_cleaning, )
+                                                make_sentences_flag=True, personal_cleaning=personal_cleaning, )
 
     print(df)
     df = df[['user_id', 'problem_id', 'correct']]
     print(df)
     # Step 3.1 - Generate NLP extracted encoding for problems
-    encode_model = count_vectorizer(min_df=min_df, max_df=max_df, binary=False, max_features=max_features)
+    encode_model = BERTopic_model()
     encode_model.fit(text_df, save_filepath)
-
-    max_value = encode_model.words_num
-    del text_df
-    gc.collect()
-    print("number of words is: " + str(max_value))
 
     def generate_encodings():
         for name, group in df.groupby('user_id'):
@@ -71,6 +62,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         output_types=types,
         output_shapes=shapes
     )
+
     nb_users = len(df.groupby('user_id'))
     if shuffle:
         dataset = dataset.shuffle(buffer_size=nb_users)

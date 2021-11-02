@@ -2,8 +2,7 @@ import pandas as pd
 import tensorflow as tf
 import numpy as np
 from Knowledge_Tracing.code.data_processing.dataset import dataset as dt
-from Knowledge_Tracing.code.evaluation.predictors.logistic_regression import logistic_regressor
-from Knowledge_Tracing.code.models.gensim_model.gensim_pretrained_word2vec import pretrained_word2vec
+from code.models.encoding_models.gensim_model import pretrained_word2vec
 
 MASK_VALUE = -1.  # The masking value cannot be zero.
 

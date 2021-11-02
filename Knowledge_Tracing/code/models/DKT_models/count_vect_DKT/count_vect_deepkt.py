@@ -1,6 +1,6 @@
 from tensorflow.keras import Model, Input, layers, losses
 
-from Knowledge_Tracing.code.models.count_vect_DKT_from_clean_datasets.data_utils import get_target as NLP_get_target
+from code.models.DKT_models.count_vect_DKT.data_utils import get_target as NLP_get_target
 
 
 class clean_count_vect_DKTModel(Model):

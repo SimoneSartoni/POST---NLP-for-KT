@@ -1,13 +1,11 @@
-import numpy as np
-import tensorflow as tf
+from tensorflow.keras import Model, Input, layers, losses
 
-from Knowledge_Tracing.code.models.DKT.data_utils import *
+from code.models.DKT_models.count_vect_plus_skills_DKT.data_utils import get_target as NLP_get_target
 
 
-class DKTModel(tf.keras.Model):
+class count_vect_plus_skill_DKTModel(Model):
     """ The Deep Knowledge Tracing model.
     Arguments in __init__:
-        nb_features: The number of features in the input.
         nb_skills: The number of skills in the dataset.
         hidden_units: Positive integer. The number of units of the LSTM layer.
         dropout_rate: Float between 0 and 1. Fraction of the units to drop.
@@ -16,21 +14,38 @@ class DKTModel(tf.keras.Model):
             and what the model expects.
     """
 
-    def __init__(self, nb_features, nb_skills, hidden_units=100, dropout_rate=0.2):
-        inputs = tf.keras.Input(shape=(None, nb_features), name='inputs')
+    def __init__(self, nb_encodings, nb_skills, hidden_units=100, dropout_rate=0.2):
+        input_encodings = Input(shape=[None, nb_encodings], name='input_encodings')
+        input_labels = Input(shape=[None, 1], name='input_labels')
+        input_skills = Input(shape=[None, nb_skills], name='input_skills')
 
-        x = tf.keras.layers.Masking(mask_value=MASK_VALUE)(inputs)
+        mask_encodings = layers.Masking(mask_value=-1.0)(input_encodings)
+        mask_labels = layers.Masking(mask_value=-1.0)(input_labels)
+        mask_skills = layers.Masking(mask_value=-1.0)(input_skills)
+        mask_encodings_labels = layers.concatenate([mask_encodings, mask_labels], axis=-1)
+        mask_skills_labels = layers.concatenate([mask_skills, mask_labels], axis=-1)
 
-        x = tf.keras.layers.LSTM(hidden_units,
-                                 return_sequences=True,
-                                 dropout=dropout_rate)(x)
+        lstm_encodings = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_encodings_labels)
+        lstm_skill = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_skills_labels)
+        lstm = layers.concatenate([lstm_encodings, lstm_skill])
 
-        dense = tf.keras.layers.Dense(nb_skills, activation='sigmoid')
-        outputs = tf.keras.layers.TimeDistributed(dense, name='outputs')(x)
+        dense_encodings = layers.Dense(nb_encodings, activation='sigmoid')
+        dense_skills = layers.Dense(nb_skills, activation='sigmoid')
 
-        super(DKTModel, self).__init__(inputs=inputs,
-                                       outputs=outputs,
-                                       name="DKTModel")
+        output_encodings = layers.TimeDistributed(dense_encodings, name='output_encodings')(lstm)
+        output_skills = layers.TimeDistributed(dense_skills, name='output_skills')(lstm)
+        outputs_encodings_skills = layers.concatenate([output_encodings, output_skills])
+
+        dense_label = layers.Dense(1, activation='sigmoid')
+
+        output_label = layers.TimeDistributed(dense_label, name='output_class')(outputs_encodings_skills)
+        outputs = layers.concatenate([outputs_encodings_skills, output_label])
+
+        super(count_vect_plus_skill_DKTModel, self).__init__(inputs=[input_encodings, input_skills, input_labels],
+                                                             outputs=outputs,
+                                                             name="count_vect_plus_skill_DKTModel")
+        self.nb_encodings = nb_encodings
+        self.nb_skills = nb_skills
 
     def compile(self, optimizer, metrics=None):
         """Configures the model for training.
@@ -51,10 +66,10 @@ class DKTModel(tf.keras.Model):
         """
 
         def custom_loss(y_true, y_pred):
-            y_true, y_pred = get_target(y_true, y_pred)
-            return tf.keras.losses.binary_crossentropy(y_true, y_pred)
+            y_true, y_pred = NLP_get_target(y_true, y_pred, nb_encodings=self.nb_encodings, nb_skills=self.nb_skills)
+            return losses.binary_crossentropy(y_true, y_pred)
 
-        super(DKTModel, self).compile(
+        super(count_vect_plus_skill_DKTModel, self).compile(
             loss=custom_loss,
             optimizer=optimizer,
             metrics=metrics,
@@ -74,7 +89,7 @@ class DKTModel(tf.keras.Model):
         """Trains the model for a fixed number of epochs (iterations on a dataset).
         Arguments:
             dataset: A `tf.data` dataset. Should return a tuple
-                of `(inputs, (skills, targets))`.
+                of `(inputs, outputs)`.
             epochs: Integer. Number of epochs to train the model.
                 An epoch is an iteration over the entire data provided.
                 Note that in conjunction with `initial_epoch`,
@@ -129,16 +144,16 @@ class DKTModel(tf.keras.Model):
             ValueError: In case of mismatch between the provided input data
                 and what the model expects.
         """
-        return super(DKTModel, self).fit(x=dataset,
-                                         epochs=epochs,
-                                         verbose=verbose,
-                                         callbacks=callbacks,
-                                         validation_data=validation_data,
-                                         shuffle=shuffle,
-                                         initial_epoch=initial_epoch,
-                                         steps_per_epoch=steps_per_epoch,
-                                         validation_steps=validation_steps,
-                                         validation_freq=validation_freq)
+        return super(count_vect_plus_skill_DKTModel, self).fit(x=dataset,
+                                                               epochs=epochs,
+                                                               verbose=verbose,
+                                                               callbacks=callbacks,
+                                                               validation_data=validation_data,
+                                                               shuffle=shuffle,
+                                                               initial_epoch=initial_epoch,
+                                                               steps_per_epoch=steps_per_epoch,
+                                                               validation_steps=validation_steps,
+                                                               validation_freq=validation_freq)
 
     def custom_evaluate(self,
                         dataset,
@@ -170,10 +185,10 @@ class DKTModel(tf.keras.Model):
         Raises:
             ValueError: in case of invalid arguments.
         """
-        return super(DKTModel, self).evaluate(dataset,
-                                              verbose=verbose,
-                                              steps=steps,
-                                              callbacks=callbacks)
+        return super(count_vect_plus_skill_DKTModel, self).evaluate(dataset,
+                                                                    verbose=verbose,
+                                                                    steps=steps,
+                                                                    callbacks=callbacks)
 
     def evaluate_generator(self, *args, **kwargs):
         raise SyntaxError("Not supported")
