@@ -1,9 +1,9 @@
 from tensorflow.keras import Model, Input, layers, losses
 
-from Knowledge_Tracing.code.models.DKT_NLPforSkills.data_utils import get_target as NLP_get_target
+from Knowledge_Tracing.code.models.count_vect_plus_skills_DKT.data_utils import get_target as NLP_get_target
 
 
-class NLP_DKTModel(Model):
+class count_vect_plus_skill_DKTModel(Model):
     """ The Deep Knowledge Tracing model.
     Arguments in __init__:
         nb_skills: The number of skills in the dataset.
@@ -14,35 +14,38 @@ class NLP_DKTModel(Model):
             and what the model expects.
     """
 
-    def __init__(self, nb_features, nb_encodings, hidden_units=100, dropout_rate=0.2):
-        input_encoding_correct = Input(shape=[None, nb_encodings], name='input_encoding_correct')
-        input_encoding_wrong = Input(shape=[None, nb_encodings], name='input_encoding_wrong')
-        input_features = Input(shape=[None, nb_features], name='input_feature')
+    def __init__(self, nb_encodings, nb_skills, hidden_units=100, dropout_rate=0.2):
+        input_encodings = Input(shape=[None, nb_encodings], name='input_encodings')
+        input_labels = Input(shape=[None, 1], name='input_labels')
+        input_skills = Input(shape=[None, nb_skills], name='input_skills')
 
-        mask_encoding_correct = layers.Masking(mask_value=-1.0)(input_encoding_correct)
-        mask_encoding_wrong = layers.Masking(mask_value=-1.0)(input_encoding_wrong)
-        mask_features = layers.Masking(mask_value=-1.0)(input_features)
+        mask_encodings = layers.Masking(mask_value=-1.0)(input_encodings)
+        mask_labels = layers.Masking(mask_value=-1.0)(input_labels)
+        mask_skills = layers.Masking(mask_value=-1.0)(input_skills)
+        mask_encodings_labels = layers.concatenate([mask_encodings, mask_labels], axis=-1)
+        mask_skills_labels = layers.concatenate([mask_skills, mask_labels], axis=-1)
 
-        mask = layers.concatenate([mask_encoding_correct, mask_encoding_wrong, mask_features], axis=2)
-        lstm = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask)
+        lstm_encodings = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_encodings_labels)
+        lstm_skill = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_skills_labels)
+        lstm = layers.concatenate([lstm_encodings, lstm_skill])
 
-        dense_encodings_correct = layers.Dense(nb_encodings, activation='sigmoid')
-        dense_encodings_wrong = layers.Dense(nb_encodings, activation='sigmoid')
-        dense_features = layers.Dense(nb_features, activation='sigmoid')
-        output_encodings_correct = layers.TimeDistributed(dense_encodings_correct, name='output_encodings_correct')(lstm)
-        output_encodings_wrong = layers.TimeDistributed(dense_encodings_wrong, name='output_encodings_wrong')(lstm)
-        output_feature = layers.TimeDistributed(dense_features, name='output_feature')(lstm)
-        outputs = layers.concatenate([output_encodings_correct, output_encodings_wrong, output_feature])
-        dense_class = layers.Dense(1, activation='sigmoid')
-        output_class = layers.TimeDistributed(dense_class, name='output_class')(outputs)
-        outputs_with_class = layers.concatenate([output_encodings_correct, output_encodings_wrong, output_feature,
-                                                 output_class])
+        dense_encodings = layers.Dense(nb_encodings, activation='sigmoid')
+        dense_skills = layers.Dense(nb_skills, activation='sigmoid')
 
-        super(NLP_DKTModel, self).__init__(inputs=[input_encoding_correct, input_encoding_wrong, input_features],
-                                           outputs=outputs_with_class,
-                                           name="DKT_NLP_Model")
+        output_encodings = layers.TimeDistributed(dense_encodings, name='output_encodings')(lstm)
+        output_skills = layers.TimeDistributed(dense_skills, name='output_skills')(lstm)
+        outputs_encodings_skills = layers.concatenate([output_encodings, output_skills])
+
+        dense_label = layers.Dense(1, activation='sigmoid')
+
+        output_label = layers.TimeDistributed(dense_label, name='output_class')(outputs_encodings_skills)
+        outputs = layers.concatenate([outputs_encodings_skills, output_label])
+
+        super(count_vect_plus_skill_DKTModel, self).__init__(inputs=[input_encodings, input_skills, input_labels],
+                                                             outputs=outputs,
+                                                             name="count_vect_plus_skill_DKTModel")
         self.nb_encodings = nb_encodings
-        self.nb_features = nb_features
+        self.nb_skills = nb_skills
 
     def compile(self, optimizer, metrics=None):
         """Configures the model for training.
@@ -63,10 +66,10 @@ class NLP_DKTModel(Model):
         """
 
         def custom_loss(y_true, y_pred):
-            y_true, y_pred = NLP_get_target(y_true, y_pred, nb_encodings=self.nb_encodings, nb_features=self.nb_features)
+            y_true, y_pred = NLP_get_target(y_true, y_pred, nb_encodings=self.nb_encodings, nb_skills=self.nb_skills)
             return losses.binary_crossentropy(y_true, y_pred)
 
-        super(NLP_DKTModel, self).compile(
+        super(count_vect_plus_skill_DKTModel, self).compile(
             loss=custom_loss,
             optimizer=optimizer,
             metrics=metrics,
@@ -141,16 +144,16 @@ class NLP_DKTModel(Model):
             ValueError: In case of mismatch between the provided input data
                 and what the model expects.
         """
-        return super(NLP_DKTModel, self).fit(x=dataset,
-                                             epochs=epochs,
-                                             verbose=verbose,
-                                             callbacks=callbacks,
-                                             validation_data=validation_data,
-                                             shuffle=shuffle,
-                                             initial_epoch=initial_epoch,
-                                             steps_per_epoch=steps_per_epoch,
-                                             validation_steps=validation_steps,
-                                             validation_freq=validation_freq)
+        return super(count_vect_plus_skill_DKTModel, self).fit(x=dataset,
+                                                               epochs=epochs,
+                                                               verbose=verbose,
+                                                               callbacks=callbacks,
+                                                               validation_data=validation_data,
+                                                               shuffle=shuffle,
+                                                               initial_epoch=initial_epoch,
+                                                               steps_per_epoch=steps_per_epoch,
+                                                               validation_steps=validation_steps,
+                                                               validation_freq=validation_freq)
 
     def custom_evaluate(self,
                         dataset,
@@ -182,10 +185,10 @@ class NLP_DKTModel(Model):
         Raises:
             ValueError: in case of invalid arguments.
         """
-        return super(NLP_DKTModel, self).evaluate(dataset,
-                                                  verbose=verbose,
-                                                  steps=steps,
-                                                  callbacks=callbacks)
+        return super(count_vect_plus_skill_DKTModel, self).evaluate(dataset,
+                                                                    verbose=verbose,
+                                                                    steps=steps,
+                                                                    callbacks=callbacks)
 
     def evaluate_generator(self, *args, **kwargs):
         raise SyntaxError("Not supported")
