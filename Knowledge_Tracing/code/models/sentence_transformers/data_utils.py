@@ -17,12 +17,12 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         df, text_df = get_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
                                                 interactions_filepath=interactions_filepath,
                                                 texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
-                                                make_sentences_flag=False, personal_cleaning=personal_cleaning)
+                                                make_sentences_flag=True, personal_cleaning=personal_cleaning)
     elif dataset_name == 'assistment_2009':
         df, text_df = get_data_assistments_2009(min_questions=min_questions, max_questions=max_questions,
                                                 interactions_filepath=interactions_filepath,
                                                 texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
-                                                make_sentences_flag=False, personal_cleaning=personal_cleaning,)
+                                                make_sentences_flag=True, personal_cleaning=personal_cleaning,)
 
 
     print(df)
