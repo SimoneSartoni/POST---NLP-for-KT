@@ -2,55 +2,54 @@ import pandas as pd
 import tensorflow as tf
 import numpy as np
 from Knowledge_Tracing.code.data_processing.get_data_assistments_2012 import get_data_assistments_2012
+from Knowledge_Tracing.code.data_processing.get_data_assistments_2009 import get_data_assistments_2009
 from Knowledge_Tracing.code.models.BERTTopic.BERTopic_model import BERTopic_model
 
 MASK_VALUE = -1.0  # The masking value cannot be zero.
 
 
-def load_dataset_NLP_skills(batch_size=32, shuffle=True,
-                            interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
-                                                  ".csv",
-                            save_filepath='/kaggle/working/', texts_filepath='../input/', min_df=2, max_df=1.0,
-                            min_questions=2, max_features=1000, max_questions=25, n_rows=None):
-
-    df, loaded_dataset = get_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
-                                                   interactions_filepath=interactions_filepath,
-                                                   texts_filepath=texts_filepath, n_rows=n_rows)
+def load_dataset_NLP_skills(batch_size=32, shuffle=True, dataset_name='assistment_2012',
+                 interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
+                                       ".csv",
+                 encoding_model='all-mpnet-base-v2',
+                 save_filepath='/kaggle/working/', texts_filepath='../input/', min_df=2, max_df=1.0,
+                 min_questions=2, max_features=1000, max_questions=25, n_rows=None, n_texts=None,
+                 personal_cleaning=True):
+    if dataset_name == 'assistment_2012':
+        df, text_df = get_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
+                                                interactions_filepath=interactions_filepath,
+                                                texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
+                                                make_sentences_flag=True, personal_cleaning=personal_cleaning)
+    elif dataset_name == 'assistment_2009':
+        df, text_df = get_data_assistments_2009(min_questions=min_questions, max_questions=max_questions,
+                                                interactions_filepath=interactions_filepath,
+                                                texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
+                                                make_sentences_flag=True, personal_cleaning=personal_cleaning, )
 
     print(df)
     df = df[['user_id', 'problem_id', 'correct']]
     print(df)
     # Step 3.1 - Generate NLP extracted encoding for problems
     encode_model = BERTopic_model()
-    encode_model.fit(loaded_dataset.problems_with_text_known_list, loaded_dataset.problem_id_to_index,
-                     loaded_dataset.texts_list, save_filepath)
+    encode_model.fit(text_df, save_filepath)
 
-    def generate_encodings(problems, corrects, lengths):
-        document_to_term = []
-        labels = np.array([], dtype=np.int)
-        for index in range(0, lengths):
-            encoding = encode_model.get_encoding(problems[index])
-            encoding = np.expand_dims(encoding, axis=0)
-            document_to_term.append(encoding)
-            labels = np.append(labels, corrects[index])
-        document_to_term = np.concatenate(document_to_term, axis=0)
-        i_doc = document_to_term[:-1]
-        o_doc = document_to_term[1:]
-        i_label = labels[:-1]
-        o_label = labels[1:]
-        inputs = (i_doc, i_label)
-        outputs = (o_doc, o_label)
-        return inputs, outputs
-
-    seq = df.groupby('user_id').apply(
-        lambda r: (
-            generate_encodings(
-                r['problem_id'].values,
-                r['correct'].values,
-                len(r['problem_id'])
-            )
-        )
-    )
+    def generate_encodings():
+        for name, group in df.groupby('user_id'):
+            document_to_term = []
+            labels = np.array([], dtype=np.int)
+            for problem, label in list(zip(group['problem_id'].values, group['correct'].values)):
+                encoding = encode_model.get_encoding(problem)
+                encoding = np.expand_dims(encoding, axis=0)
+                document_to_term.append(encoding)
+                labels = np.append(labels, label)
+            document_to_term = np.concatenate(document_to_term, axis=0)
+            i_doc = document_to_term[:-1]
+            o_doc = document_to_term[1:]
+            i_label = labels[:-1]
+            o_label = labels[1:]
+            inputs = (i_doc, i_label)
+            outputs = (o_doc, o_label)
+            yield inputs, outputs
 
     encoding_depth = encode_model.vector_size
 
@@ -58,14 +57,14 @@ def load_dataset_NLP_skills(batch_size=32, shuffle=True,
              (tf.float32, tf.float32))
     shapes = (([None, encode_model.vector_size], [None]),
               ([None, encode_model.vector_size], [None]))
-
     # Step 5 - Get Tensorflow Dataset
     dataset = tf.data.Dataset.from_generator(
-        generator=lambda: seq,
+        generator=generate_encodings,
         output_types=types,
         output_shapes=shapes
     )
-    nb_users = len(seq)
+
+    nb_users = len(df.groupby('user_id'))
     if shuffle:
         dataset = dataset.shuffle(buffer_size=nb_users)
 
