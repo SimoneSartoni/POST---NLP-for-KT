@@ -3,13 +3,10 @@ import numpy as np
 import os
 import scipy
 from scipy import sparse as sps
-from sentence_transformers import SentenceTransformer
 from Knowledge_Tracing.code.Similarity.Compute_Similarity import Compute_Similarity
 
-from sklearn.feature_extraction.text import CountVectorizer
 from Knowledge_Tracing.code.models.base_model import base_model
 from bertopic import BERTopic
-import hdbscan
 
 
 def write_txt(file, data):
@@ -23,7 +20,7 @@ def identity_tokenizer(text):
 
 
 class BERTopic_model(base_model):
-    def __init__(self, n_neighbors=15, n_components=5, metric='cosine', min_cluster_size=15, metric='euclidean',
+    def __init__(self, n_neighbors=15, n_components=5, min_cluster_size=15, metric='euclidean',
                  cluster_selection_method='eom'):
         super().__init__("sentence_transformers", "NLP")
         """self.sentence_transformer = SentenceTransformer('bert-large-nli-mean-tokens')
@@ -71,7 +68,6 @@ class BERTopic_model(base_model):
 
         self.pro_num = self.vectors.shape[0]
         self.words_num = self.vectors.shape[1]
-
 
     def write_words_unique(self, data_folder):
         write_txt(os.path.join(data_folder, 'words_set.txt'), self.words_unique)
@@ -122,39 +118,13 @@ class BERTopic_model(base_model):
             return [0.0], [0.0]
         return item_scores, correct_ids
 
-    def compute_encoding(self, input_problems, corrects, target_problem):
-        pos_mean_encoding = np.zeros(shape=self.words_num, dtype=np.float)
-        neg_mean_encoding = np.zeros(shape=self.words_num, dtype=np.float)
-        pos, neg = 0.0, 0.0
-        for p, c in list(zip(input_problems, corrects)):
-            if p in self.problem_id_to_index.keys():
-                # and p not in unique_problems_set:
-                # unique_problems_set.add(p)
-                problem = self.problem_id_to_index[p]
-                x = np.array(self.vectors[problem])
-                if c > 0.0:
-                    pos += 1.0
-                    pos_mean_encoding = pos_mean_encoding + x
-                else:
-                    neg += 1.0
-                    neg_mean_encoding = neg_mean_encoding + x
-        if pos > 0.0:
-            pos_mean_encoding = pos_mean_encoding / pos
-        if neg > 0.0:
-            neg_mean_encoding = neg_mean_encoding / neg
-        target_encoding = np.zeros(shape=self.words_num, dtype=np.float)
-        if target_problem in self.problem_id_to_index.keys():
-            x = np.array(self.vectors[self.problem_id_to_index[target_problem]])
-            target_encoding = target_encoding + x
-        encoding = np.concatenate((pos_mean_encoding, neg_mean_encoding, target_encoding), axis=0)
-        return encoding
-
     def get_encoding(self, problem):
         index = self.problem_id_to_index[problem]
         encoding = np.array(self.vectors[index])
         return encoding
 
     def get_serializable_params(self):
-        return {"min_df": self.min_df, "max_df": self.max_df, "binary":self.binary, "name": self.name, "topK": self.topK,
+        return {"min_df": self.min_df, "max_df": self.max_df, "binary": self.binary, "name": self.name,
+                "topK": self.topK,
                 "shrink": self.shrink, "normalize": self.normalize,
                 "similarity": self.similarity}
