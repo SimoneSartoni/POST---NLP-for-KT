@@ -1,6 +1,6 @@
 from tensorflow.keras import Model, Input, layers, losses
 
-from code.models.DKT_models.complete_DKT.data_utils import get_target as NLP_get_target
+from Knowledge_Tracing.code.models.DKT_models.complete_DKT.data_utils import get_target as NLP_get_target
 
 
 class complete_DKTModel(Model):

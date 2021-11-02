@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 from Knowledge_Tracing.code.data_processing.get_data_assistments_2012 import get_data_assistments_2012
 from Knowledge_Tracing.code.data_processing.get_data_assistments_2009 import get_data_assistments_2009
-from code.models.encoding_models.BERTopic_model import BERTopic_model
+from Knowledge_Tracing.code.models.encoding_models.BERTopic_model import BERTopic_model
 
 MASK_VALUE = -1.0  # The masking value cannot be zero.
 
