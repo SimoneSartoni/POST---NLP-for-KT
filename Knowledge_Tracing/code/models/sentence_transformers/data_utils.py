@@ -12,7 +12,8 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
                                        ".csv",
                  encoding_model='all-mpnet-base-v2',
                  save_filepath='/kaggle/working/', texts_filepath='../input/', min_df=2, max_df=1.0,
-                 min_questions=2, max_features=1000, max_questions=25, n_rows=None, n_texts=None, personal_cleaning=True):
+                 min_questions=2, max_features=1000, max_questions=25, n_rows=None, n_texts=None,
+                 personal_cleaning=True):
     if dataset_name == 'assistment_2012':
         df, text_df = get_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
                                                 interactions_filepath=interactions_filepath,
@@ -22,8 +23,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         df, text_df = get_data_assistments_2009(min_questions=min_questions, max_questions=max_questions,
                                                 interactions_filepath=interactions_filepath,
                                                 texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
-                                                make_sentences_flag=True, personal_cleaning=personal_cleaning,)
-
+                                                make_sentences_flag=True, personal_cleaning=personal_cleaning, )
 
     print(df)
     df = df[['user_id', 'problem_id', 'correct']]
@@ -33,6 +33,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
     encode_model.fit(text_df, save_filepath)
 
     print(encode_model.get_encoding())
+
     def generate_encodings(problems, corrects, lengths):
         document_to_term = []
         labels = np.array([], dtype=np.int)

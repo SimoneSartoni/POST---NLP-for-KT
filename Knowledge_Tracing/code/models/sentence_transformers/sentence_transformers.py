@@ -48,7 +48,7 @@ class sentence_transformer(base_model):
             self.problem_id_to_index[p] = index
             self.texts.append(text)
             index += 1
-        self.vectors = self.sentence_transformer.encode(sentences=texts_df['body'], show_progress_bar=True)
+        self.vectors = self.sentence_transformer.encode(sentences=self.texts, show_progress_bar=True)
 
         # Save sparse matrix in current directory
         self.vector_size = self.vectors.shape[1]
