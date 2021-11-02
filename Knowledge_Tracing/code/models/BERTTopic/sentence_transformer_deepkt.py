@@ -1,6 +1,6 @@
 from tensorflow.keras import Model, Input, layers, losses
 
-from Knowledge_Tracing.code.models.sentence_transformers.data_utils import get_target as NLP_get_target
+from Knowledge_Tracing.code.models.BERTTopic.data_utils import get_target as NLP_get_target
 
 
 class sentence_transformer_deepkt(Model):

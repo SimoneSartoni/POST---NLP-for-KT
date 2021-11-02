@@ -1,6 +1,6 @@
 
 
-from Knowledge_Tracing.code.models.sentence_transformers.data_utils import *
+from Knowledge_Tracing.code.models.BERTTopic.data_utils import *
 
 
 class BinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
