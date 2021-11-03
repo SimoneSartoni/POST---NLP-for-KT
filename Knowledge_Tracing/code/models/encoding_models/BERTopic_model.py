@@ -62,13 +62,10 @@ class BERTopic_model(base_model):
         self.topic_model = self.bert_topic.fit(self.texts)
         print("topic model created")
         self.words_num = len(self.topic_model.get_topic_freq())
-        print(self.topic_model.transform(self.texts[0]))
-        # Save sparse matrix in current directory
+        self.topics, self.probabilities = self.topic_model.transform(self.texts)
 
-        sps.save_npz(os.path.join(save_filepath, '../pro_words.npz'), self.vectors)
-
-        self.pro_num = self.vectors.shape[0]
-        self.words_num = self.vectors.shape[1]
+        self.vector_size = self.words_num
+        self.pro_num = len(self.texts)
 
     def write_words_unique(self, data_folder):
         write_txt(os.path.join(data_folder, 'words_set.txt'), self.words_unique)
@@ -121,7 +118,7 @@ class BERTopic_model(base_model):
 
     def get_encoding(self, problem):
         index = self.problem_id_to_index[problem]
-        encoding = np.array(self.vectors[index])
+        encoding = np.array(self.probabilities[index])
         return encoding
 
     def get_serializable_params(self):
