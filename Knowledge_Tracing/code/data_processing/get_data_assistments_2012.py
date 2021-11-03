@@ -1,18 +1,9 @@
-import os
 from datetime import datetime
 
 import numpy as np
 import pandas as pd
-import psutil
-import gc
-from sklearn.metrics import roc_auc_score, accuracy_score
-
-from torch.nn.utils.rnn import pad_sequence
-
-import torch
 
 from Knowledge_Tracing.code.utils.utils import try_parsing_date
-from Knowledge_Tracing.code.data_processing.dataset import dataset as dt
 from Knowledge_Tracing.code.data_processing.get_assistments_texts import get_assistments_texts
 
 
