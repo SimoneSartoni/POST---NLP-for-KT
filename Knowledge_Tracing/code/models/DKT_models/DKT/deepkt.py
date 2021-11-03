@@ -1,4 +1,4 @@
-from code.models.DKT_models.DKT.data_utils import *
+from Knowledge_Tracing.code.models.DKT_models.DKT.data_utils import *
 
 
 class DKTModel(tf.keras.Model):
