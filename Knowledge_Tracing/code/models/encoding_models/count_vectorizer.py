@@ -48,28 +48,21 @@ class count_vectorizer(base_model):
         self.vectors = None
         self.problem_id_to_index = {}
         self.problem_ids = None
-        self.texts = None
+        self.texts_df = None
         self.vector_size = 0
 
     def fit(self, texts_df, save_filepath='./'):
-        self.problem_ids = texts_df['problem_id']
-        self.texts = []
-        index = 0
-        for p, text in list(zip(texts_df['problem_id'], texts_df['body'])):
-            self.problem_id_to_index[p] = index
-            self.texts.append(text)
-            index += 1
-        tfidf_vectorizer_vectors = self.count_vectorizer.fit_transform(self.texts)
-        self.vectors = tfidf_vectorizer_vectors
+        self.texts_df = texts_df['problem_id']
+        self.count_vectorizer = self.count_vectorizer.fit(self.texts_df['body'])
 
         self.words_unique = self.count_vectorizer.get_feature_names()
         # Save sparse matrix in current directory
-        self.vector_size = self.vectors.shape[1]
+        self.vector_size = self.count_vectorizer.vector_size
 
         sps.save_npz(os.path.join(save_filepath, '../pro_words.npz'), self.vectors)
 
-        self.pro_num = self.vectors.shape[0]
-        self.words_num = self.vectors.shape[1]
+        self.pro_num = self.count_vectorizer.pro_num
+        self.words_num = self.count_vectorizer.words_num
 
     def write_words_unique(self, data_folder):
         write_txt(os.path.join(data_folder, 'words_set.txt'), self.words_unique)
@@ -148,8 +141,8 @@ class count_vectorizer(base_model):
         return encoding
 
     def get_encoding(self, problem):
-        index = self.problem_id_to_index[problem]
-        encoding = np.array(self.vectors.getrow(index).todense()).squeeze()
+        row = self.texts_df.loc[self.texts_df['problem_id']==problem]
+        encoding = np.array(self.count_vectorizer.transform(row['body']).todense()).squeeze()
         return encoding
 
     def get_serializable_params(self):
