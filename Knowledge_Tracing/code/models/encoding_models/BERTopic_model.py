@@ -52,20 +52,11 @@ class BERTopic_model(base_model):
         self.vector_size = 0
 
     def fit(self, texts_df, save_filepath='./'):
-        self.problem_ids = texts_df['problem_id'].values
-        self.texts = []
-        index = 0
-        for p, text in list(zip(texts_df['problem_id'], texts_df['body'])):
-            self.problem_id_to_index[p] = index
-            self.texts.append(text)
-            index += 1
-        self.topic_model = self.bert_topic.fit(self.texts)
+        self.texts_df = texts_df
+        self.topic_model = self.bert_topic.fit(self.texts_df['body'])
         print("topic model created")
         self.words_num = len(self.topic_model.get_topic_freq())
-        self.topics, self.probabilities = self.topic_model.transform(self.texts)
-        print(self.vector_size)
-        print(len(self.probabilities[0]))
-        print(self.probabilities)
+        self.topics, self.probabilities = self.topic_model.transform(self.texts[0])
         self.vector_size = len(self.probabilities[0])
         self.pro_num = len(self.texts)
 
@@ -119,8 +110,8 @@ class BERTopic_model(base_model):
         return item_scores, correct_ids
 
     def get_encoding(self, problem):
-        index = self.problem_id_to_index[problem]
-        encoding = np.array(self.probabilities[index])
+        row = self.texts_df.loc[self.texts_df['problem_id'] == problem]
+        encoding = np.array(self.topic_model.transform(row['body']))
         return encoding
 
     def get_serializable_params(self):
