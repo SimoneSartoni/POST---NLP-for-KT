@@ -8,6 +8,8 @@ import numpy as np
 from scipy import sparse
 
 from Knowledge_Tracing.code.data_processing.get_data_assistments_2012 import get_data_assistments_2012
+from Knowledge_Tracing.code.data_processing.get_data_assistments_2009 import get_data_assistments_2009
+
 
 class DataProcess:
     def __init__(self, data_folder='./', output_folder='./', file_name='skill_builder_data_corrected_collapsed.csv',
@@ -19,10 +21,13 @@ class DataProcess:
         self.output_folder = output_folder
         self.dataset_name = dataset_name
 
-    def process_csv(self):
+    def process_csv(self, dataset_name='assistment_2012'):
         # pre-process original csv file for assist dataset
         data_path = os.path.join(self.data_folder, self.file_name)
-        df = get_data_assistments_2012(interactions_filepath=data_path)
+        if dataset_name=='assistment_2012':
+            df = get_data_assistments_2012(interactions_filepath=data_path)
+        elif dataset_name=='assistment_2009':
+            df = get_data_assistments_2009(interactions_filepath=data_path)
         df.to_csv(os.path.join(self.output_folder, '%s_processed.csv' % self.file_name))
 
     def pro_skill_graph(self):
