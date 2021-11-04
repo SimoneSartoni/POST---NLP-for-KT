@@ -56,8 +56,7 @@ class count_vectorizer(base_model):
         self.count_vectorizer = self.count_vectorizer.fit(self.texts_df['body'])
 
         # Save sparse matrix in current directory
-        print(self.count_vectorizer.transform(self.texts_df['body'][0]))
-        self.vector_size = self.count_vectorizer.transform(self.texts_df['body'][0]).shape[1]
+        self.vector_size = self.count_vectorizer.transform(self.texts_df['body']).shape[1]
 
         self.pro_num = len(self.texts_df['problem_id'])
         self.words_num = self.vector_size
