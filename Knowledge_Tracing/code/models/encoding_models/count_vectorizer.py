@@ -55,14 +55,13 @@ class count_vectorizer(base_model):
         self.texts_df = texts_df
         self.count_vectorizer = self.count_vectorizer.fit(self.texts_df['body'])
 
-        self.words_unique = self.count_vectorizer.get_feature_names()
+        self.words_unique = self.count_vectorizer.get_feature_names_out()
         # Save sparse matrix in current directory
-        self.vector_size = self.count_vectorizer.vector_size
+        print(self.count_vectorizer.transform(self.texts_df['body'][0]))
+        self.vector_size = len(self.count_vectorizer.transform(self.texts_df['body'][0]))
 
-        sps.save_npz(os.path.join(save_filepath, '../pro_words.npz'), self.vectors)
-
-        self.pro_num = self.count_vectorizer.pro_num
-        self.words_num = self.count_vectorizer.words_num
+        self.pro_num = len(self.texts_df['problem_id'])
+        self.words_num = self.vector_size
 
     def write_words_unique(self, data_folder):
         write_txt(os.path.join(data_folder, 'words_set.txt'), self.words_unique)
