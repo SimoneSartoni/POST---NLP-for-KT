@@ -11,10 +11,6 @@ from datetime import datetime
 
 from Knowledge_Tracing.code.models.RKT.dataset import Dataset
 
-start = torch.cuda.Event(enable_timing=True)
-end = torch.cuda.Event(enable_timing=True)
-
-print(torch.cuda.is_available())
 dt = datetime.utcnow()
 
 
