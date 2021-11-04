@@ -1,7 +1,7 @@
 # Passages needed to recompute pro_pro_skills
 # Initially I will use file with the ones already computed by RKT authors
 # In the future I will modify the code and try to compute better ones.
-
+import gc
 import os
 import pandas as pd
 import numpy as np
@@ -21,13 +21,17 @@ class DataProcess:
         self.output_folder = output_folder
         self.dataset_name = dataset_name
 
-    def process_csv(self, dataset_name='assistment_2012'):
+    def process_csv(self, dataset_name='assistment_2012', texts_filepath = "../input/assistments-texts/ASSISTments2012DataSet-ProblemBodies.csv"):
         # pre-process original csv file for assist dataset
         data_path = os.path.join(self.data_folder, self.file_name)
-        if dataset_name=='assistment_2012':
-            df = get_data_assistments_2012(interactions_filepath=data_path)
-        elif dataset_name=='assistment_2009':
-            df = get_data_assistments_2009(interactions_filepath=data_path)
+        if dataset_name == 'assistment_2012':
+            df = get_data_assistments_2012(interactions_filepath=data_path, max_questions=30,
+                                           make_sentences_flag=False, texts_filepath=texts_filepath)
+        elif dataset_name == 'assistment_2009':
+            df, text_df = get_data_assistments_2009(interactions_filepath=data_path, max_questions=30,
+                                                    make_sentences_flag=False, texts_filepath=texts_filepath)
+        del text_df
+        gc.collect()
         df.to_csv(os.path.join(self.output_folder, '%s_processed.csv' % self.file_name))
 
     def pro_skill_graph(self):
