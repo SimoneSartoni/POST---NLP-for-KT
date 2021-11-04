@@ -24,6 +24,7 @@ class DataProcess:
     def process_csv(self, dataset_name='assistment_2012', texts_filepath = "../input/assistments-texts/ASSISTments2012DataSet-ProblemBodies.csv"):
         # pre-process original csv file for assist dataset
         data_path = os.path.join(self.data_folder, self.file_name)
+        print(data_path)
         if dataset_name == 'assistment_2012':
             df = get_data_assistments_2012(interactions_filepath=data_path, max_questions=30,
                                            make_sentences_flag=False, texts_filepath=texts_filepath)
