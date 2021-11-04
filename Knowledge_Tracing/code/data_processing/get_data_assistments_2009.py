@@ -16,7 +16,8 @@ from Knowledge_Tracing.code.data_processing.get_assistments_texts import get_ass
 
 
 def get_data_assistments_2009(min_questions=2, max_questions=50,
-                              interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final.csv",
+                              interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4"
+                                                    "-final.csv",
                               texts_filepath='../input/', n_rows=None, n_texts=None, personal_cleaning=True,
                               make_sentences_flag=True):
     dtypes = {'user_id': 'int32', 'problem_id': 'int64',
@@ -25,9 +26,9 @@ def get_data_assistments_2009(min_questions=2, max_questions=50,
 
     print("loading csv.....")
     if n_rows:
-        train_df = pd.read_csv(interactions_filepath, dtype=dtypes, nrows=n_rows)
+        train_df = pd.read_csv(interactions_filepath, dtype=dtypes, nrows=n_rows, on_bad_lines='skip')
     else:
-        train_df = pd.read_csv(interactions_filepath, dtype=dtypes)
+        train_df = pd.read_csv(interactions_filepath, dtype=dtypes, on_bad_lines='skip')
     print("shape of dataframe :", train_df.shape)
 
     # Step 3.1 - Define start, end and elapsed time, fill no timed elapsed time and cap values under a max
