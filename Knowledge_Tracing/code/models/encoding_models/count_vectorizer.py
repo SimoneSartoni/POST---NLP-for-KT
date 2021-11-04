@@ -52,7 +52,7 @@ class count_vectorizer(base_model):
         self.vector_size = 0
 
     def fit(self, texts_df, save_filepath='./'):
-        self.texts_df = texts_df['problem_id']
+        self.texts_df = texts_df
         self.count_vectorizer = self.count_vectorizer.fit(self.texts_df['body'])
 
         self.words_unique = self.count_vectorizer.get_feature_names()
