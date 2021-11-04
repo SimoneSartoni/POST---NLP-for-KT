@@ -55,7 +55,6 @@ class count_vectorizer(base_model):
         self.texts_df = texts_df
         self.count_vectorizer = self.count_vectorizer.fit(self.texts_df['body'])
 
-        self.words_unique = self.count_vectorizer.get_feature_names_out()
         # Save sparse matrix in current directory
         print(self.count_vectorizer.transform(self.texts_df['body'][0]))
         self.vector_size = len(self.count_vectorizer.transform(self.texts_df['body'][0]))
