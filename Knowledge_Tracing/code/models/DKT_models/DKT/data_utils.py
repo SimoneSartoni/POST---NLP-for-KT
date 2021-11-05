@@ -95,11 +95,11 @@ def split_dataset(sequences, total_size, test_fraction, val_fraction=None):
     if val_fraction is not None and not 0 < val_fraction < 1:
         raise ValueError("val_fraction must be between (0, 1)")
 
-    train_set, test_set = train_test_split(sequences, test_fraction)
+    train_set, test_set = train_test_split(sequences, test_size=test_fraction)
 
     val_set = None
     if val_fraction:
-        train_set, val_set = train_test_split(train_set, val_fraction)
+        train_set, val_set = train_test_split(train_set, test_size=val_fraction)
 
     return train_set, test_set, val_set
 
