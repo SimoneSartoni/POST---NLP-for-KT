@@ -80,6 +80,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             padded_shapes=([None, None], [None, None]),
             drop_remainder=True
         )
+        return dataset
 
     train_set = create_dataset(train_seq, features_depth, skill_depth)
     val_set = create_dataset(val_seq, features_depth, skill_depth)
