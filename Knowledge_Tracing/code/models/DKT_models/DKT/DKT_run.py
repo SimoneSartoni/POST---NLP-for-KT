@@ -17,7 +17,7 @@ dataset, length, nb_features, nb_skills = data_utils.load_dataset(fn=fn,
                                                                   batch_size=batch_size,
                                                                   shuffle=True)
 
-train_set, test_set, val_set = data_utils.split_dataset(dataset=dataset,
+train_set, test_set, val_set = data_utils.split_dataset(sequences=dataset,
                                                         total_size=length,
                                                         test_fraction=test_fraction,
                                                         val_fraction=validation_fraction)
