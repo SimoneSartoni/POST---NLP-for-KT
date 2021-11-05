@@ -47,7 +47,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
     )
 
     if shuffle:
-        dataset = dataset.shuffle(buffer_size=nb_users)
+        dataset = dataset.shuffle(buffer_size=nb_users, reshuffle_each_iteration=True)
 
     # Step 6 - Encode categorical features and merge skills with labels to compute target loss.
     # More info: https://github.com/tensorflow/tensorflow/issues/32142

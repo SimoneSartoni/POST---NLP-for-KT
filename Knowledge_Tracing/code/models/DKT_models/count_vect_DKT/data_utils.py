@@ -70,7 +70,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
     )
     nb_users = len(df.groupby('user_id'))
     if shuffle:
-        dataset = dataset.shuffle(buffer_size=nb_users)
+        dataset = dataset.shuffle(buffer_size=nb_users, reshuffle_each_iteration=True)
 
     print(dataset)
     dataset = dataset.map(

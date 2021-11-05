@@ -21,19 +21,21 @@ class DataProcess:
         self.output_folder = output_folder
         self.dataset_name = dataset_name
 
-    def process_csv(self, dataset_name='assistment_2012', texts_filepath = "../input/assistments-texts/ASSISTments2012DataSet-ProblemBodies.csv"):
+    def process_csv(self, dataset_name='assistment_2012',
+                    texts_filepath="../input/assistments-texts/ASSISTments2012DataSet-ProblemBodies.csv"):
         # pre-process original csv file for assist dataset
         data_path = os.path.join(self.data_folder, self.file_name)
         print(data_path)
         if dataset_name == 'assistment_2012':
-            df = get_data_assistments_2012(interactions_filepath=data_path, max_questions=30,
-                                           make_sentences_flag=False, texts_filepath=texts_filepath)
+            df, texts_df = get_data_assistments_2012(interactions_filepath=data_path, max_questions=30,
+                                                     make_sentences_flag=False, texts_filepath=texts_filepath)
         elif dataset_name == 'assistment_2009':
-            df, text_df = get_data_assistments_2009(interactions_filepath=data_path, max_questions=30,
-                                                    make_sentences_flag=False, texts_filepath=texts_filepath)
-        del text_df
-        gc.collect()
+            df, texts_df = get_data_assistments_2009(interactions_filepath=data_path, max_questions=30,
+                                                     make_sentences_flag=False, texts_filepath=texts_filepath)
+        del texts_df
         df.to_csv(os.path.join(self.output_folder, '%s_processed.csv' % self.file_name))
+        del df
+        gc.collect()
 
     def pro_skill_graph(self):
         df = pd.read_csv(os.path.join(self.output_folder, '%s_processed.csv' % self.file_name), low_memory=False,
@@ -99,7 +101,6 @@ class DataProcess:
         print('user number %d' % len(ui_df))
 
         user_inters = []
-        cnt = 0
         for ui in ui_df:
             tmp_user, tmp_inter = ui[0], ui[1]
             tmp_problems = list(tmp_inter['problem_id'])
@@ -141,7 +142,7 @@ class DataProcess:
             if self.dataset_name == 'assistment_2012':
                 tmp_skills = [ele + 1 for ele in tmp_skills]  # for assist12
             if self.dataset_name == 'assistment_2009':
-                tmp_skills = [skill_id_dict[ele]+1 for ele in tmp_skills]     # for assist09
+                tmp_skills = [skill_id_dict[ele] + 1 for ele in tmp_skills]  # for assist09
             tmp_pro = eval(lines[index + 2])[:max_len]
             tmp_pro = [pro_id_dict[ele] + 1 for ele in tmp_pro]
             tmp_ans = eval(lines[index + 3])[:max_len]
