@@ -60,6 +60,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             inputs = (i_doc, i_label)
             outputs = (o_doc, o_label)
             yield inputs, outputs
+
     def generate_encodings_test():
         for name, group in df.loc[df['user_id'] in test_users].groupby('user_id'):
             document_to_term = []
@@ -78,7 +79,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             outputs = (o_doc, o_label)
             yield inputs, outputs
     def generate_encodings_train():
-        for name, group in df.loc[df['user_id'] in train_users].groupby('user_id'):
+        for name, group in df.loc[df['user_id'] in val_users].groupby('user_id'):
             document_to_term = []
             labels = np.array([], dtype=np.int)
             for problem, label in list(zip(group['problem_id'].values, group['correct'].values)):
@@ -96,51 +97,52 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             yield inputs, outputs
     encoding_depth = encode_model.vector_size
 
-    def create_dataset(seq, generator, features_depth, skill_depth):
+    def create_dataset(generate_encodings, users, encoding_depth):
         # Step 5 - Get Tensorflow Dataset
         types = ((tf.float32, tf.float32),
                  (tf.float32, tf.float32))
-        shapes = (([None, encode_model.vector_size], [None]),
-                  ([None, encode_model.vector_size], [None]))
+        shapes = (([None, encoding_depth], [None]),
+                  ([None, encoding_depth], [None]))
         # Step 5 - Get Tensorflow Dataset
         dataset = tf.data.Dataset.from_generator(
-            generator=generator,
+            generator=generate_encodings,
             output_types=types,
             output_shapes=shapes
         )
 
+        nb_users = len(users)
         if shuffle:
-            dataset = dataset.shuffle(buffer_size=len(seq), reshuffle_each_iteration=True)
+            dataset = dataset.shuffle(buffer_size=nb_users, reshuffle_each_iteration=True)
+
+        print(dataset)
+        dataset = dataset.map(
+            lambda inputs, outputs: (
+                (inputs[0], tf.expand_dims(inputs[1], axis=-1)),
+                tf.concat(values=[
+                    outputs[0],
+                    tf.expand_dims(outputs[1], axis=-1)],
+                    axis=-1)
+            )
+        )
 
         # Step 6 - Encode categorical features and merge skills with labels to compute target loss.
         # More info: https://github.com/tensorflow/tensorflow/issues/32142
 
-
-        dataset = dataset.map(
-            lambda feat, skill, label: (
-                tf.one_hot(feat, depth=features_depth),
-                tf.concat(
-                    values=[
-                        tf.one_hot(skill, depth=skill_depth),
-                        tf.expand_dims(label, -1)
-                    ],
-                    axis=-1
-                )
-            )
-        )
+        print(dataset)
 
         # Step 7 - Pad sequences per batch
         dataset = dataset.padded_batch(
             batch_size=batch_size,
-            padding_values=(MASK_VALUE, MASK_VALUE),
-            padded_shapes=([None, None], [None, None]),
+            padding_values=MASK_VALUE,
             drop_remainder=True
         )
+
+        print(dataset)
         return dataset
 
-    train_set = create_dataset(generate_encodings_train(), encoding_depth)
-    val_set = create_dataset(generate_encodings_val(), encoding_depth)
-    test_set = create_dataset(generate_encodings_test(), encoding_depth)
+    train_set = create_dataset(generate_encodings_train(), train_users, encoding_depth)
+    val_set = create_dataset(generate_encodings_val(), val_users, encoding_depth)
+    test_set = create_dataset(generate_encodings_test(), test_users, encoding_depth)
 
     return train_set, val_set, test_set, encoding_depth
 
