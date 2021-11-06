@@ -48,6 +48,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         for name, group in df.loc[df['user_id'].isin(val_users)].groupby('user_id'):
             document_to_term = []
             labels = np.array([], dtype=np.int)
+            skills = np.array([], dtype=np.int)
             for problem, label, skill in list(zip(group['problem_id'].values, group['correct'].values, group['skill'].values)):
                 encoding = encode_model.get_encoding(problem)
                 encoding = np.expand_dims(encoding, axis=0)
@@ -55,6 +56,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
                 labels = np.append(labels, label)
                 skills = np.append(skills, skill)
             document_to_term = np.concatenate(document_to_term, axis=0)
+
             i_doc = document_to_term[:-1]
             o_doc = document_to_term[1:]
             i_label = labels[:-1]
@@ -69,6 +71,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         for name, group in df.loc[df['user_id'].isin(test_users)].groupby('user_id'):
             document_to_term = []
             labels = np.array([], dtype=np.int)
+            skills = np.array([], dtype=np.int)
             for problem, label, skill in list(zip(group['problem_id'].values, group['correct'].values, group['skill'].values)):
                 encoding = encode_model.get_encoding(problem)
                 encoding = np.expand_dims(encoding, axis=0)
@@ -90,6 +93,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         for name, group in df.loc[df['user_id'].isin(train_users)].groupby('user_id'):
             document_to_term = []
             labels = np.array([], dtype=np.int)
+            skills = np.array([], dtype=np.int)
             for problem, label, skill in list(zip(group['problem_id'].values, group['correct'].values, group['skill'].values)):
                 encoding = encode_model.get_encoding(problem)
                 encoding = np.expand_dims(encoding, axis=0)
