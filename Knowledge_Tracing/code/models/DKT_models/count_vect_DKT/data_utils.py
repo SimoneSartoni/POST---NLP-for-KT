@@ -140,9 +140,9 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         print(dataset)
         return dataset
 
-    train_set = create_dataset(generate_encodings_train(), train_users, encoding_depth)
-    val_set = create_dataset(generate_encodings_val(), val_users, encoding_depth)
-    test_set = create_dataset(generate_encodings_test(), test_users, encoding_depth)
+    train_set = create_dataset(generate_encodings_train, train_users, encoding_depth)
+    val_set = create_dataset(generate_encodings_val, val_users, encoding_depth)
+    test_set = create_dataset(generate_encodings_test, test_users, encoding_depth)
 
     return train_set, val_set, test_set, encoding_depth
 
