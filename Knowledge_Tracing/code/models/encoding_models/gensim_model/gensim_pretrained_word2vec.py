@@ -20,6 +20,9 @@ class pretrained_word2vec(base_model):
         self.sg = sg
         self.epochs = None
         self.pretrained = pretrained
+        self.texts_df = None
+        self.pro_num = 0
+        self.words_num = 0
         if self.pretrained in list(downloader.info()['models'].keys()):
             print("download")
             if load:
@@ -29,8 +32,7 @@ class pretrained_word2vec(base_model):
             self.wordvectors.save('vectors.kv')
             self.vector_size = self.wordvectors.vector_size
             print("end")
-        self.problem_to_text = {}
-        self.problem_id_to_index = None
+
         self.similarities = None
         self.texts = None
 
@@ -48,14 +50,11 @@ class pretrained_word2vec(base_model):
         # self.save_vectors(path, name)
         # self.save_model(path, name)
 
-    def encode_problems(self, problem_id_to_index, texts):
-        self.problem_id_to_index = problem_id_to_index
-        k = 0
-        self.texts = {}
-        vocabulary = set(self.wordvectors.index_to_key)
-        for p in problem_id_to_index.keys():
-            text = ['/c/en/' + x for x in texts[self.problem_id_to_index[p]]]
-            self.texts[p] = list(set(text).intersection(vocabulary))
+    def encode_problems(self, texts_df):
+        self.texts_df = texts_df
+
+        self.pro_num = len(self.texts_df['problem_id'])
+        self.words_num = self.vector_size
 
     def save_vectors(self, path="", name="poj"):
         word_vectors = self.wordvectors
@@ -123,13 +122,13 @@ class pretrained_word2vec(base_model):
         return encoding
 
     def get_encoding(self, problem):
-        text = self.texts[problem]
+        row = self.texts_df.loc[self.texts_df['problem_id']==problem]
         sentence_encoding = np.zeros(shape=self.vector_size)
         num = 0
-        for word in text:
+        for word in row['body'].values:
             sentence_encoding = sentence_encoding + np.array(self.wordvectors[word])
             num += 1
-        if len(text) > 0:
+        if len(row['body']) > 0:
             sentence_encoding = sentence_encoding / float(num)
         return sentence_encoding
 
