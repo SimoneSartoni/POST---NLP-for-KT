@@ -108,13 +108,13 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             yield inputs, outputs
 
     encoding_depth = encode_model.vector_size
+    skill_depth = df['skill'].max() + 1
 
-    def create_dataset(generate_encodings, users, encoding_depth):
-        # Step 5 - Get Tensorflow Dataset
-        types = ((tf.float32, tf.float32),
-                 (tf.float32, tf.float32))
-        shapes = (([None, encoding_depth], [None]),
-                  ([None, encoding_depth], [None]))
+    def create_dataset(generate_encodings, users, encoding_depth, skill_depth):
+        types = ((tf.float32, tf.int32, tf.float32),
+                 (tf.float32, tf.int32, tf.float32))
+        shapes = (([None, encoding_depth], [None], [None]),
+                  ([None, encoding_depth], [None], [None]))
         # Step 5 - Get Tensorflow Dataset
         dataset = tf.data.Dataset.from_generator(
             generator=generate_encodings,
@@ -124,15 +124,15 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
 
         nb_users = len(users)
         if shuffle:
-            dataset = dataset.shuffle(buffer_size=nb_users, reshuffle_each_iteration=True)
+            dataset = dataset.shuffle(buffer_size=nb_users)
 
-        print(dataset)
         dataset = dataset.map(
             lambda inputs, outputs: (
-                (inputs[0], tf.expand_dims(inputs[1], axis=-1)),
+                (inputs[0], tf.one_hot(inputs[1], depth=skill_depth), tf.expand_dims(inputs[2], axis=-1)),
                 tf.concat(values=[
                     outputs[0],
-                    tf.expand_dims(outputs[1], axis=-1)],
+                    tf.one_hot(outputs[1], depth=skill_depth),
+                    tf.expand_dims(outputs[2], axis=-1)],
                     axis=-1)
             )
         )
@@ -140,7 +140,6 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         # Step 6 - Encode categorical features and merge skills with labels to compute target loss.
         # More info: https://github.com/tensorflow/tensorflow/issues/32142
 
-        print(dataset)
 
         # Step 7 - Pad sequences per batch
         dataset = dataset.padded_batch(
@@ -149,14 +148,13 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             drop_remainder=True
         )
 
-        print(dataset)
         return dataset
 
-    train_set = create_dataset(generate_encodings_train, train_users, encoding_depth)
-    val_set = create_dataset(generate_encodings_val, val_users, encoding_depth)
-    test_set = create_dataset(generate_encodings_test, test_users, encoding_depth)
+    train_set = create_dataset(generate_encodings_train, train_users, encoding_depth, skill_depth)
+    val_set = create_dataset(generate_encodings_val, val_users, encoding_depth, skill_depth)
+    test_set = create_dataset(generate_encodings_test, test_users, encoding_depth, skill_depth)
 
-    return train_set, val_set, test_set, encoding_depth
+    return train_set, val_set, test_set, encoding_depth, skill_depth
 
 
 def get_target(y_true, y_pred, nb_encodings=300, nb_skills=300):
