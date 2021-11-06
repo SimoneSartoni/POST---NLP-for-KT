@@ -43,8 +43,9 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
     train_users, test_users = train_test_split(users, test_size=0.2)
     train_users, val_users = train_test_split(train_users, test_size=0.2)
 
+
     def generate_encodings_val():
-        for name, group in df.loc[df['user_id'] in val_users].groupby('user_id'):
+        for name, group in df.loc[df['user_id'].isin(val_users)].groupby('user_id'):
             document_to_term = []
             labels = np.array([], dtype=np.int)
             for problem, label in list(zip(group['problem_id'].values, group['correct'].values)):
@@ -62,7 +63,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             yield inputs, outputs
 
     def generate_encodings_test():
-        for name, group in df.loc[df['user_id'] in test_users].groupby('user_id'):
+        for name, group in df.loc[df['user_id'].isin(test_users)].groupby('user_id'):
             document_to_term = []
             labels = np.array([], dtype=np.int)
             for problem, label in list(zip(group['problem_id'].values, group['correct'].values)):
@@ -79,7 +80,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             outputs = (o_doc, o_label)
             yield inputs, outputs
     def generate_encodings_train():
-        for name, group in df.loc[df['user_id'] in val_users].groupby('user_id'):
+        for name, group in df.loc[df['user_id'].isin(train_users)].groupby('user_id'):
             document_to_term = []
             labels = np.array([], dtype=np.int)
             for problem, label in list(zip(group['problem_id'].values, group['correct'].values)):
