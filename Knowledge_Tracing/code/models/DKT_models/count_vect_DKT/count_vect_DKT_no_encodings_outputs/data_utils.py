@@ -128,7 +128,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         dataset = dataset.map(
             lambda inputs, outputs: (
                 inputs,
-                outputs
+                tf.expand_dims(outputs, axis=0)
             )
         )
 
