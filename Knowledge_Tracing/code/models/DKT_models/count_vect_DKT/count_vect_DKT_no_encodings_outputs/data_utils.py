@@ -111,7 +111,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
     def create_dataset(generate_encodings, users, encoding_depth):
         # Step 5 - Get Tensorflow Dataset
         types = (tf.float32,
-                 (tf.float32, tf.float32))
+                 tf.float32)
         shapes = ([None, encoding_depth], [None])
         # Step 5 - Get Tensorflow Dataset
         dataset = tf.data.Dataset.from_generator(
