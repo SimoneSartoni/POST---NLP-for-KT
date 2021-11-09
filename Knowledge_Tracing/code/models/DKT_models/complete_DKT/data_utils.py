@@ -18,24 +18,34 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
                                        ".csv",
                  save_filepath='/kaggle/working/', texts_filepath='../input/',
                  min_questions=2, max_questions=25, n_rows=None, n_texts=None,
-                 personal_cleaning=True,
                  **encodings_kwargs):
 
     if dataset_name == 'assistment_2012':
         df, text_df = get_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
                                                 interactions_filepath=interactions_filepath,
                                                 texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
-                                                make_sentences_flag=False, personal_cleaning=personal_cleaning)
+                                                make_sentences_flag=False, personal_cleaning=False)
+        del df
+        gc.collect()
+        df, text_df_sentences = get_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
+                                                interactions_filepath=interactions_filepath,
+                                                texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
+                                                make_sentences_flag=True, personal_cleaning=False)
     elif dataset_name == 'assistment_2009':
         df, text_df = get_data_assistments_2009(min_questions=min_questions, max_questions=max_questions,
                                                 interactions_filepath=interactions_filepath,
                                                 texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
-                                                make_sentences_flag=False, personal_cleaning=personal_cleaning)
+                                                make_sentences_flag=False, personal_cleaning=False)
+        del df
+        gc.collect()
+        df, text_df_sentences = get_data_assistments_2009(min_questions=min_questions, max_questions=max_questions,
+                                                interactions_filepath=interactions_filepath,
+                                                texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
+                                                make_sentences_flag=True, personal_cleaning=False)
 
     coloumns = ['user_id', 'problem_id', 'correct']
     if encodings_kwargs['use_skills']:
         coloumns.append('skill_with_answer')
-        skill_depth = df['skill'].max() + 1
         # Step 3 - Cross skill id with answer to form a synthetic feature
         df['skill_with_answer'] = df['skill'] * 2 + df['correct']
         df['skill_with_answer'] = df['skill_with_answer'].astype('int32')
@@ -47,6 +57,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
     print(df)
     # Step 3.1 - Generate NLP extracted encoding for problems
     encode_models = []
+
     if encodings_kwargs['count_vect']:
         min_df, max_df, max_features = encodings_kwargs['min_df'], encodings_kwargs['max_df'], \
                                        encodings_kwargs['max_features']
@@ -58,7 +69,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
     if encodings_kwargs['sentence_encoder']:
         encoding_model = encodings_kwargs['sentence_encoder_model']
         encode_model = sentence_transformer(encoding_model=encoding_model)
-        encode_model.fit(text_df, save_filepath)
+        encode_model.fit(text_df_sentences, save_filepath)
         encode_models.append(encode_model)
     if encodings_kwargs['pretrained_word2vec']:
         load, keyed_vectors = encodings_kwargs['pretrained_word2vec_load'], encodings_kwargs['pretrained_word2vec_keyed_vectors']

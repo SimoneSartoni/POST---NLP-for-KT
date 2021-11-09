@@ -42,7 +42,7 @@ class sentence_transformer(base_model):
 
     def fit(self, texts_df, save_filepath='./'):
         self.texts_df = texts_df
-        self.vectors = self.sentence_transformer.encode(sentences=self.texts_df['body'], show_progress_bar=True)
+        self.vectors = self.sentence_transformer.encode(sentences=self.texts_df['body'].values, show_progress_bar=True)
 
         # Save sparse matrix in current directory
         self.vector_size = self.vectors.shape[1]
