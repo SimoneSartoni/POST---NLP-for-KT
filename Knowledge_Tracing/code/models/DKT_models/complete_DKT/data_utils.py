@@ -201,6 +201,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         input_shapes = [[None, encode_model.vector_size] for encode_model in encode_models]
         if encodings_kwargs['use_skills']:
             input_shapes.append([None])
+        input_shapes = tuple(input_shapes)
         output_shapes = [None]
         shapes = (input_shapes, output_shapes)
         print(types)
