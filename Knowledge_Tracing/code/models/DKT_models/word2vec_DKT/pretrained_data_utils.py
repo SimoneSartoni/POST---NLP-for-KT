@@ -36,7 +36,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
 
     encode_model = pretrained_word2vec(load=True, keyedvectors=keyed_vectors)
     encode_model.fit()
-    encode_model.encode_problems()
+    encode_model.encode_problems(texts_df=text_df)
 
     max_value = encode_model.words_num
     del text_df
