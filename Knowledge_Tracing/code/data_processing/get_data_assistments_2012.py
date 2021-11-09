@@ -36,7 +36,9 @@ def get_data_assistments_2012(min_questions=2, max_questions=50, interactions_fi
                              for start in train_df['start_time']]
 
     # Step 4 - Sort interactions according to timestamp
-    train_df = train_df.sort_values(["timestamp"], ascending=True).reset_index(drop=True)
+    train_df = train_df.sort_values(["timestamp"], ascending=True)
+
+    train_df = train_df.drop_duplicates(subset=['user_id', 'problem_id'], keep='first').reset_index(drop=True)
 
     # Step 1 - Remove users with less than a certain number of answers
     train_df = train_df.groupby('user_id').tail(max_questions)
