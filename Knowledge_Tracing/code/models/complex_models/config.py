@@ -5,7 +5,8 @@ ENC_HEADS = DEC_HEADS = 8
 NUM_ENCODER = NUM_DECODER = 6
 BATCH_SIZE = 128
 TRAIN_FILE = "/kaggle/input/assistmentds-2012/2012-2013-data-with-predictions-4-final.csv"  # Dataset path
-TOTAL_EXE = 50000
-TOTAL_CAT = 300
+NB_QUESTIONS = 50000
+NB_SKILL = 300
+NB_RESPONSES = 2
 
 

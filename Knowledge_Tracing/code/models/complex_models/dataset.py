@@ -8,6 +8,9 @@ from torch.utils.data import Dataset, DataLoader
 import gc
 from sklearn.model_selection import train_test_split
 
+from Knowledge_Tracing.code.data_processing.get_data_assistments_2009 import get_data_assistments_2009
+from Knowledge_Tracing.code.data_processing.get_data_assistments_2012 import get_data_assistments_2012
+
 
 class DKTDataset(Dataset):
     def __init__(self, group, max_seq=100):
@@ -56,63 +59,45 @@ class DKTDataset(Dataset):
 
         target_ids = input_ids[:]
         target_skill = input_skill[:]
+        target_label = ans
 
-        label = ans
+        encoder_inputs = {"question_id": input_ids, "rtime": input_rtime.astype(np.int), "skill": input_skill}
+        decoder_inputs = {"label": input_label}
+        decoder_targets = {"target_id": target_ids, "target_skill": target_skill, 'target_label': target_label}
+        inputs = {}
+        inputs['encoder'] = encoder_inputs
+        inputs['decoder'] = decoder_inputs
 
-        input = {"input_id": input_ids, "input_rtime": input_rtime.astype(np.int), "input_skill": input_skill,
-                 "input_label": input_label}
-        target = {"target_id": target_ids, "target_skill": target_skill}
-
-        return input, target, label
+        return inputs, decoder_targets
 
 
-def get_dataloaders(nrows=10000, max_seq=100):
-    dtypes = {'user_id': 'int32', 'problem_id': 'int64',
-              'correct': 'float64', 'skill': "string",
-              'start_time': "string", 'end_time': "string"}
-
-    print("loading csv.....")
-    train_df = pd.read_csv(config.TRAIN_FILE, dtype=dtypes, nrows=nrows)
-    print("shape of dataframe :", train_df.shape)
-
-    train_df.fillna("no_skill", inplace=True)
-    print("shape after drop no skill:", train_df.shape)
-
-    # Step 1.2 - Remove users with a single answer
-    train_df = train_df.groupby('user_id').filter(lambda q: len(q) > 1).copy()
-    print("shape after at least 2 interactions:", train_df.shape)
-
-    # Step 2 - Enumerate skill id
-    train_df['skill'], _ = pd.factorize(train_df['skill'], sort=True)
-    print("shape after factorize:", train_df.shape)
-
-    train_df['start_time'] = [try_parsing_date(x) for x in train_df['start_time']]
-    train_df['end_time'] = [try_parsing_date(x) for x in train_df['end_time']]
-
-    train_df["prior_question_elapsed_time"] = [datetime.strptime(end, '%Y-%m-%d %H:%M:%S').timestamp() -
-                                               datetime.strptime(start, '%Y-%m-%d %H:%M:%S').timestamp()
-                                               for start, end in
-                                               list(zip(train_df['start_time'], train_df['end_time']))]
-
-    train_df["prior_question_elapsed_time"].fillna(300, inplace=True)
-    train_df["prior_question_elapsed_time"].clip(lower=0, upper=300, inplace=True)
-    train_df["prior_question_elapsed_time"] = train_df["prior_question_elapsed_time"].astype(np.int)
-
-    train_df["timestamp"] = [datetime.strptime(start, '%Y-%m-%d %H:%M:%S').timestamp()
-                             for start in train_df['start_time']]
-    train_df = train_df.sort_values(["timestamp"], ascending=True).reset_index(drop=True)
-    ids = train_df['problem_id'].unique()
-    n_ids = len(ids)
-    n_skills = len(train_df['skill'].unique()) + 100
-    print("no. of problems :", n_ids)
-    print("no. of skills: ", n_skills)
-    print("shape after exclusion:", train_df.shape)
-
-    train_df['question_id'], _ = pd.factorize(train_df['problem_id'], sort=True)
+def get_dataloaders(batch_size=32, shuffle=True, dataset_name='assistment_2012',
+                 interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
+                                       ".csv",
+                 save_filepath='/kaggle/working/', texts_filepath='../input/', min_df=2, max_df=1.0,
+                 min_questions=2, max_features=1000, max_questions=25, n_rows=None, n_texts=None,
+                 personal_cleaning=True):
+    if dataset_name == 'assistment_2012':
+        df, text_df = get_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
+                                                interactions_filepath=interactions_filepath,
+                                                texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
+                                                make_sentences_flag=False, personal_cleaning=personal_cleaning)
+    elif dataset_name == 'assistment_2009':
+        df, text_df = get_data_assistments_2009(min_questions=min_questions, max_questions=max_questions,
+                                                interactions_filepath=interactions_filepath,
+                                                texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
+                                                make_sentences_flag=False, personal_cleaning=personal_cleaning, )
+    del text_df
+    gc.collect()
+    print(df)
+    df = df[['user_id', 'problem_id', 'correct', 'skill', 'start_time'], 'end_time']
 
     # grouping based on user_id to get the data supply
     print("Grouping users...")
-    group = train_df[
+    nb_questions = len(df['problem_id'].unique())
+    nb_skills = len(df['skill'].unique())
+
+    group = df[
         ["user_id", "question_id", "correct", "prior_question_elapsed_time", "skill"]] \
         .groupby("user_id") \
         .apply(lambda r: (r.question_id.values, r.correct.values, r.prior_question_elapsed_time.values, r.skill.values))
@@ -123,22 +108,26 @@ def get_dataloaders(nrows=10000, max_seq=100):
     train, test = train_test_split(group, test_size=0.2)
     train, val = train_test_split(train, test_size=0.2)
     print("train size: ", train.shape, "validation size: ", val.shape)
-    print()
-    train_dataset = DKTDataset(train.values, max_seq=max_seq)
-    val_dataset = DKTDataset(val.values, max_seq=max_seq)
-    test_dataset = DKTDataset(test.values, max_seq=max_seq)
+
+    train_dataset = DKTDataset(train.values, max_seq=max_questions)
+    val_dataset = DKTDataset(val.values, max_seq=max_questions)
+    test_dataset = DKTDataset(test.values, max_seq=max_questions)
     train_loader = DataLoader(train_dataset,
                               batch_size=config.BATCH_SIZE,
                               num_workers=2,
                               shuffle=True)
+    del train_dataset
+    gc.collect()
     val_loader = DataLoader(val_dataset,
                             batch_size=config.BATCH_SIZE,
                             num_workers=2,
                             shuffle=False)
+    del val_dataset
+    gc.collect()
     test_loader = DataLoader(test_dataset,
                              batch_size=config.BATCH_SIZE,
                              num_workers=2,
                              shuffle=False)
-    del train_dataset, val_dataset, test_dataset
+    del test_dataset
     gc.collect()
-    return train_loader, val_loader, test_loader
+    return train_loader, val_loader, test_loader, nb_questions, nb_skills
