@@ -146,7 +146,7 @@ class word2vec(base_model):
             if word in self.wordvectors.key_to_index:
                 sentence_encoding = sentence_encoding + np.array(self.wordvectors.get_vector(word, norm=norm))
                 num += 1
-        if len(row['body']) > 0:
+        if num > 0:
             sentence_encoding = sentence_encoding / float(num)
         return sentence_encoding
 
