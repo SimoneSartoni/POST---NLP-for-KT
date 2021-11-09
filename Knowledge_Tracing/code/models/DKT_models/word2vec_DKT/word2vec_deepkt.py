@@ -1,6 +1,6 @@
 from tensorflow.keras import Model, Input, layers, losses
 
-from Knowledge_Tracing.code.models.word2vec_DKT.data_utils import get_target as NLP_get_target
+from Knowledge_Tracing.code.models.DKT_models.word2vec_DKT.pretrained_data_utils import get_target as NLP_get_target
 
 
 class word2vec_DKTModel(Model):
@@ -15,32 +15,23 @@ class word2vec_DKTModel(Model):
     """
 
     def __init__(self, nb_encodings, hidden_units=100, dropout_rate=0.2):
-        input_encoding_correct = Input(shape=[None, nb_encodings], name='input_encoding_correct')
-        input_encoding_wrong = Input(shape=[None, nb_encodings], name='input_encoding_wrong')
+        input_encodings = Input(shape=[None, nb_encodings], name='input_encodings')
 
-        mask_encoding_correct = layers.Masking(mask_value=-1.0)(input_encoding_correct)
-        mask_encoding_wrong = layers.Masking(mask_value=-1.0)(input_encoding_wrong)
+        mask_encodings = layers.Masking(mask_value=-1.0)(input_encodings)
 
-        mask = layers.concatenate([mask_encoding_correct, mask_encoding_wrong], axis=2)
-        lstm = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask)
+        lstm = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_encodings)
 
-        dense_encodings_correct = layers.Dense(nb_encodings, activation='sigmoid')
-        dense_encodings_wrong = layers.Dense(nb_encodings, activation='sigmoid')
+        dense_encodings = layers.Dense(nb_encodings, activation='sigmoid')
 
-        output_encodings_correct = layers.TimeDistributed(dense_encodings_correct, name='output_encodings_correct')(lstm)
-        output_encodings_wrong = layers.TimeDistributed(dense_encodings_wrong, name='output_encodings_wrong')(lstm)
-
-        outputs = layers.concatenate([output_encodings_correct, output_encodings_wrong])
+        output_encodings = layers.TimeDistributed(dense_encodings, name='output_encodings')(lstm)
 
         dense_class = layers.Dense(1, activation='sigmoid')
-        output_class = layers.TimeDistributed(dense_class, name='output_class')(outputs)
 
-        outputs_with_class = layers.concatenate([output_encodings_correct, output_encodings_wrong,
-                                                 output_class])
+        output_class = layers.TimeDistributed(dense_class, name='output_class')(output_encodings)
 
-        super(word2vec_DKTModel, self).__init__(inputs=[input_encoding_correct, input_encoding_wrong],
-                                                outputs=outputs_with_class,
-                                                name="DKT_NLP_Model")
+        super(word2vec_DKTModel, self).__init__(inputs=input_encodings,
+                                                outputs=output_class,
+                                                name="word2vec_DKTModel")
         self.nb_encodings = nb_encodings
 
     def compile(self, optimizer, metrics=None):

@@ -1,6 +1,6 @@
 
 
-from Knowledge_Tracing.code.models.word2vec_DKT.data_utils import *
+from Knowledge_Tracing.code.models.DKT_models.word2vec_DKT.pretrained_data_utils import *
 
 
 class BinaryAccuracy(tf.keras.metrics.BinaryAccuracy):

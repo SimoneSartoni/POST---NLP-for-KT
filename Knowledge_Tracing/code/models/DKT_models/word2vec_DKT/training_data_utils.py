@@ -1,39 +1,51 @@
+import gc
+
+import pandas as pd
 import tensorflow as tf
 import numpy as np
 from sklearn.model_selection import train_test_split
 
+from Knowledge_Tracing.code.models.encoding_models.gensim_model.gensim_word2vec import word2vec
 from Knowledge_Tracing.code.data_processing.get_data_assistments_2012 import get_data_assistments_2012
-from code.models.encoding_models.sentence_transformers import sentence_transformer
 from Knowledge_Tracing.code.data_processing.get_data_assistments_2009 import get_data_assistments_2009
 
-MASK_VALUE = -1.0  # The masking value cannot be zero.
+MASK_VALUE = -1.  # The masking value cannot be zero.
 
 
 def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
                  interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
                                        ".csv",
-                 encoding_model='all-mpnet-base-v2',
-                 save_filepath='/kaggle/working/', texts_filepath='../input/', min_df=2, max_df=1.0,
-                 min_questions=2, max_features=1000, max_questions=25, n_rows=None, n_texts=None,
-                 personal_cleaning=True):
+                 save_filepath='/kaggle/working/', texts_filepath='../input/',
+                 min_questions=2, max_questions=25, n_rows=None, n_texts=None, personal_cleaning=True,
+                 min_df=2, max_df=1.0, max_features=1000,
+                 keyed_vectors=""):
     if dataset_name == 'assistment_2012':
         df, text_df = get_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
                                                 interactions_filepath=interactions_filepath,
                                                 texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
-                                                make_sentences_flag=True, personal_cleaning=personal_cleaning)
+                                                make_sentences_flag=False, personal_cleaning=personal_cleaning)
     elif dataset_name == 'assistment_2009':
         df, text_df = get_data_assistments_2009(min_questions=min_questions, max_questions=max_questions,
                                                 interactions_filepath=interactions_filepath,
                                                 texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
-                                                make_sentences_flag=True, personal_cleaning=personal_cleaning, )
+                                                make_sentences_flag=False, personal_cleaning=personal_cleaning, )
 
     print(df)
     df = df[['user_id', 'problem_id', 'correct']]
     print(df)
-    # Step 3.1 - Generate NLP extracted encoding for problems
-    encode_model = sentence_transformer(encoding_model=encoding_model)
-    encode_model.fit(text_df, save_filepath)
 
+    if max_features:
+        encode_model = word2vec(min_count=min_df, vector_size=max_features)
+    else:
+        encode_model = word2vec(min_count=min_df)
+    encode_model.encode_problems(texts_df=text_df)
+    encode_model.fit()
+
+
+    max_value = encode_model.words_num
+    del text_df
+    gc.collect()
+    print("number of words is: " + str(max_value))
     users = df['user_id'].unique()
     train_users, test_users = train_test_split(users, test_size=0.2)
     train_users, val_users = train_test_split(train_users, test_size=0.2)
@@ -51,6 +63,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
                     encoding = np.concatenate([zeros, encoding])
                 encoding = np.expand_dims(encoding, axis=0)
                 document_to_term.append(encoding)
+                labels = np.append(labels, label)
             document_to_term = np.concatenate(document_to_term, axis=0)
             i_doc = document_to_term[:-1]
             o_label = labels[1:]
@@ -71,6 +84,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
                     encoding = np.concatenate([zeros, encoding])
                 encoding = np.expand_dims(encoding, axis=0)
                 document_to_term.append(encoding)
+                labels = np.append(labels, label)
             document_to_term = np.concatenate(document_to_term, axis=0)
             i_doc = document_to_term[:-1]
             o_label = labels[1:]
@@ -91,6 +105,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
                     encoding = np.concatenate([zeros, encoding])
                 encoding = np.expand_dims(encoding, axis=0)
                 document_to_term.append(encoding)
+                labels = np.append(labels, label)
             document_to_term = np.concatenate(document_to_term, axis=0)
             i_doc = document_to_term[:-1]
             o_label = labels[1:]
@@ -98,14 +113,13 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             outputs = o_label
             yield inputs, outputs
 
-    encoding_depth = encode_model.vector_size
+    encoding_depth = 2 * encode_model.vector_size
 
     def create_dataset(generate_encodings, users, encoding_depth):
         # Step 5 - Get Tensorflow Dataset
-        types = ((tf.float32, tf.float32),
-                 (tf.float32, tf.float32))
-        shapes = (([None, encoding_depth], [None]),
-                  ([None, encoding_depth], [None]))
+        types = (tf.float32,
+                 tf.float32)
+        shapes = ([None, encoding_depth], [None])
         # Step 5 - Get Tensorflow Dataset
         dataset = tf.data.Dataset.from_generator(
             generator=generate_encodings,

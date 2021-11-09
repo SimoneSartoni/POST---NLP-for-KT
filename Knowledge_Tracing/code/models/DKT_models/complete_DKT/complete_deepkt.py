@@ -14,48 +14,41 @@ class complete_DKTModel(Model):
             and what the model expects.
     """
 
-    def __init__(self, encoding_sizes=[], nb_skills=None, hidden_units=100, output_units_per_encoding=50, dropout_rate=0.2):
-        input_labels = Input(shape=[None, 1], name='input_labels')
-        mask_labels = layers.Masking(mask_value=-1.0)(input_labels)
+    def __init__(self, encoding_sizes=[], nb_features=None, hidden_units=100, output_units_per_encoding=50, dropout_rate=0.2):
+
         dense_units = 0
         inputs = []
         if len(encoding_sizes) > 0:
             lstm_encodings = []
+            dense_units = len(encoding_sizes) * output_units_per_encoding
             for index in range(0, len(encoding_sizes)):
                 input_encoding = Input(shape=[None, encoding_sizes[index]], name='input_encoding_'+str(index))
                 inputs.append(input_encoding)
                 mask_encoding = layers.Masking(mask_value=-1.0)(input_encoding)
-                mask_encoding_labels = layers.concatenate([mask_encoding, mask_labels], axis=-1)
-                lstm_encoding = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_encoding_labels)
+                lstm_encoding = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_encoding)
                 lstm_encodings.append(lstm_encoding)
-                dense_units = len(encoding_sizes) * output_units_per_encoding
-        if nb_skills:
-            input_skills = Input(shape=[None, nb_skills], name='input_skills')
-            inputs.append(input_skills)
-            mask_skills = layers.Masking(mask_value=-1.0)(input_skills)
-            mask_skills_labels = layers.concatenate([mask_skills, mask_labels], axis=-1)
-            lstm_skill = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_skills_labels)
+        if nb_features:
+            input_features = Input(shape=[None, nb_features], name='input_skills')
+            inputs.append(input_features)
+            mask_features = layers.Masking(mask_value=-1.0)(input_features)
+            lstm_features = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_features)
 
-        inputs.append(input_labels)
+        lstm = layers.concatenate(lstm_encodings.append(lstm_features))
 
-        lstm = layers.concatenate(lstm_encodings.append(lstm_skill))
-
-        if nb_skills:
+        if nb_features:
             dense_units += output_units_per_encoding
 
         dense_layer = layers.Dense(dense_units, activation='sigmoid')
 
-        dense_outputs = layers.TimeDistributed(dense_layer, name='output_encodings')(lstm)
+        dense_outputs = layers.TimeDistributed(dense_layer, name='output_dense')(lstm)
 
         dense_label = layers.Dense(1, activation='sigmoid')
 
         output_label = layers.TimeDistributed(dense_label, name='output_class')(dense_outputs)
-        outputs = layers.concatenate([dense_outputs, output_label])
 
-
-        super(complete_DKTModel, self).__init__(inputs=inputs, outputs=outputs, name="count_vect_plus_skill_DKTModel")
+        super(complete_DKTModel, self).__init__(inputs=inputs, outputs=output_label, name="complete_DKTModel")
         self.encoding_sizes = encoding_sizes
-        self.nb_skills = nb_skills
+        self.nb_features = nb_features
 
     def compile(self, optimizer, metrics=None):
         """Configures the model for training.

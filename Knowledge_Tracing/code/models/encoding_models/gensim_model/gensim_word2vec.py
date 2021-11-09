@@ -8,9 +8,9 @@ from Knowledge_Tracing.code.models.base_model import base_model
 
 # WORD2VEC using Gensim:
 
-class world2vec(base_model):
+class word2vec(base_model):
     def __init__(self, min_count=2, window=5, vector_size=300, workers=3, sg=1):
-        super(world2vec, self).__init__("gensim_word2vec", "NLP")
+        super(word2vec, self).__init__("gensim_word2vec", "NLP")
         self.min_count = min_count
         self.window = window
         self.vector_size = vector_size
@@ -26,6 +26,9 @@ class world2vec(base_model):
         self.problem_to_text = {}
         self.problem_id_to_index = None
         self.similarities = None
+        self.texts_df = None
+        self.pro_num = 0
+        self.words_num = 0
 
     def load_model(self, epochs, path="C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/intermediate_files/", name="poj"):
         x = "word2vec_" + str(self.vector_size) + "_" + str(epochs) + ".model"
@@ -52,32 +55,24 @@ class world2vec(base_model):
     def get_similarity_matrix_from_vectors(self, word_vectors):
         self.similarities = np.dot(word_vectors.vectors, word_vectors.vectors.T)
 
-    def fit(self, texts, epochs=20, path='', name=''):
+    def fit(self, epochs=20, path='', name=''):
         t = time()
         self.epochs = epochs
-        self.word2vec.build_vocab(texts, progress_per=100)
+        self.word2vec.build_vocab(self.texts_df, progress_per=100)
         self.time_to_build = round((time() - t) / 60, 2)
         print('Time to build vocab: {} mins'.format(self.time_to_build))
         t = time()
-        self.word2vec.train(texts, total_examples=self.word2vec.corpus_count, epochs=epochs, report_delay=1)
+        self.word2vec.train(self.texts_df, total_examples=self.word2vec.corpus_count, epochs=epochs, report_delay=1)
         self.time_to_train = round((time() - t) / 60, 2)
         print('Time to train the model: {} mins'.format(round((time() - t) / 60, 2)))
         self.wordvectors = self.word2vec.wv
-        # self.save_vectors(path, name)
-        # self.save_model(path, name)
+        self.save_vectors(path, name)
+        self.save_model(path, name)
 
-    def encode_problems(self, problem_id_to_index, texts):
-        self.problem_id_to_index = problem_id_to_index
-        vocabulary = self.wordvectors.key_to_index
-        k = 0
-        for problem_id in self.problem_id_to_index.keys():
-            problem_words = []
-            t = texts[self.problem_id_to_index[problem_id]]
-            for word in t:
-                if word in vocabulary:
-                    problem_words.append(word)
-            self.problem_to_text[problem_id] = problem_words
-            k += 1
+    def encode_problems(self, texts_df):
+        self.texts_df = texts_df
+        self.pro_num = len(self.texts_df['problem_id'])
+        self.words_num = self.vector_size
 
     def save_model(self, path="", name="poj"):
         self.word2vec.save(path+name+"_word2vec_" + str(self.vector_size) + "_" + str(self.epochs) + ".model")
@@ -142,6 +137,17 @@ class world2vec(base_model):
                 target_encoding = target_encoding / float(len(text))
         encoding = np.concatenate((pos_mean_encoding, neg_mean_encoding, target_encoding), axis=0)
         return encoding
+
+    def get_encoding(self, problem):
+        row = self.texts_df.loc[self.texts_df['problem_id'] == problem]
+        sentence_encoding = np.zeros(shape=self.vector_size)
+        num = 0
+        for word in row['body'].values:
+            sentence_encoding = sentence_encoding + np.array(self.wordvectors[word])
+            num += 1
+        if len(row['body']) > 0:
+            sentence_encoding = sentence_encoding / float(num)
+        return sentence_encoding
 
     def get_serializable_params(self):
         return {"name": self.name, "min_count": self.min_count, "window": self.window, "vector_size": self.vector_size,

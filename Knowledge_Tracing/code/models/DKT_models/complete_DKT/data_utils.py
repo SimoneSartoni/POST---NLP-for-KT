@@ -2,8 +2,11 @@ import gc
 
 import tensorflow as tf
 import numpy as np
+from sklearn.model_selection import train_test_split
+
 from Knowledge_Tracing.code.models.encoding_models.count_vectorizer import count_vectorizer
 from Knowledge_Tracing.code.models.encoding_models.sentence_transformers import sentence_transformer
+from Knowledge_Tracing.code.models.encoding_models.gensim_model.gensim_pretrained_word2vec import pretrained_word2vec
 from Knowledge_Tracing.code.data_processing.get_data_assistments_2012 import get_data_assistments_2012
 from Knowledge_Tracing.code.data_processing.get_data_assistments_2009 import get_data_assistments_2009
 
@@ -31,8 +34,15 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
 
     coloumns = ['user_id', 'problem_id', 'correct']
     if encodings_kwargs['use_skills']:
-        coloumns.append('skill')
+        coloumns.append('skill_with_answer')
         skill_depth = df['skill'].max() + 1
+        # Step 3 - Cross skill id with answer to form a synthetic feature
+        df['skill_with_answer'] = df['skill'] * 2 + df['correct']
+        df['skill_with_answer'] = df['skill_with_answer'].astype('int32')
+        print(df['skill_with_answer'])
+        features_depth = df['skill_with_answer'].max() + 1
+    else:
+        features_depth = 0
     df = df[coloumns]
     print(df)
     # Step 3.1 - Generate NLP extracted encoding for problems
@@ -50,115 +60,180 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         encode_model = sentence_transformer(encoding_model=encoding_model)
         encode_model.fit(text_df, save_filepath)
         encode_models.append(encode_model)
+    if encodings_kwargs['pretrained_word2vec']:
+        load, keyed_vectors = encodings_kwargs['pretrained_word2vec_load'], encodings_kwargs['pretrained_word2vec_keyed_vectors']
+        encode_model = pretrained_word2vec(load=load, keyedvectors=keyed_vectors)
+        encode_model.encode_problems()
+        encode_model.fit(text_df)
+        encode_models.append(encode_model)
+    if encodings_kwargs['word2vec']:
+        min_df, max_df, vector_size = encodings_kwargs['min_df'], encodings_kwargs['max_df'], \
+                                       encodings_kwargs['vector_size']
+        encode_model = pretrained_word2vec(min_count=min_df, vector_size=vector_size)
+        encode_model.encode_problems(texts_df=text_df)
+        encode_model.fit()
+        encode_models.append(encode_model)
 
     del text_df
     gc.collect()
+    print("number of words is: " + str(max_value))
+    users = df['user_id'].unique()
 
-    def generate_encodings():
+    train_users, test_users = train_test_split(users, test_size=0.2)
+    train_users, val_users = train_test_split(train_users, test_size=0.2)
+
+    def generate_encodings_val():
         doc_to_encodings = {}
         i_doc_to_encodings = {}
-        o_doc_to_encodings = {}
-
-        for name, group in df.groupby('user_id'):
+        for name, group in df.loc[df['user_id'].isin(val_users)].groupby('user_id'):
             labels = np.array([], dtype=np.int)
-            skills = np.array([], dtype=np.int)
             for model in encode_models:
                 doc_to_encodings[model.name] = []
-            for problem, label, skill in list(zip(group['problem_id'].values, group['correct'].values, group['skill'].values)):
-                for model in encode_models:
-                    encoding = model.get_encoding(problem)
-                    encoding = np.expand_dims(encoding, axis=0)
-                    doc_to_encodings[model.name].append(encoding)
+            for problem, label, feature in list(zip(group['problem_id'].values, group['correct'].values,
+                                                    group['skills_with_answer'].values)):
+                encoding = encode_model.get_encoding(problem)
+                zeros = np.zeros(encoding.shape, dtype=np.float)
+                if label:
+                    encoding = np.concatenate([encoding, zeros])
+                else:
+                    encoding = np.concatenate([zeros, encoding])
+                encoding = np.expand_dims(encoding, axis=0)
+                doc_to_encodings[model.name].append(encoding)
                 labels = np.append(labels, label)
                 if encodings_kwargs['use_skills']:
-                    skills = np.append(skills, skill)
+                    features = np.append(features, feature)
             for model in encode_models:
                 doc_to_encodings[model.name] = np.concatenate(doc_to_encodings[model.name], axis=0)
                 i_doc_to_encodings[model.name] = doc_to_encodings[model.name][:-1]
-                o_doc_to_encodings[model.name] = doc_to_encodings[model.name][1:]
-            i_label = labels[:-1]
+            i_feature = features[:-1]
             o_label = labels[1:]
-            i_skill = skills[:-1]
-            o_skill = skills[1:]
             inputs = []
-            outputs = []
             for model in encode_models:
                 inputs.append(i_doc_to_encodings[model.name])
-                outputs.append(o_doc_to_encodings[model.name])
             if encodings_kwargs['use_skills']:
-                inputs.append(i_skill)
-                inputs.append(o_skill)
-            inputs.append(i_label)
-            inputs.append(o_label)
+                inputs.append(i_feature)
+            outputs = o_label
             yield inputs, outputs
 
-    encoding_sizes = [model.vector_size for model in encode_models]
+    def generate_encodings_test():
+        doc_to_encodings = {}
+        i_doc_to_encodings = {}
+        for name, group in df.loc[df['user_id'].isin(test_users)].groupby('user_id'):
+            labels = np.array([], dtype=np.int)
+            for model in encode_models:
+                doc_to_encodings[model.name] = []
+            for problem, label, feature in list(zip(group['problem_id'].values, group['correct'].values,
+                                                    group['skills_with_answer'].values)):
+                encoding = encode_model.get_encoding(problem)
+                zeros = np.zeros(encoding.shape, dtype=np.float)
+                if label:
+                    encoding = np.concatenate([encoding, zeros])
+                else:
+                    encoding = np.concatenate([zeros, encoding])
+                encoding = np.expand_dims(encoding, axis=0)
+                doc_to_encodings[model.name].append(encoding)
+                labels = np.append(labels, label)
+                if encodings_kwargs['use_skills']:
+                    features = np.append(features, feature)
+            for model in encode_models:
+                doc_to_encodings[model.name] = np.concatenate(doc_to_encodings[model.name], axis=0)
+                i_doc_to_encodings[model.name] = doc_to_encodings[model.name][:-1]
+            i_feature = features[:-1]
+            o_label = labels[1:]
+            inputs = []
+            for model in encode_models:
+                inputs.append(i_doc_to_encodings[model.name])
+            if encodings_kwargs['use_skills']:
+                inputs.append(i_feature)
+            outputs = o_label
+            yield inputs, outputs
 
-    input_types = [tf.float32 for x in encode_models]
-    if encodings_kwargs['use_skills']:
-        input_types.append(tf.int32)
-    input_types.append(tf.float32)
-    output_types = input_types
-    types = (input_types, output_types)
-    input_shapes = [[None, encode_model.vector_size] for encode_model in encode_models]
-    if encodings_kwargs['use_skills']:
-        input_shapes.append([None])
-    input_shapes.append([None])
-    output_shapes = input_shapes
-    shapes = (input_shapes, output_shapes)
-    print(types)
-    print(shapes)
-    # Step 5 - Get Tensorflow Dataset
-    dataset = tf.data.Dataset.from_generator(
-        generator=generate_encodings,
-        output_types=types,
-        output_shapes=shapes
-    )
+    def generate_encodings_train():
+        doc_to_encodings = {}
+        i_doc_to_encodings = {}
+        for name, group in df.loc[df['user_id'].isin(train_users)].groupby('user_id'):
+            labels = np.array([], dtype=np.int)
+            for model in encode_models:
+                doc_to_encodings[model.name] = []
+            for problem, label, feature in list(zip(group['problem_id'].values, group['correct'].values,
+                                                    group['skills_with_answer'].values)):
+                encoding = encode_model.get_encoding(problem)
+                zeros = np.zeros(encoding.shape, dtype=np.float)
+                if label:
+                    encoding = np.concatenate([encoding, zeros])
+                else:
+                    encoding = np.concatenate([zeros, encoding])
+                encoding = np.expand_dims(encoding, axis=0)
+                doc_to_encodings[model.name].append(encoding)
+                labels = np.append(labels, label)
+                if encodings_kwargs['use_skills']:
+                    features = np.append(features, feature)
+            for model in encode_models:
+                doc_to_encodings[model.name] = np.concatenate(doc_to_encodings[model.name], axis=0)
+                i_doc_to_encodings[model.name] = doc_to_encodings[model.name][:-1]
+            i_feature = features[:-1]
+            o_label = labels[1:]
+            inputs = []
+            for model in encode_models:
+                inputs.append(i_doc_to_encodings[model.name])
+            if encodings_kwargs['use_skills']:
+                inputs.append(i_feature)
+            outputs = o_label
+            yield inputs, outputs
 
-
-    nb_users = len(df.groupby('user_id'))
-    if shuffle:
-        dataset = dataset.shuffle(buffer_size=nb_users)
-
-
-
-    print(dataset)
-    dataset = dataset.map(
-        lambda inputs, outputs: (
-            (inputs[0:-2], tf.one_hot(inputs[-2], depth=skill_depth), tf.expand_dims(inputs[-1], axis=-1)),
-            tf.concat(values=[
-                outputs[0:-2],
-                tf.one_hot(outputs[-2], depth=skill_depth),
-                tf.expand_dims(outputs[-1], axis=-1)],
-                axis=-1)
-        ) if encodings_kwargs['use_skills'] else
-        (
-            (inputs[0:-1], tf.expand_dims(inputs[-1], axis=-1)),
-            tf.concat(values=[
-                outputs[0:-1],
-                tf.expand_dims(outputs[-1], axis=-1)],
-                axis=-1)
+    def create_dataset(generate_encodings, users, encode_models, features_depth):
+        input_types = [tf.float32 for x in encode_models]
+        if encodings_kwargs['use_skills']:
+            input_types.append(tf.int32)
+        output_types = tf.int32
+        types = (input_types, output_types)
+        input_shapes = [[None, encode_model.vector_size] for encode_model in encode_models]
+        if encodings_kwargs['use_skills']:
+            input_shapes.append([None])
+        output_shapes = [None]
+        shapes = (input_shapes, output_shapes)
+        print(types)
+        print(shapes)
+        # Step 5 - Get Tensorflow Dataset
+        dataset = tf.data.Dataset.from_generator(
+            generator=generate_encodings,
+            output_types=types,
+            output_shapes=shapes
         )
-    )
 
-    # Step 6 - Encode categorical features and merge skills with labels to compute target loss.
-    # More info: https://github.com/tensorflow/tensorflow/issues/32142
+        nb_users = len(users)
+        if shuffle:
+            dataset = dataset.shuffle(buffer_size=nb_users)
 
-    print(dataset)
+        print(dataset)
+        dataset = dataset.map(
+            lambda inputs, outputs: (
+                (inputs[0:-1], tf.one_hot(inputs[-1], depth=features_depth)),
+                tf.expand_dims(outputs, axis=-1)
+            ) if encodings_kwargs['use_skills'] else
+            (
+                inputs,
+                tf.expand_dims(outputs, axis=-1)
+            )
+        )
 
-    # Step 7 - Pad sequences per batch
-    dataset = dataset.padded_batch(
-        batch_size=batch_size,
-        padding_values=MASK_VALUE,
-        drop_remainder=True
-    )
 
-    print(dataset)
+        # Step 7 - Pad sequences per batch
+        dataset = dataset.padded_batch(
+            batch_size=batch_size,
+            padding_values=MASK_VALUE,
+            drop_remainder=True
+        )
+        return dataset
 
-    length = nb_users // batch_size
+    encoding_sizes = [2*model.vector_size for model in encode_models]
+    train_set = create_dataset(generate_encodings_train, train_users, encode_models, features_depth)
+    val_set = create_dataset(generate_encodings_val, val_users, encode_models, features_depth)
+    test_set = create_dataset(generate_encodings_test, test_users, encode_models, features_depth)
+
     if encodings_kwargs['use_skills']:
-        return dataset, length, encoding_sizes, skill_depth
-    return dataset, length, encoding_sizes
+        return train_set, val_set, test_set, encoding_sizes, features_depth
+    return train_set, val_set, test_set, encoding_sizes
 
 
 def get_target(y_true, y_pred, nb_encodings=300, nb_skills=300):
