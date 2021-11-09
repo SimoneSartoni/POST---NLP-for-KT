@@ -18,7 +18,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
                  save_filepath='/kaggle/working/', texts_filepath='../input/',
                  min_questions=2, max_questions=25, n_rows=None, n_texts=None, personal_cleaning=True,
                  min_df=2, max_df=1.0, max_features=1000,
-                 keyed_vectors=""):
+                 keyed_vectors="", normalize_encoding=False):
     if dataset_name == 'assistment_2012':
         df, text_df = get_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
                                                 interactions_filepath=interactions_filepath,
@@ -51,7 +51,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             document_to_term = []
             labels = np.array([], dtype=np.int)
             for problem, label in list(zip(group['problem_id'].values, group['correct'].values)):
-                encoding = encode_model.get_encoding(problem)
+                encoding = encode_model.get_encoding(problem, norm=normalize_encoding)
                 zeros = np.zeros(encoding.shape, dtype=np.float)
                 if label:
                     encoding = np.concatenate([encoding, zeros])
@@ -72,7 +72,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             document_to_term = []
             labels = np.array([], dtype=np.int)
             for problem, label in list(zip(group['problem_id'].values, group['correct'].values)):
-                encoding = encode_model.get_encoding(problem)
+                encoding = encode_model.get_encoding(problem, norm=normalize_encoding)
                 zeros = np.zeros(encoding.shape, dtype=np.float)
                 if label:
                     encoding = np.concatenate([encoding, zeros])
@@ -93,7 +93,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             document_to_term = []
             labels = np.array([], dtype=np.int)
             for problem, label in list(zip(group['problem_id'].values, group['correct'].values)):
-                encoding = encode_model.get_encoding(problem)
+                encoding = encode_model.get_encoding(problem, norm=normalize_encoding)
                 zeros = np.zeros(encoding.shape, dtype=np.float)
                 if label:
                     encoding = np.concatenate([encoding, zeros])

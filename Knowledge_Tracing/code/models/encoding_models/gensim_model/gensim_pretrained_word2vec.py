@@ -121,13 +121,13 @@ class pretrained_word2vec(base_model):
         encoding = np.concatenate((pos_mean_encoding, neg_mean_encoding, target_encoding), axis=0)
         return encoding
 
-    def get_encoding(self, problem):
-        row = self.texts_df.loc[self.texts_df['problem_id']==problem]
+    def get_encoding(self, problem, norm=False):
+        row = self.texts_df.loc[self.texts_df['problem_id'] == problem]
         sentence_encoding = np.zeros(shape=self.vector_size)
         num = 0
         for word in row['body'].values:
-            if word in self.wordvectors:
-                sentence_encoding = sentence_encoding + np.array(self.wordvectors[word])
+            if word in self.wordvectors.vocab:
+                sentence_encoding = sentence_encoding + np.array(self.wordvectors.get_vector(word, norm=norm))
                 num += 1
         if len(row['body']) > 0:
             sentence_encoding = sentence_encoding / float(num)
