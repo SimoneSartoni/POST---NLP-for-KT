@@ -126,7 +126,6 @@ class pretrained_word2vec(base_model):
         sentence_encoding = np.zeros(shape=self.vector_size)
         num = 0
         for word in row['body'].values[0]:
-            print(word)
             if word in self.wordvectors.key_to_index:
                 sentence_encoding = sentence_encoding + np.array(self.wordvectors.get_vector(word, norm=norm))
                 num += 1
