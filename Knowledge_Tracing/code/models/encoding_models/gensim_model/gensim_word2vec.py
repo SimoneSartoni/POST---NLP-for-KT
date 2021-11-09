@@ -140,14 +140,13 @@ class word2vec(base_model):
 
     def get_encoding(self, problem, norm=False):
         row = self.texts_df.loc[self.texts_df['problem_id'] == problem]
-        print(row)
         sentence_encoding = np.zeros(shape=self.vector_size)
         num = 0
-        for word in row['body'].values:
+        for word in row['body'].values[0]:
             print(word)
-            """if word in self.wordvectors.key_to_index:
+            if word in self.wordvectors.key_to_index:
                 sentence_encoding = sentence_encoding + np.array(self.wordvectors.get_vector(word, norm=norm))
-                num += 1"""
+                num += 1
         if len(row['body']) > 0:
             sentence_encoding = sentence_encoding / float(num)
         return sentence_encoding
