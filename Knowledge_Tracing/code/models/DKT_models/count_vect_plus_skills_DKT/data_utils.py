@@ -168,6 +168,7 @@ def get_target(y_true, y_pred, nb_encodings=300, nb_skills=300):
 
     mask = 1 - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
     y_true = y_true * mask
+    y_pred = y_pred * mask
     encodings_true, y_true = tf.split(y_true, num_or_size_splits=[-1, 1], axis=-1)
     encodings_pred, y_pred = tf.split(y_pred, num_or_size_splits=[-1, 1], axis=-1)
 

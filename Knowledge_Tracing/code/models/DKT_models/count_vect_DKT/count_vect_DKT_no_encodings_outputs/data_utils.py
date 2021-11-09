@@ -171,5 +171,7 @@ def split_dataset(generator, total_size, test_fraction, val_fraction=None):
 
 
 def get_target(y_true, y_pred, nb_encodings=300):
-
+    mask = 1 - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
+    y_true = y_true * mask
+    y_pred = y_pred * mask
     return y_true, y_pred
