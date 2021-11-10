@@ -18,8 +18,8 @@ class complete_DKTModel(Model):
 
         dense_units = 0
         inputs = []
+        lstm_encodings = []
         if len(encoding_sizes) > 0:
-            lstm_encodings = []
             dense_units = len(encoding_sizes) * output_units_per_encoding
             for index in range(0, len(encoding_sizes)):
                 input_encoding = Input(shape=[None, encoding_sizes[index]], name='input_encoding_'+str(index))
@@ -32,8 +32,8 @@ class complete_DKTModel(Model):
             inputs.append(input_features)
             mask_features = layers.Masking(mask_value=-1.0)(input_features)
             lstm_features = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_features)
-
-        lstm = layers.concatenate(lstm_encodings.append(lstm_features))
+            lstm_encodings.append(lstm_features)
+        lstm = layers.concatenate(lstm_encodings)
 
         if nb_features:
             dense_units += output_units_per_encoding
