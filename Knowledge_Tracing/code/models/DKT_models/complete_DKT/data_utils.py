@@ -224,12 +224,12 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         print(dataset)
         dataset = dataset.map(
             lambda inputs, outputs: (
-                (inputs[0:-1], tf.one_hot(inputs[-1], depth=features_depth).cast(tf.float32)),
-                tf.expand_dims(outputs, axis=-1).cast(tf.float32)
+                (inputs[0:-1],  tf.cast(tf.one_hot(inputs[-1], depth=features_depth), tf.float32)),
+                tf.cast(tf.expand_dims(outputs, axis=-1), tf.float32)
             ) if encodings_kwargs['use_skills'] else
             (
-                (inputs[0:-1], inputs[-1].cast(tf.float32)),
-                tf.expand_dims(outputs, axis=-1).cast(tf.float32)
+                (inputs[0:-1], tf.cast(inputs[-1], tf.float32)),
+                tf.cast(tf.expand_dims(outputs, axis=-1), tf.float32)
             )
         )
 
