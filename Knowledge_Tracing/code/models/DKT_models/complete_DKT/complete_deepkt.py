@@ -69,7 +69,7 @@ class complete_DKTModel(Model):
         """
 
         def custom_loss(y_true, y_pred):
-            y_true, y_pred = NLP_get_target(y_true, y_pred, nb_skills=self.nb_skills)
+            y_true, y_pred = NLP_get_target(y_true, y_pred)
             return losses.binary_crossentropy(y_true, y_pred)
 
         super(complete_DKTModel, self).compile(
@@ -148,15 +148,15 @@ class complete_DKTModel(Model):
                 and what the model expects.
         """
         return super(complete_DKTModel, self).fit(x=dataset,
-                                                               epochs=epochs,
-                                                               verbose=verbose,
-                                                               callbacks=callbacks,
-                                                               validation_data=validation_data,
-                                                               shuffle=shuffle,
-                                                               initial_epoch=initial_epoch,
-                                                               steps_per_epoch=steps_per_epoch,
-                                                               validation_steps=validation_steps,
-                                                               validation_freq=validation_freq)
+                                                  epochs=epochs,
+                                                  verbose=verbose,
+                                                  callbacks=callbacks,
+                                                  validation_data=validation_data,
+                                                  shuffle=shuffle,
+                                                  initial_epoch=initial_epoch,
+                                                  steps_per_epoch=steps_per_epoch,
+                                                  validation_steps=validation_steps,
+                                                  validation_freq=validation_freq)
 
     def custom_evaluate(self,
                         dataset,

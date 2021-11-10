@@ -251,14 +251,12 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
     return train_set, val_set, test_set, encoding_sizes
 
 
-def get_target(y_true, y_pred, nb_encodings=300, nb_skills=300):
+def get_target(y_true, y_pred):
     # Get skills and labels from y_true
 
     mask = 1 - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
     y_true = y_true * mask
-    encodings_true, y_true = tf.split(y_true, num_or_size_splits=[-1, 1], axis=-1)
-    encodings_pred, y_pred = tf.split(y_pred, num_or_size_splits=[-1, 1], axis=-1)
-
+    y_pred = y_pred * mask
     # Get predictions for each skill
 
     return y_true, y_pred
