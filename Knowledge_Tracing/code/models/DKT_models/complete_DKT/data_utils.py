@@ -101,7 +101,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             for model in encode_models:
                 doc_to_encodings[model.name] = []
             for problem, label, feature in list(zip(group['problem_id'].values, group['correct'].values,
-                                                    group['skills_with_answer'].values)):
+                                                    group['skill_with_answer'].values)):
                 encoding = encode_model.get_encoding(problem)
                 zeros = np.zeros(encoding.shape, dtype=np.float)
                 if label:
@@ -134,7 +134,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             for model in encode_models:
                 doc_to_encodings[model.name] = []
             for problem, label, feature in list(zip(group['problem_id'].values, group['correct'].values,
-                                                    group['skills_with_answer'].values)):
+                                                    group['skill_with_answer'].values)):
                 encoding = encode_model.get_encoding(problem)
                 zeros = np.zeros(encoding.shape, dtype=np.float)
                 if label:
@@ -167,7 +167,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             for model in encode_models:
                 doc_to_encodings[model.name] = []
             for problem, label, feature in list(zip(group['problem_id'].values, group['correct'].values,
-                                                    group['skills_with_answer'].values)):
+                                                    group['skill_with_answer'].values)):
                 encoding = encode_model.get_encoding(problem)
                 zeros = np.zeros(encoding.shape, dtype=np.float)
                 if label:
