@@ -224,12 +224,12 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         print(dataset)
         dataset = dataset.map(
             lambda inputs, outputs: (
-                (inputs[0:-1], tf.one_hot(inputs[-1], depth=features_depth)),
-                tf.expand_dims(outputs, axis=-1)
+                (inputs[0:-1], tf.one_hot(inputs[-1], depth=features_depth).cast(tf.float32)),
+                tf.expand_dims(outputs, axis=-1).cast(tf.float32)
             ) if encodings_kwargs['use_skills'] else
             (
-                inputs,
-                tf.expand_dims(outputs, axis=-1)
+                (inputs[0:-1], inputs[-1].cast(tf.float32)),
+                tf.expand_dims(outputs, axis=-1).cast(tf.float32)
             )
         )
 
@@ -237,8 +237,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         # Step 7 - Pad sequences per batch
         dataset = dataset.padded_batch(
             batch_size=batch_size,
-            padding_values=((-1.0, -1),  -1) if encodings_kwargs['use_skills'] else (-1.0, -1),
-            drop_remainder=True
+            padding_values=-1.0
         )
         return dataset
 
