@@ -98,6 +98,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         i_doc_to_encodings = {}
         for name, group in df.loc[df['user_id'].isin(val_users)].groupby('user_id'):
             labels = np.array([], dtype=np.int)
+            features = np.array([], dtype=np.int)
             for model in encode_models:
                 doc_to_encodings[model.name] = []
             for problem, label, feature in list(zip(group['problem_id'].values, group['correct'].values,
@@ -131,6 +132,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         i_doc_to_encodings = {}
         for name, group in df.loc[df['user_id'].isin(test_users)].groupby('user_id'):
             labels = np.array([], dtype=np.int)
+            features = np.array([], dtype=np.int)
             for model in encode_models:
                 doc_to_encodings[model.name] = []
             for problem, label, feature in list(zip(group['problem_id'].values, group['correct'].values,
@@ -164,6 +166,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         i_doc_to_encodings = {}
         for name, group in df.loc[df['user_id'].isin(train_users)].groupby('user_id'):
             labels = np.array([], dtype=np.int)
+            features = np.array([], dtype=np.int)
             for model in encode_models:
                 doc_to_encodings[model.name] = []
             for problem, label, feature in list(zip(group['problem_id'].values, group['correct'].values,
