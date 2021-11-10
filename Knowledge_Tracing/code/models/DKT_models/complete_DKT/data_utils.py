@@ -124,6 +124,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
                 inputs.append(i_doc_to_encodings[model.name])
             if encodings_kwargs['use_skills']:
                 inputs.append(i_feature)
+            inputs = tuple(inputs)
             outputs = o_label
             yield inputs, outputs
 
@@ -158,6 +159,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
                 inputs.append(i_doc_to_encodings[model.name])
             if encodings_kwargs['use_skills']:
                 inputs.append(i_feature)
+            inputs = tuple(inputs)
             outputs = o_label
             yield inputs, outputs
 
@@ -192,6 +194,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
                 inputs.append(i_doc_to_encodings[model.name])
             if encodings_kwargs['use_skills']:
                 inputs.append(i_feature)
+            inputs = tuple(inputs)
             outputs = o_label
             yield inputs, outputs
 
