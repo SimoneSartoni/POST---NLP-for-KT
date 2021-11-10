@@ -198,13 +198,11 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             input_types.append(tf.int32)
         output_types = tf.int32
         types = (input_types, output_types)
-        encode_sizes = list()
-        encode_sizes += [[None, encode_model.vector_size] for encode_model in encode_models]
-        print(encode_sizes)
+        input_shapes = list()
+        input_shapes += [[None, encode_model.vector_size] for encode_model in encode_models]
+        print(input_shapes)
         if encodings_kwargs['use_skills']:
-            encode_sizes += [None]
-        print(encode_sizes)
-        input_shapes = (x for x in encode_sizes)
+            input_shapes += [None]
         print(input_shapes)
         output_shapes = [None]
         shapes = (input_shapes, output_shapes)
