@@ -200,7 +200,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         input_types = tuple(input_types)
         types = (input_types, output_types)
         input_shapes = []
-        input_shapes += [[None, encode_model.vector_size] for encode_model in encode_models]
+        input_shapes += [[None, 2*encode_model.vector_size] for encode_model in encode_models]
         print(input_shapes)
         if encodings_kwargs['use_skills']:
             input_shapes += [[None]]
@@ -237,7 +237,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         # Step 7 - Pad sequences per batch
         dataset = dataset.padded_batch(
             batch_size=batch_size,
-            padding_values=MASK_VALUE,
+            padding_values=((-1.0, -1),  -1) if encodings_kwargs['use_skills'] else (-1.0, -1),
             drop_remainder=True
         )
         return dataset
