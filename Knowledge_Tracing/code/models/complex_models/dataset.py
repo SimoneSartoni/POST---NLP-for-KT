@@ -94,11 +94,11 @@ def get_dataloaders(batch_size=32, shuffle=True, dataset_name='assistment_2012',
 
     # grouping based on user_id to get the data supply
     print("Grouping users...")
-    nb_questions = len(df['problem_id'].unique())
+    nb_questions = len(df['question_id'].unique())
     nb_skills = len(df['skill'].unique())
 
     group = df.groupby("user_id").apply(lambda r: (r.question_id.values, r.correct.values,
-                                                   r.prior_question_elapsed_time.values, r.skill.values))
+                                                   r.elapsed_time.values, r.skill.values))
 
     print(group)
 
