@@ -55,7 +55,6 @@ class EncoderBlock(nn.Module):
     def forward(self, input_encoding, input_skill, first_block=True):
         if first_block:
             # _exe = self.exercise_embed(input_e)
-            print(input_skill.device)
             _skill = self.skill_embed(input_skill)
             position_encoded = pos_encode(self.seq_len).cuda()
             _pos = self.position_embed(position_encoded)
