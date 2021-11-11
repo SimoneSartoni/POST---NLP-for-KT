@@ -90,7 +90,7 @@ def get_dataloaders(batch_size=32, shuffle=True, dataset_name='assistment_2012',
     del text_df
     gc.collect()
     print(df)
-    df = df[['user_id', 'problem_id', 'correct', 'skill', 'start_time'], 'end_time']
+    df = df[['user_id', 'problem_id', 'correct', 'skill', 'start_time', 'end_time']]
 
     # grouping based on user_id to get the data supply
     print("Grouping users...")
