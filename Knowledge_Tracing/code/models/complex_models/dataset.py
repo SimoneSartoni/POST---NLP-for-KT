@@ -32,13 +32,13 @@ class DKTDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        unique_question_id, text_id, answered_correctly, response_time, exe_skill = self.data[idx]
+        unique_question_id, text_id, answered_correctly, response_elapsed_time, exe_skill = self.data[idx]
         seq_len = len(unique_question_id)
 
         q_ids = np.zeros(self.max_seq, dtype=int)
         text_ids = np.zeros(self.max_seq, dtype=int)
         ans = np.zeros(self.max_seq, dtype=int)
-        r_time = np.zeros(self.max_seq, dtype=int)
+        r_elapsed_time = np.zeros(self.max_seq, dtype=int)
         skill = np.zeros(self.max_seq, dtype=int)
         input_label = np.zeros(self.max_seq, dtype=int)
 
@@ -46,18 +46,18 @@ class DKTDataset(Dataset):
             q_ids[:] = unique_question_id[-self.max_seq:]
             text_ids[:] = text_id[-self.max_seq]
             ans[:] = answered_correctly[-self.max_seq:]
-            r_time[:] = response_time[-self.max_seq:]
+            r_elapsed_time[:] = response_elapsed_time[-self.max_seq:]
             skill[:] = exe_skill[-self.max_seq:]
         else:
             q_ids[-seq_len:] = unique_question_id
             text_ids[-seq_len:] = text_id
             ans[-seq_len:] = answered_correctly
-            r_time[-seq_len:] = response_time
+            r_elapsed_time[-seq_len:] = response_elapsed_time
             skill[-seq_len:] = exe_skill
 
         input_ids = q_ids
         input_text_ids = text_ids
-        input_rtime = r_time[:-1].copy()
+        input_r_elapsed_time = r_elapsed_time[:-1].copy().astype(np.int)
         input_skill = skill
         input_label[1:] = ans[:-1]
 
@@ -66,8 +66,8 @@ class DKTDataset(Dataset):
         target_skill = input_skill[:]
         target_label = ans
 
-        encoder_inputs = {"question_id": input_ids, "text_id": input_text_ids, "rtime": input_rtime.astype(np.int), "skill": input_skill}
-        decoder_inputs = {"label": input_label}
+        encoder_inputs = {"question_id": input_ids, "text_id": input_text_ids, "skill": input_skill}
+        decoder_inputs = {"label": input_label, "r_elapsed_time": input_r_elapsed_time}
         decoder_targets = {"target_id": target_ids, "target_text_id": target_text_ids, "target_skill": target_skill, 'target_label': target_label}
         inputs = {}
         inputs['encoder'] = encoder_inputs
