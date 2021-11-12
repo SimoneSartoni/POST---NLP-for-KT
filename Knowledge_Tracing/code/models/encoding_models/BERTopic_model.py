@@ -110,7 +110,7 @@ class BERTopic_model(base_model):
         return item_scores, correct_ids
 
     def get_encoding(self, problem):
-        row = self.texts_df.loc[self.texts_df['problem_id'] == problem]
+        row = self.texts_df.loc[self.texts_df['question_id'] == problem]
         encoding = np.array(self.topic_model.transform(row['body']))
         return encoding
 

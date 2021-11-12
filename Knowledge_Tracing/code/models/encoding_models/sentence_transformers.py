@@ -125,7 +125,7 @@ class sentence_transformer(base_model):
         return encoding
 
     def get_encoding(self, problem):
-        row = self.texts_df.loc[self.texts_df['problem_id'] == problem]
+        row = self.texts_df.loc[self.texts_df['question_id'] == problem]
         encoding = np.array(self.vectors[row['body']])
         return encoding
 

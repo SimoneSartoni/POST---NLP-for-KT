@@ -139,7 +139,7 @@ class word2vec(base_model):
         return encoding
 
     def get_encoding(self, problem, norm=False):
-        row = self.texts_df.loc[self.texts_df['problem_id'] == problem]
+        row = self.texts_df.loc[self.texts_df['question_id'] == problem]
         sentence_encoding = np.zeros(shape=self.vector_size)
         num = 0
         for word in row['body'].values[0]:
