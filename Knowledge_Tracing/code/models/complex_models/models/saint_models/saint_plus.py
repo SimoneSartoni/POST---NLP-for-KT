@@ -22,7 +22,7 @@ class SAINT_plus(nn.Module):
         encoder_inputs, decoder_inputs = inputs['encoder'], inputs['decoder']
         in_exercise, in_skill, in_response = encoder_inputs['question_id'], encoder_inputs['skill'], \
                                              decoder_inputs['label']
-        in_elapsed_time = decoder_inputs['r_elapsed_time']
+        in_elapsed_time = decoder_inputs['r_elapsed_time'].unsqueeze(-1).float()
         for n in range(self.n_encoder):
             if n >= 1:
                 first_block = False
