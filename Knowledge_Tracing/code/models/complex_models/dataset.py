@@ -18,13 +18,13 @@ class DKTDataset(Dataset):
         self.max_seq = max_seq
         self.data = []
 
-        for que, ans, res_time, exe_cat in self.samples:
-            if len(que) >= self.max_seq:
-                self.data.extend([(que[l:l + self.max_seq], ans[l:l + self.max_seq], res_time[l:l + self.max_seq],
-                                   exe_cat[l:l + self.max_seq]) for
-                                  l in range(len(que)) if l % self.max_seq == 0])
-            elif self.max_seq > len(que) > 1:
-                self.data.append((que, ans, res_time, exe_cat))
+        for unique_question_id, text_id, ans, res_time, exe_skill in self.samples:
+            if len(unique_question_id) >= self.max_seq:
+                self.data.extend([(unique_question_id[l:l + self.max_seq], text_id[l:l + self.max_seq],
+                                   ans[l:l + self.max_seq], res_time[l:l + self.max_seq], exe_skill[l:l + self.max_seq])
+                                  for l in range(len(unique_question_id)) if l % self.max_seq == 0])
+            elif self.max_seq > len(unique_question_id) > 1:
+                self.data.append((unique_question_id, text_id, ans, res_time, exe_skill))
             else:
                 continue
 
@@ -32,38 +32,43 @@ class DKTDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        content_ids, answered_correctly, response_time, exe_category = self.data[idx]
-        seq_len = len(content_ids)
+        unique_question_id, text_id, answered_correctly, response_time, exe_skill = self.data[idx]
+        seq_len = len(unique_question_id)
 
         q_ids = np.zeros(self.max_seq, dtype=int)
+        text_ids = np.zeros(self.max_seq, dtype=int)
         ans = np.zeros(self.max_seq, dtype=int)
         r_time = np.zeros(self.max_seq, dtype=int)
-        exe_cat = np.zeros(self.max_seq, dtype=int)
+        skill = np.zeros(self.max_seq, dtype=int)
         input_label = np.zeros(self.max_seq, dtype=int)
 
         if seq_len >= self.max_seq:
-            q_ids[:] = content_ids[-self.max_seq:]
+            q_ids[:] = unique_question_id[-self.max_seq:]
+            text_ids[:] = text_id[-self.max_seq]
             ans[:] = answered_correctly[-self.max_seq:]
             r_time[:] = response_time[-self.max_seq:]
-            exe_cat[:] = exe_category[-self.max_seq:]
+            skill[:] = exe_skill[-self.max_seq:]
         else:
-            q_ids[-seq_len:] = content_ids
+            q_ids[-seq_len:] = unique_question_id
+            text_ids[-seq_len:] = text_id
             ans[-seq_len:] = answered_correctly
             r_time[-seq_len:] = response_time
-            exe_cat[-seq_len:] = exe_category
+            skill[-seq_len:] = exe_skill
 
         input_ids = q_ids
+        input_text_ids = text_ids
         input_rtime = r_time[:-1].copy()
-        input_skill = exe_cat
+        input_skill = skill
         input_label[1:] = ans[:-1]
 
         target_ids = input_ids[:]
+        target_text_ids = input_text_ids
         target_skill = input_skill[:]
         target_label = ans
 
-        encoder_inputs = {"question_id": input_ids, "rtime": input_rtime.astype(np.int), "skill": input_skill}
+        encoder_inputs = {"question_id": input_ids, "text_id": input_text_ids, "rtime": input_rtime.astype(np.int), "skill": input_skill}
         decoder_inputs = {"label": input_label}
-        decoder_targets = {"target_id": target_ids, "target_skill": target_skill, 'target_label': target_label}
+        decoder_targets = {"target_id": target_ids, "target_text_id": target_text_ids, "target_skill": target_skill, 'target_label': target_label}
         inputs = {}
         inputs['encoder'] = encoder_inputs
         inputs['decoder'] = decoder_inputs
@@ -90,14 +95,14 @@ def get_dataloaders(batch_size=32, shuffle=True, dataset_name='assistment_2012',
     del text_df
     gc.collect()
     print(df)
-    df = df[["user_id", "question_id", "correct", "elapsed_time", "skill"]]
+    df = df[["user_id", "problem_id", "question_id", "correct", "elapsed_time", "skill"]]
 
     # grouping based on user_id to get the data supply
     print("Grouping users...")
     nb_questions = len(df['question_id'].unique())
     nb_skills = len(df['skill'].unique())
 
-    group = df.groupby("user_id").apply(lambda r: (r.question_id.values, r.correct.values,
+    group = df.groupby("user_id").apply(lambda r: (r.question_id.values, r.problem_id.values, r.correct.values,
                                                    r.elapsed_time.values, r.skill.values))
 
     print(group)
