@@ -41,6 +41,7 @@ class DKTDataset(Dataset):
         r_elapsed_time = np.zeros(self.max_seq, dtype=int)
         skill = np.zeros(self.max_seq, dtype=int)
         input_label = np.zeros(self.max_seq, dtype=int)
+        input_r_elapsed_time = np.zeros(self.max_seq, dtype=int)
 
         if seq_len >= self.max_seq:
             q_ids[:] = unique_question_id[-self.max_seq:]
@@ -57,7 +58,7 @@ class DKTDataset(Dataset):
 
         input_ids = q_ids
         input_text_ids = text_ids
-        input_r_elapsed_time = r_elapsed_time[:-1].copy().astype(np.int)
+        input_r_elapsed_time[1:] = r_elapsed_time[:-1].copy().astype(np.int)
         input_skill = skill
         input_label[1:] = ans[:-1]
 
