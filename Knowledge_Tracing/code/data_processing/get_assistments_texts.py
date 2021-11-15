@@ -80,13 +80,12 @@ def get_assistments_texts(personal_cleaning=True, texts_filepath='../input/', n_
     else:
         df = pd.read_csv(texts_filepath, low_memory=False, dtype=input_types)
     # Using the preprocessing function to preprocess the tweet data
-    if personal_cleaning:
-        df['body'] = df['body'].apply(lambda x: remove_issues(remove_stopwords(escape_values(x))))
-    else:
-        preprocess_data(df, 'body')
-        # Using tokenizer and removing the stopwords
-        rem_stopwords_tokenize(df, 'body')
+    df['body'] = df['body'].apply(lambda x: remove_issues(remove_stopwords(escape_values(x))))
+    preprocess_data(df, 'body')
+    # Using tokenizer and removing the stopwords
+    rem_stopwords_tokenize(df, 'body')
     # Converting all the texts back to sentences
+    lemmatize_all(df, 'body')
     if make_sentences_flag:
         make_sentences(df, 'body')
     return df
