@@ -7,8 +7,7 @@ from bs4 import BeautifulSoup
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
-from Knowledge_Tracing.code.data_processing.data_processing import remove_stopwords, remove_issues, remove_duplications, \
-    escape_values
+from Knowledge_Tracing.code.data_processing.data_processing import remove_issues
 
 
 # Function to preprocess the tweets data
@@ -26,7 +25,7 @@ def preprocess_data(data, name):
         return text_with_clean_tags
 
     data[name].apply(lambda x: clean_tags(x))
-    print("after claen tags")
+    print("after clean tags")
     print(data[name])
     # Code to remove the Hashtags from the text
     data[name] = data[name].apply(lambda x: re.sub(r'\B#\S+', '', str(x)))
@@ -44,6 +43,21 @@ def preprocess_data(data, name):
 
 # This function is to remove stopwords from a particular column and to tokenize it
 def rem_stopwords_tokenize(data, name):
+    def escape_values(text):
+        text = str(text).replace(' ', '#').replace('/', '#slash#').replace('<', '#lessthan#').replace('>',
+                                                                                                      '#morethan#').replace(
+            ",", "#comma#").replace(";", "#semicolon#").replace(".", "#dot#").replace("?", "#questionmark#").replace(
+            "!", "exclamationpoint").replace("=", "#equal#").replace("\\", "#").replace("%", "#percentage#").replace(
+            "\\t", "#").replace("\\n", "#").replace("\t", "#").replace("\n", "#").replace('\"', "##").replace(
+            "(", "#openroundbracket#").replace(")", "#closeroundbracket#").replace("[", "#opensquarebracket#").replace(
+            "]", "#closesquarebracket#").replace("_", "#underscore#").replace("&", "#ampersand#").\
+            replace("}", "#closebrace#").replace("{", "#openbrace#").replace("+", "#plus#").replace("-", "#minus#").\
+            replace("*", "#multiplication#").replace("€", "#euros#").replace("$", "#dollar#").\
+            replace("^", "#powerof#exponent#").replace(":", "#colon#")
+        words = str(text).split('#')
+        text = ' '.join(words)
+        return text
+
     def getting(sen):
         example_sent = sen
         stop_words = set(stopwords.words('english'))
@@ -57,7 +71,7 @@ def rem_stopwords_tokenize(data, name):
 
     x = []
     for i in data[name].values:
-        x.append(getting(i))
+        x.append(getting(escape_values(i)))
     data[name] = x
 
 

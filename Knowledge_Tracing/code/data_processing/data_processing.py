@@ -20,14 +20,14 @@ def escape_values(question):
     def replace(text):
         text = str(text).replace(' ', '#').replace('/', '#slash#').replace('<', '#lessthan#').replace('>',
                                                                                                       '#morethan#').replace(
-            ",", "#").replace(";", "#").replace(".", "#").replace("?", "#").replace(
+            ",", "#comma#").replace(";", "#semicolon#").replace(".", "#dot#").replace("?", "#questionmark#").replace(
             "!", "exclamationpoint").replace("=", "#equal#").replace("\\", "#").replace("%", "#percentage#").replace(
             "\\t", "#").replace("\\n", "#").replace("\t", "#").replace("\n", "#").replace('\"', "##").replace(
             "(", "#openroundbracket#").replace(")", "#closeroundbracket#").replace("[", "#opensquarebracket#").replace(
-            "]", "#closesquarebracket#").replace("_", "#underscore#").replace("&", "#ampersand#").replace("}",
-                                                                                                          "#closebrace#").replace(
-            "{", "#openbrace#").replace("+", "#plus#").replace("-", "#minus#").replace("*", "#multiplication#").replace(
-            "€", "#euros#").replace("$", "#dollar#").replace("^", "#powerof#exponent#")
+            "]", "#closesquarebracket#").replace("_", "#underscore#").replace("&", "#ampersand#").\
+            replace("}", "#closebrace#").replace("{", "#openbrace#").replace("+", "#plus#").replace("-", "#minus#").\
+            replace("*", "#multiplication#").replace("€", "#euros#").replace("$", "#dollar#").\
+            replace("^", "#powerof#exponent#").replace(":", "#colon#")
         words = str(text).split('#')
         words = list(set(words))
         return words
