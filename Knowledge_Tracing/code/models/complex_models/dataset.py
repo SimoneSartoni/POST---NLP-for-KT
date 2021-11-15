@@ -1,15 +1,12 @@
 import Knowledge_Tracing.code.models.complex_models.config as config
-from Knowledge_Tracing.code.utils.utils import try_parsing_date
-from datetime import datetime
 
-import pandas as pd
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
 import gc
 from sklearn.model_selection import train_test_split
 
-from Knowledge_Tracing.code.data_processing.get_data_assistments_2009 import get_data_assistments_2009
-from Knowledge_Tracing.code.data_processing.get_data_assistments_2012 import get_data_assistments_2012
+from Knowledge_Tracing.code.data_processing.load_preprocessed.load_preprocessed_data import load_preprocessed_texts, \
+    load_preprocessed_interactions
 
 
 class DKTDataset(Dataset):
@@ -77,24 +74,10 @@ class DKTDataset(Dataset):
         return inputs, decoder_targets
 
 
-def get_dataloaders(batch_size=32, shuffle=True, dataset_name='assistment_2012',
-                 interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
-                                       ".csv",
-                 save_filepath='/kaggle/working/', texts_filepath='../input/', min_df=2, max_df=1.0,
-                 min_questions=2, max_features=1000, max_questions=25, n_rows=None, n_texts=None,
-                 personal_cleaning=True):
-    if dataset_name == 'assistment_2012':
-        df, text_df = get_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
-                                                interactions_filepath=interactions_filepath,
-                                                texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
-                                                make_sentences_flag=False, personal_cleaning=personal_cleaning)
-    elif dataset_name == 'assistment_2009':
-        df, text_df = get_data_assistments_2009(min_questions=min_questions, max_questions=max_questions,
-                                                interactions_filepath=interactions_filepath,
-                                                texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
-                                                make_sentences_flag=False, personal_cleaning=personal_cleaning, )
-    del text_df
-    gc.collect()
+def get_dataloaders(interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
+                                       ".csv", texts_filepath='../input/', interaction_sequence_len=25, personal_cleaning=True):
+
+    df = load_preprocessed_interactions(interactions_filepath=interactions_filepath)
     print(df)
     df = df[["user_id", "problem_id", "question_id", "correct", "elapsed_time", "skill"]]
 
@@ -113,9 +96,9 @@ def get_dataloaders(batch_size=32, shuffle=True, dataset_name='assistment_2012',
     train, val = train_test_split(train, test_size=0.2)
     print("train size: ", train.shape, "validation size: ", val.shape)
 
-    train_dataset = DKTDataset(train.values, max_seq=max_questions)
-    val_dataset = DKTDataset(val.values, max_seq=max_questions)
-    test_dataset = DKTDataset(test.values, max_seq=max_questions)
+    train_dataset = DKTDataset(train.values, max_seq=interaction_sequence_len)
+    val_dataset = DKTDataset(val.values, max_seq=interaction_sequence_len)
+    test_dataset = DKTDataset(test.values, max_seq=interaction_sequence_len)
     train_loader = DataLoader(train_dataset,
                               batch_size=config.BATCH_SIZE,
                               num_workers=2,

@@ -7,8 +7,8 @@ from sklearn.model_selection import train_test_split
 from Knowledge_Tracing.code.models.encoding_models.count_vectorizer import count_vectorizer
 from Knowledge_Tracing.code.models.encoding_models.sentence_transformers import sentence_transformer
 from Knowledge_Tracing.code.models.encoding_models.gensim_model.gensim_pretrained_word2vec import pretrained_word2vec
-from Knowledge_Tracing.code.data_processing.get_data_assistments_2012 import get_data_assistments_2012
-from Knowledge_Tracing.code.data_processing.get_data_assistments_2009 import get_data_assistments_2009
+from code.data_processing.preprocess.process_data_assistments_2012 import process_data_assistments_2012
+from code.data_processing.preprocess.process_data_assistments_2009 import process_data_assistments_2009
 
 MASK_VALUE = -1.0  # The masking value cannot be zero.
 
@@ -21,27 +21,27 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
                  **encodings_kwargs):
 
     if dataset_name == 'assistment_2012':
-        df, text_df = get_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
-                                                interactions_filepath=interactions_filepath,
-                                                texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
-                                                make_sentences_flag=False, personal_cleaning=False)
+        df, text_df = process_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
+                                                    interactions_filepath=interactions_filepath,
+                                                    texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
+                                                    make_sentences_flag=False, personal_cleaning=False)
         del df
         gc.collect()
-        df, text_df_sentences = get_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
-                                                interactions_filepath=interactions_filepath,
-                                                texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
-                                                make_sentences_flag=True, personal_cleaning=False)
+        df, text_df_sentences = process_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
+                                                              interactions_filepath=interactions_filepath,
+                                                              texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
+                                                              make_sentences_flag=True, personal_cleaning=False)
     elif dataset_name == 'assistment_2009':
-        df, text_df = get_data_assistments_2009(min_questions=min_questions, max_questions=max_questions,
-                                                interactions_filepath=interactions_filepath,
-                                                texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
-                                                make_sentences_flag=False, personal_cleaning=False)
+        df, text_df = process_data_assistments_2009(min_questions=min_questions, max_questions=max_questions,
+                                                    interactions_filepath=interactions_filepath,
+                                                    texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
+                                                    make_sentences_flag=False, personal_cleaning=False)
         del df
         gc.collect()
-        df, text_df_sentences = get_data_assistments_2009(min_questions=min_questions, max_questions=max_questions,
-                                                interactions_filepath=interactions_filepath,
-                                                texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
-                                                make_sentences_flag=True, personal_cleaning=False)
+        df, text_df_sentences = process_data_assistments_2009(min_questions=min_questions, max_questions=max_questions,
+                                                              interactions_filepath=interactions_filepath,
+                                                              texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
+                                                              make_sentences_flag=True, personal_cleaning=False)
 
     coloumns = ['question_id', 'user_id', 'problem_id', 'correct']
     if encodings_kwargs['use_skills']:

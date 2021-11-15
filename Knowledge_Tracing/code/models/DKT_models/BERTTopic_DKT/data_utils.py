@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
-from Knowledge_Tracing.code.data_processing.get_data_assistments_2012 import get_data_assistments_2012
-from Knowledge_Tracing.code.data_processing.get_data_assistments_2009 import get_data_assistments_2009
+from code.data_processing.preprocess.process_data_assistments_2012 import process_data_assistments_2012
+from code.data_processing.preprocess.process_data_assistments_2009 import process_data_assistments_2009
 from Knowledge_Tracing.code.models.encoding_models.BERTopic_model import BERTopic_model
 
 MASK_VALUE = -1.0  # The masking value cannot be zero.
@@ -15,15 +15,15 @@ def load_dataset_NLP_skills(batch_size=32, shuffle=True, dataset_name='assistmen
                             min_questions=2, max_features=1000, max_questions=25, n_rows=None, n_texts=None,
                             personal_cleaning=True):
     if dataset_name == 'assistment_2012':
-        df, text_df = get_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
-                                                interactions_filepath=interactions_filepath,
-                                                texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
-                                                make_sentences_flag=True, personal_cleaning=personal_cleaning)
+        df, text_df = process_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
+                                                    interactions_filepath=interactions_filepath,
+                                                    texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
+                                                    make_sentences_flag=True, personal_cleaning=personal_cleaning)
     elif dataset_name == 'assistment_2009':
-        df, text_df = get_data_assistments_2009(min_questions=min_questions, max_questions=max_questions,
-                                                interactions_filepath=interactions_filepath,
-                                                texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
-                                                make_sentences_flag=True, personal_cleaning=personal_cleaning, )
+        df, text_df = process_data_assistments_2009(min_questions=min_questions, max_questions=max_questions,
+                                                    interactions_filepath=interactions_filepath,
+                                                    texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
+                                                    make_sentences_flag=True, personal_cleaning=personal_cleaning, )
 
     print(df)
     df = df[['user_id', 'problem_id', 'correct']]

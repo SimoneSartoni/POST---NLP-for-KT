@@ -3,23 +3,17 @@ from datetime import datetime
 
 import numpy as np
 import pandas as pd
-import psutil
-import gc
-from sklearn.metrics import roc_auc_score, accuracy_score
 
-from torch.nn.utils.rnn import pad_sequence
-
-import torch
 
 from Knowledge_Tracing.code.utils.utils import try_parsing_date
 from Knowledge_Tracing.code.data_processing.get_assistments_texts import get_assistments_texts
 
 
-def get_data_assistments_2009(min_questions=2, max_questions=50,
-                              interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4"
+def process_data_assistments_2009(min_questions=2, max_questions=50,
+                                  interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4"
                                                     "-final.csv",
-                              texts_filepath='../input/', n_rows=None, n_texts=None, personal_cleaning=True,
-                              make_sentences_flag=True):
+                                  texts_filepath='../input/', output_filepath="/kaggle/working/", n_rows=None,
+                                  n_texts=None, personal_cleaning=True, make_sentences_flag=True):
     dtypes = {'user_id': 'int32', 'problem_id': 'int64',
               'correct': 'float64', 'skill_id': "string",
               'order_id': "string"}
@@ -47,10 +41,8 @@ def get_data_assistments_2009(min_questions=2, max_questions=50,
 
     train_df = train_df.drop_duplicates(subset=['user_id', 'problem_id'], keep='first').reset_index(drop=True)
 
-
-
     # Step 1 - Remove users with less than a certain number of answers
-    # train_df = train_df.groupby('user_id').filter(lambda q: len(q) >= min_questions).copy()
+    train_df = train_df.groupby('user_id').filter(lambda q: len(q) >= min_questions).copy()
     print("shape after at least 2 interactions:", train_df.shape)
 
     # Step 2.1 - Fill no skilled question with "no_skill" token
@@ -85,4 +77,6 @@ def get_data_assistments_2009(min_questions=2, max_questions=50,
     texts_df['question_id'], _ = pd.factorize(texts_df['problem_id'], sort=True)
     train_df['question_id'], _ = pd.factorize(train_df['problem_id'], sort=True)
 
+    texts_df.to_csv(output_filepath + 'texts_processed.csv')
+    train_df.to_csv(output_filepath + 'interactions_processed.csv')
     return train_df, texts_df

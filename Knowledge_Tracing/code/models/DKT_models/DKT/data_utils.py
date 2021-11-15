@@ -1,11 +1,9 @@
-import pandas as pd
 import tensorflow as tf
-import numpy as np
 from sklearn.model_selection import train_test_split
 
 MASK_VALUE = -1.  # The masking value cannot be zero.
-from Knowledge_Tracing.code.data_processing.get_data_assistments_2012 import get_data_assistments_2012
-from Knowledge_Tracing.code.data_processing.get_data_assistments_2009 import get_data_assistments_2009
+from Knowledge_Tracing.code.data_processing.load_preprocessed.load_preprocessed_data import load_preprocessed_texts, \
+    load_preprocessed_interactions
 
 
 def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
@@ -14,16 +12,8 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
                  save_filepath='/kaggle/working/', texts_filepath='../input/', min_df=2, max_df=1.0,
                  min_questions=2, max_features=1000, max_questions=25, n_rows=None, n_texts=None,
                  personal_cleaning=True):
-    if dataset_name == 'assistment_2012':
-        df, loaded_dataset = get_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
-                                                       interactions_filepath=interactions_filepath,
-                                                       texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
-                                                       make_sentences_flag=False, personal_cleaning=personal_cleaning)
-    elif dataset_name == 'assistment_2009':
-        df, loaded_dataset = get_data_assistments_2009(min_questions=min_questions, max_questions=max_questions,
-                                                       interactions_filepath=interactions_filepath,
-                                                       texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
-                                                       make_sentences_flag=False, personal_cleaning=personal_cleaning)
+    df = load_preprocessed_interactions(interactions_filepath=interactions_filepath)
+
     # Step 3 - Cross skill id with answer to form a synthetic feature
     df['skill_with_answer'] = df['skill'] * 2 + df['correct']
     df['skill_with_answer'] = df['skill_with_answer'].astype('int32')

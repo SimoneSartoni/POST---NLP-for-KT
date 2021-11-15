@@ -227,7 +227,7 @@ def generate_sequences_for_training_RKT(problems, real_lens, corrects, batch_siz
               'shuffle': True}
     process = psutil.Process(os.getpid())
     gc.enable()
-    # data = np.load('../input/assesments-12-13-precessed-data/2012-2013-data-with-predictions-4-final.csv.npz')
+    # data = np.load_preprocessed('../input/assesments-12-13-precessed-data/2012-2013-data-with-predictions-4-final.csv.npz')
     skill_num, pro_num = 0, len(problems)
     timestamps = []
     y = []
