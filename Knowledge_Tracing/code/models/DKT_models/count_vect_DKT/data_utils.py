@@ -29,7 +29,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
                                                 make_sentences_flag=False, personal_cleaning=personal_cleaning, )
 
     print(df)
-    df = df[['user_id', 'problem_id', 'correct']]
+    df = df[['question_id', 'user_id', 'problem_id', 'correct']]
     print(df)
     # Step 3.1 - Generate NLP extracted encoding for problems
     encode_model = count_vectorizer(min_df=min_df, max_df=max_df, binary=False, max_features=max_features)
@@ -48,7 +48,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         for name, group in df.loc[df['user_id'].isin(val_users)].groupby('user_id'):
             document_to_term = []
             labels = np.array([], dtype=np.int)
-            for problem, label in list(zip(group['problem_id'].values, group['correct'].values)):
+            for problem, label in list(zip(group['question_id'].values, group['correct'].values)):
                 encoding = encode_model.get_encoding(problem)
                 encoding = np.expand_dims(encoding, axis=0)
                 document_to_term.append(encoding)
@@ -66,7 +66,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         for name, group in df.loc[df['user_id'].isin(test_users)].groupby('user_id'):
             document_to_term = []
             labels = np.array([], dtype=np.int)
-            for problem, label in list(zip(group['problem_id'].values, group['correct'].values)):
+            for problem, label in list(zip(group['question_id'].values, group['correct'].values)):
                 encoding = encode_model.get_encoding(problem)
                 encoding = np.expand_dims(encoding, axis=0)
                 document_to_term.append(encoding)
@@ -83,7 +83,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         for name, group in df.loc[df['user_id'].isin(train_users)].groupby('user_id'):
             document_to_term = []
             labels = np.array([], dtype=np.int)
-            for problem, label in list(zip(group['problem_id'].values, group['correct'].values)):
+            for problem, label in list(zip(group['question_id'].values, group['correct'].values)):
                 encoding = encode_model.get_encoding(problem)
                 encoding = np.expand_dims(encoding, axis=0)
                 document_to_term.append(encoding)

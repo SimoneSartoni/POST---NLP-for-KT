@@ -43,7 +43,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
                                                 texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
                                                 make_sentences_flag=True, personal_cleaning=False)
 
-    coloumns = ['user_id', 'problem_id', 'correct']
+    coloumns = ['question_id', 'user_id', 'problem_id', 'correct']
     if encodings_kwargs['use_skills']:
         coloumns.append('skill_with_answer')
         # Step 3 - Cross skill id with answer to form a synthetic feature
@@ -100,7 +100,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             features = np.array([], dtype=np.int)
             for model in encode_models:
                 doc_to_encodings[model.name] = []
-            for problem, label, feature in list(zip(group['problem_id'].values, group['correct'].values,
+            for problem, label, feature in list(zip(group['question_id'].values, group['correct'].values,
                                                     group['skill_with_answer'].values)):
                 encoding = encode_model.get_encoding(problem)
                 zeros = np.zeros(encoding.shape, dtype=np.float)
@@ -135,7 +135,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             features = np.array([], dtype=np.int)
             for model in encode_models:
                 doc_to_encodings[model.name] = []
-            for problem, label, feature in list(zip(group['problem_id'].values, group['correct'].values,
+            for problem, label, feature in list(zip(group['question_id'].values, group['correct'].values,
                                                     group['skill_with_answer'].values)):
                 encoding = encode_model.get_encoding(problem)
                 zeros = np.zeros(encoding.shape, dtype=np.float)
@@ -170,7 +170,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             features = np.array([], dtype=np.int)
             for model in encode_models:
                 doc_to_encodings[model.name] = []
-            for problem, label, feature in list(zip(group['problem_id'].values, group['correct'].values,
+            for problem, label, feature in list(zip(group['question_id'].values, group['correct'].values,
                                                     group['skill_with_answer'].values)):
                 encoding = encode_model.get_encoding(problem)
                 zeros = np.zeros(encoding.shape, dtype=np.float)
