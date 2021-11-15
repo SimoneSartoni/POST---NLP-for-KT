@@ -9,7 +9,7 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from Knowledge_Tracing.code.data_processing.data_processing import remove_issues
 from autocorrect import Speller
-
+import enchant
 
 # Function to preprocess the tweets data
 def preprocess_data(data, name):
@@ -47,8 +47,9 @@ def preprocess_data(data, name):
 
 # This function is to remove stopwords from a particular column and to tokenize it
 def rem_stopwords_tokenize(data, name, personal_cleaning):
-    spell = Speller()
     stop_words = set(stopwords.words('english'))
+    en_US = enchant.Dict("en_US")
+    en_GB = enchant.Dict("en_GB")
 
     def escape_values(text):
         text = text.replace(' ', '#').replace('/', '#slash#').replace('<', '#lessthan#').replace('>',
@@ -68,13 +69,19 @@ def rem_stopwords_tokenize(data, name, personal_cleaning):
     def getting(sen):
         example_sent = sen
         word_tokens = word_tokenize(example_sent)
-        filtered_sentence = set(word_tokens).difference(stop_words)
+        filtered_sentence = list(set(word_tokens).difference(stop_words))
         return list(filtered_sentence)
 
+    def filter_existing_words(text):
+        filtered_text = []
+        for word in text:
+            if en_GB.check(word) or en_US.check(word):
+                filtered_text.append(word)
+        return filtered_text
+
     data[name] = data[name].apply(lambda text: escape_values(text))
-    if personal_cleaning:
-        data[name] = data[name].apply(lambda text: spell(text))
     data[name] = data[name].apply(lambda text: getting(text))
+    data[name] = data[name].apply(lambda text: filter_existing_words(text))
 
 
 # Making a function to lemmatize all the words
