@@ -8,7 +8,7 @@ from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from Knowledge_Tracing.code.data_processing.data_processing import remove_issues
-import enchant
+import hunspell
 
 # Function to preprocess the tweets data
 def preprocess_data(data, name):
@@ -47,8 +47,7 @@ def preprocess_data(data, name):
 # This function is to remove stopwords from a particular column and to tokenize it
 def rem_stopwords_tokenize(data, name, personal_cleaning):
     stop_words = set(stopwords.words('english'))
-    en_US = enchant.Dict("en_US")
-    en_GB = enchant.Dict("en_GB")
+    dictionary = hunspell.HunSpell('/usr/share/hunspell/en_US.dic', '/usr/share/hunspell/en_US.aff')
 
     def escape_values(text):
         text = text.replace(' ', '#').replace('/', '#slash#').replace('<', '#lessthan#').replace('>',
@@ -74,7 +73,7 @@ def rem_stopwords_tokenize(data, name, personal_cleaning):
     def filter_existing_words(text):
         filtered_text = []
         for word in text:
-            if en_GB.check(word) or en_US.check(word):
+            if dictionary.spell(word):
                 filtered_text.append(word)
         return filtered_text
 
