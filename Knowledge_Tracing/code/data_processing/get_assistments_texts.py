@@ -72,6 +72,7 @@ def rem_stopwords_tokenize(data, name):
         return list(filtered_sentence)
 
     data[name] = data[name].apply(lambda text: escape_values(text))
+    data[name] = data[name].apply(lambda text: spell(text))
     data[name] = data[name].apply(lambda text: getting(text))
 
 

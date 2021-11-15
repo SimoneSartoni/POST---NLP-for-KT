@@ -47,8 +47,10 @@ def get_data_assistments_2009(min_questions=2, max_questions=50,
 
     train_df = train_df.drop_duplicates(subset=['user_id', 'problem_id'], keep='first').reset_index(drop=True)
 
+
+
     # Step 1 - Remove users with less than a certain number of answers
-    train_df = train_df.groupby('user_id').filter(lambda q: len(q) >= min_questions).copy()
+    # train_df = train_df.groupby('user_id').filter(lambda q: len(q) >= min_questions).copy()
     print("shape after at least 2 interactions:", train_df.shape)
 
     # Step 2.1 - Fill no skilled question with "no_skill" token
