@@ -18,11 +18,12 @@ def preprocess_data(data, name):
 
     def clean_tags(text):
         text_with_clean_tags = ""
-        soup = BeautifulSoup(text, "html.parser")
-        for el in soup.find_all('img'):
-            text_with_clean_tags = text_with_clean_tags + ' ' + str(el.unwrap())
-        p = re.compile(r'<.*?>')
-        text_with_clean_tags = text_with_clean_tags + ' ' + p.sub('', text)
+        if not pd.isnull(text):
+            soup = BeautifulSoup(text, "html.parser")
+            for el in soup.find_all('img'):
+                text_with_clean_tags = text_with_clean_tags + ' ' + str(el.unwrap())
+            p = re.compile(r'<.*?>')
+            text_with_clean_tags = text_with_clean_tags + ' ' + p.sub('', text)
         return text_with_clean_tags
 
     data[name].apply(lambda x: clean_tags(x))
