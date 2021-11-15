@@ -38,6 +38,8 @@ def preprocess_data(data, name):
     data[name] = data[name].apply(lambda x: re.sub(r'\s+', ' ', str(x), flags=re.I))
     # Code to remove all the single characters in the text
     data[name] = data[name].apply(lambda x: re.sub(r'\s+[a-zA-Z]\s+', '', str(x)))
+    # Code to remove all digits from text:
+    data[name] = data[name].apply(lambda x: re.sub(r'[0-9]+', '', str(x)))
     # Remove the twitter handlers
     data[name] = data[name].apply(lambda x: re.sub(r'@[^\s]+', '', str(x)))
 
@@ -46,14 +48,10 @@ def preprocess_data(data, name):
 def rem_stopwords_tokenize(data, name):
     spell = Speller()
     stop_words = set(stopwords.words('english'))
+
     def escape_values(text):
-        def remove_numbers(word):
-            return ''.join([alphanumeric for alphanumeric in word if not alphanumeric.isdigit()])
-
-        text = spell(remove_numbers(str(text)))
-
         text = text.replace(' ', '#').replace('/', '#slash#').replace('<', '#lessthan#').replace('>',
-                                                                                                      '#morethan#').replace(
+                                                                                                 '#morethan#').replace(
             ",", "#comma#").replace(";", "#semicolon#").replace(".", "#dot#").replace("?", "#questionmark#").replace(
             "!", "exclamationpoint").replace("=", "#equal#").replace("\\", "#").replace("%", "#percentage#").replace(
             "\\t", "#").replace("\\n", "#").replace("\t", "#").replace("\n", "#").replace('\"', "##").replace(
@@ -79,7 +77,8 @@ def rem_stopwords_tokenize(data, name):
         print("filtered_2:")
         print(filtered_2)
         return filtered_sentence
-    data[name] = data[name].apply(lambda text: escape_values(text))
+
+    # data[name] = data[name].apply(lambda text: escape_values(text))
     data[name] = data[name].apply(lambda text: getting(text))
 
 
