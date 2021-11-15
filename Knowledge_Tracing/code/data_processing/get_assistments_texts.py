@@ -3,6 +3,7 @@ import re
 import pandas as pd
 
 import nltk
+from bs4 import BeautifulSoup
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
@@ -14,6 +15,18 @@ from Knowledge_Tracing.code.data_processing.data_processing import remove_stopwo
 def preprocess_data(data, name):
     # Lowering the case of the words in the sentences
     data[name] = data[name].str.lower()
+
+    def clean_tags(text):
+        text_with_clean_tags = ""
+        soup = BeautifulSoup(text, "html.parser")
+        for el in soup.find_all('img'):
+            text_with_clean_tags = text_with_clean_tags + ' ' + str(el.unwrap())
+        p = re.compile(r'<.*?>')
+        text_with_clean_tags = text_with_clean_tags + ' ' + p.sub('', text)
+        return text_with_clean_tags
+
+    data[name].apply(lambda x: clean_tags(x))
+    print("after claen tags")
     print(data[name])
     # Code to remove the Hashtags from the text
     data[name] = data[name].apply(lambda x: re.sub(r'\B#\S+', '', str(x)))
@@ -66,8 +79,7 @@ def lemmatize_all(data, name):
 
 # Function to make it back into a sentence
 def make_sentences(data, name):
-
-    data[name] = data[name].apply(lambda x: ' '.join([i+' ' for i in x]))
+    data[name] = data[name].apply(lambda x: ' '.join([i + ' ' for i in x]))
     # Removing double spaces if created
     data[name] = data[name].apply(lambda x: re.sub(r'\s+', ' ', x, flags=re.I))
 
@@ -79,15 +91,15 @@ def get_assistments_texts(personal_cleaning=True, texts_filepath='../input/', n_
     else:
         df = pd.read_csv(texts_filepath, low_memory=False, dtype=input_types)
     # Using the preprocessing function to preprocess the tweet data
-    df['body'] = df['body'].apply(lambda x: remove_issues(remove_stopwords(escape_values(x))))
-    print("df after personal cleaning:")
-    print(df)
     preprocess_data(df, 'body')
     print("df after preprocess data:")
     print(df)
     # Using tokenizer and removing the stopwords
     rem_stopwords_tokenize(df, 'body')
     print("df after stopwords tokenize:")
+    print(df)
+    df['body'] = df['body'].apply(lambda x: remove_issues(x))
+    print("df after personal cleaning:")
     print(df)
     # Converting all the texts back to sentences
     lemmatize_all(df, 'body')
