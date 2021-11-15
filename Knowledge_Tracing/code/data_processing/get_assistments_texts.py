@@ -71,17 +71,16 @@ def rem_stopwords_tokenize(data, name):
         stop_words = set(stopwords.words('english'))
         word_tokens = word_tokenize(example_sent)
         filtered_sentence = []
-
+        filtered_2 = set(word_tokens).difference(stop_words)
         for w in word_tokens:
             if w not in stop_words:
-                filtered_sentence.append(w.lower())
+                filtered_sentence.append(w)
+        print("filtered:")
+        print(filtered_sentence)
+        print("filtered_2:")
+        print(filtered_2)
         return filtered_sentence
-
-    x = []
-    for i in data[name].values:
-        x.append(getting(escape_values(i)))
-    data[name] = x
-
+    data[name] = data[name].apply(lambda text: getting(escape_values(text)))
 
 # Making a function to lemmatize all the words
 lemmatizer = WordNetLemmatizer()
