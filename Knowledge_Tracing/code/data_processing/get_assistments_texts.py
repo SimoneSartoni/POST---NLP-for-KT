@@ -45,9 +45,14 @@ def preprocess_data(data, name):
 # This function is to remove stopwords from a particular column and to tokenize it
 def rem_stopwords_tokenize(data, name):
     spell = Speller()
-
+    stop_words = set(stopwords.words('english'))
     def escape_values(text):
-        text = str(text).replace(' ', '#').replace('/', '#slash#').replace('<', '#lessthan#').replace('>',
+        def remove_numbers(word):
+            return ''.join([alphanumeric for alphanumeric in word if not alphanumeric.isdigit()])
+
+        text = spell(remove_numbers(str(text)))
+
+        text = text.replace(' ', '#').replace('/', '#slash#').replace('<', '#lessthan#').replace('>',
                                                                                                       '#morethan#').replace(
             ",", "#comma#").replace(";", "#semicolon#").replace(".", "#dot#").replace("?", "#questionmark#").replace(
             "!", "exclamationpoint").replace("=", "#equal#").replace("\\", "#").replace("%", "#percentage#").replace(
@@ -58,17 +63,11 @@ def rem_stopwords_tokenize(data, name):
             replace("*", "#multiplication#").replace("€", "#euros#").replace("$", "#dollar#"). \
             replace("^", "#powerof#exponent#").replace(":", "#colon#")
 
-        def remove_numbers(word):
-            return ''.join([alphanumeric for alphanumeric in word if not alphanumeric.isdigit()])
-
-        words = str(text).split('#')
-        text = ' '.join(words)
-        text = spell(remove_numbers(text))
+        text = str(text).replace('#', ' ')
         return text
 
     def getting(sen):
         example_sent = sen
-        stop_words = set(stopwords.words('english'))
         word_tokens = word_tokenize(example_sent)
         filtered_sentence = []
         filtered_2 = set(word_tokens).difference(stop_words)
@@ -80,7 +79,9 @@ def rem_stopwords_tokenize(data, name):
         print("filtered_2:")
         print(filtered_2)
         return filtered_sentence
-    data[name] = data[name].apply(lambda text: getting(escape_values(text)))
+    data[name] = data[name].apply(lambda text: escape_values(text))
+    data[name] = data[name].apply(lambda text: getting(text))
+
 
 # Making a function to lemmatize all the words
 lemmatizer = WordNetLemmatizer()
