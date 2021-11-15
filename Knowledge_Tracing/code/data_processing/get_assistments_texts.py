@@ -8,6 +8,7 @@ from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from Knowledge_Tracing.code.data_processing.data_processing import remove_issues
+from autocorrect import spell
 
 
 # Function to preprocess the tweets data
@@ -55,7 +56,11 @@ def rem_stopwords_tokenize(data, name):
             replace("*", "#multiplication#").replace("€", "#euros#").replace("$", "#dollar#").\
             replace("^", "#powerof#exponent#").replace(":", "#colon#")
         words = str(text).split('#')
-        words = [word for word in words if not word.isdigit()]
+
+        def remove_numbers(word):
+            return ''.join([alphanumeric for alphanumeric in word if not alphanumeric.isdigit()])
+
+        words = [remove_numbers(spell(word)) for word in words if not word.isdigit()]
         text = ' '.join(words)
         return text
 
