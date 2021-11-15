@@ -45,6 +45,7 @@ def preprocess_data(data, name):
 # This function is to remove stopwords from a particular column and to tokenize it
 def rem_stopwords_tokenize(data, name):
     spell = Speller()
+
     def escape_values(text):
         text = str(text).replace(' ', '#').replace('/', '#slash#').replace('<', '#lessthan#').replace('>',
                                                                                                       '#morethan#').replace(
@@ -52,17 +53,17 @@ def rem_stopwords_tokenize(data, name):
             "!", "exclamationpoint").replace("=", "#equal#").replace("\\", "#").replace("%", "#percentage#").replace(
             "\\t", "#").replace("\\n", "#").replace("\t", "#").replace("\n", "#").replace('\"', "##").replace(
             "(", "#openroundbracket#").replace(")", "#closeroundbracket#").replace("[", "#opensquarebracket#").replace(
-            "]", "#closesquarebracket#").replace("_", "#underscore#").replace("&", "#ampersand#").\
-            replace("}", "#closebrace#").replace("{", "#openbrace#").replace("+", "#plus#").replace("-", "#minus#").\
-            replace("*", "#multiplication#").replace("€", "#euros#").replace("$", "#dollar#").\
+            "]", "#closesquarebracket#").replace("_", "#underscore#").replace("&", "#ampersand#"). \
+            replace("}", "#closebrace#").replace("{", "#openbrace#").replace("+", "#plus#").replace("-", "#minus#"). \
+            replace("*", "#multiplication#").replace("€", "#euros#").replace("$", "#dollar#"). \
             replace("^", "#powerof#exponent#").replace(":", "#colon#")
-        words = str(text).split('#')
 
         def remove_numbers(word):
             return ''.join([alphanumeric for alphanumeric in word if not alphanumeric.isdigit()])
 
-        words = [spell(remove_numbers(word)) for word in words if not word.isdigit()]
+        words = str(text).split('#')
         text = ' '.join(words)
+        text = spell(remove_numbers(text))
         return text
 
     def getting(sen):
