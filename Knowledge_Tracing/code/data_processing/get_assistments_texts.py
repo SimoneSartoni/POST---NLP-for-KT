@@ -55,6 +55,7 @@ def rem_stopwords_tokenize(data, name):
             replace("*", "#multiplication#").replace("€", "#euros#").replace("$", "#dollar#").\
             replace("^", "#powerof#exponent#").replace(":", "#colon#")
         words = str(text).split('#')
+        words = [word for word in words if not word.isdigit()]
         text = ' '.join(words)
         return text
 
