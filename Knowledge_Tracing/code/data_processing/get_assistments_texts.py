@@ -8,7 +8,7 @@ from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from Knowledge_Tracing.code.data_processing.data_processing import remove_issues
-from autocorrect import spell
+from autocorrect import Speller
 
 
 # Function to preprocess the tweets data
@@ -44,6 +44,7 @@ def preprocess_data(data, name):
 
 # This function is to remove stopwords from a particular column and to tokenize it
 def rem_stopwords_tokenize(data, name):
+    spell = Speller()
     def escape_values(text):
         text = str(text).replace(' ', '#').replace('/', '#slash#').replace('<', '#lessthan#').replace('>',
                                                                                                       '#morethan#').replace(
@@ -60,7 +61,7 @@ def rem_stopwords_tokenize(data, name):
         def remove_numbers(word):
             return ''.join([alphanumeric for alphanumeric in word if not alphanumeric.isdigit()])
 
-        words = [remove_numbers(spell(word)) for word in words if not word.isdigit()]
+        words = [spell(remove_numbers(word)) for word in words if not word.isdigit()]
         text = ' '.join(words)
         return text
 
