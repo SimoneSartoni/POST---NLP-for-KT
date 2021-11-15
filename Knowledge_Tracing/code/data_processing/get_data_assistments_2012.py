@@ -80,6 +80,5 @@ def get_data_assistments_2012(min_questions=2, max_questions=50, interactions_fi
     print("shape after exclusion:", train_df.shape)
     train_df['skill'], _ = pd.factorize(train_df['skill'], sort=True)
     texts_df['question_id'], _ = pd.factorize(texts_df['problem_id'], sort=True)
-    train_df['question_id'], _ = pd.factorize(train_df['problem_id'], sort=True)
 
     return train_df, texts_df

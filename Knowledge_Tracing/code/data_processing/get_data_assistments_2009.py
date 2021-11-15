@@ -61,7 +61,6 @@ def get_data_assistments_2009(min_questions=2, max_questions=50,
 
     # Step 5 - Compute number of unique skills ids and number of unique question ids
     n_skills = len(train_df['skill'].unique())
-    print("no. of problems :", n_ids)
     print("no. of skills: ", n_skills)
     print("shape after exclusion:", train_df.shape)
 
@@ -82,6 +81,5 @@ def get_data_assistments_2009(min_questions=2, max_questions=50,
     print("shape after exclusion:", train_df.shape)
     train_df['skill'], _ = pd.factorize(train_df['skill'], sort=True)
     texts_df['question_id'], _ = pd.factorize(texts_df['problem_id'], sort=True)
-    train_df['question_id'], _ = pd.factorize(train_df['problem_id'], sort=True)
 
     return train_df, texts_df

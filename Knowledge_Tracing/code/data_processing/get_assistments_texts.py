@@ -59,7 +59,6 @@ def lemmatize_all(data, name):
         b = []
         for j in i:
             x = lemmatizer.lemmatize(j, pos='a')
-            x = lemmatizer.lemmatize(x)
             b.append(x)
         a.append(b)
     data[name] = a
