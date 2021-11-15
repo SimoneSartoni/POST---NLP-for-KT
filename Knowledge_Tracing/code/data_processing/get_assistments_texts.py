@@ -8,7 +8,6 @@ from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from Knowledge_Tracing.code.data_processing.data_processing import remove_issues
-from autocorrect import Speller
 import enchant
 
 # Function to preprocess the tweets data
