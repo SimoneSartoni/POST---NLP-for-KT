@@ -46,7 +46,7 @@ def preprocess_data(data, name):
 
 
 # This function is to remove stopwords from a particular column and to tokenize it
-def rem_stopwords_tokenize(data, name):
+def rem_stopwords_tokenize(data, name, personal_cleaning):
     spell = Speller()
     stop_words = set(stopwords.words('english'))
 
@@ -72,7 +72,8 @@ def rem_stopwords_tokenize(data, name):
         return list(filtered_sentence)
 
     data[name] = data[name].apply(lambda text: escape_values(text))
-    data[name] = data[name].apply(lambda text: spell(text))
+    if personal_cleaning:
+        data[name] = data[name].apply(lambda text: spell(text))
     data[name] = data[name].apply(lambda text: getting(text))
 
 
@@ -110,7 +111,7 @@ def get_assistments_texts(personal_cleaning=True, texts_filepath='../input/', n_
     print("df after preprocess data:")
     print(df)
     # Using tokenizer and removing the stopwords
-    rem_stopwords_tokenize(df, 'body')
+    rem_stopwords_tokenize(df, 'body', personal_cleaning)
     print("df after stopwords tokenize:")
     print(df)
     df['body'] = df['body'].apply(lambda x: remove_issues(x))
