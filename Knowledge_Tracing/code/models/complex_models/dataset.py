@@ -14,18 +14,12 @@ class DKTDataset(Dataset):
     def __init__(self, grouped_df, max_seq=100):
         self.max_seq = max_seq
         self.data = grouped_df
-        print(self.data[1])
-        unique_question_id = self.data['question_id'].values[0]
-        print(unique_question_id)
 
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self, idx):
-        data = self.data
-        unique_question_id, text_id, answered_correctly, response_elapsed_time, \
-            exe_skill = data['question_id'].values[idx], data['problem_id'].values[idx], data['correct'].values[idx]\
-            , data['elapsed_time'].values[idx]
+        user_id, unique_question_id, text_id, answered_correctly, response_elapsed_time, exe_skill = self.data[idx]
         seq_len = len(unique_question_id)
 
         q_ids = np.zeros(self.max_seq, dtype=int)
@@ -61,6 +55,7 @@ class DKTDataset(Dataset):
         inputs['decoder'] = decoder_inputs
 
         return inputs, decoder_targets
+
 
 
 def get_dataloaders(interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"

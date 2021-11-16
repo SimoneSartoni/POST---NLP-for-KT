@@ -12,7 +12,7 @@ def generate_sequences_of_same_length(df, seq_len, output_filepath="/kaggle/work
     timestamp = []
     for name, group in grouped:
         index = 0
-        while index + seq_len <= len(group['question_id'].values):
+        while index + seq_len < len(group['question_id'].values):
             user_id.append(name)
             problem_id.append(group['problem_id'].values[index:index+seq_len])
             question_id.append(group['question_id'].values[index:index+seq_len])
