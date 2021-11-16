@@ -32,7 +32,7 @@ def generate_sequences_of_same_length(df, seq_len, output_filepath="/kaggle/work
         end_time.append(group['end_time'].values[index:])
         elapsed_time.append(group['elapsed_time'].values[index:])
         timestamp.append(group['timestamp'].values[index:])
-    data = {'question_id': question_id, 'problem_ids': problem_id, 'user_ids': user_id, 'correct': correct,
+    data = {'question_id': question_id, 'problem_id': problem_id, 'user_id': user_id, 'correct': correct,
             'skill': skill, 'start_time': start_time, 'end_time': end_time, 'elapsed_time': elapsed_time,
             'timestamp': timestamp}
     new_df = pd.DataFrame(data=data)
