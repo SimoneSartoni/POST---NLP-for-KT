@@ -15,16 +15,17 @@ class DKTDataset(Dataset):
         self.max_seq = max_seq
         self.data = grouped_df
         print(self.data[1])
-        unique_question_id = self.data[0]['problem_id']
+        unique_question_id = self.data['question_id'].values[0]
         print(unique_question_id)
 
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self, idx):
-        data = self.data[idx]
+        data = self.data
         unique_question_id, text_id, answered_correctly, response_elapsed_time, \
-            exe_skill = data['question_id'], data['problem_id'], data['correct'], data['elapsed_time']
+            exe_skill = data['question_id'].values[idx], data['problem_id'].values[idx], data['correct'].values[idx]\
+            , data['elapsed_time'].values[idx]
         seq_len = len(unique_question_id)
 
         q_ids = np.zeros(self.max_seq, dtype=int)
@@ -37,7 +38,7 @@ class DKTDataset(Dataset):
 
         q_ids[-seq_len:] = unique_question_id
         text_ids[-seq_len:] = text_id
-        ans[-seq_len:] = answered_correctly
+        ans[-seq_len:] = [-1.0 if not x else 1.0 for x in answered_correctly]
         r_elapsed_time[-seq_len:] = response_elapsed_time
         skill[-seq_len:] = exe_skill
 
