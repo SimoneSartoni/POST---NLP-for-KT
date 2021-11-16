@@ -9,7 +9,7 @@ from ast import literal_eval
 
 def load_preprocessed_interactions(interactions_filepath=""):
     dtypes = {'user_id': 'int32', 'problem_id': 'int64',
-              'correct': 'float64', 'skill': "string",
+              'correct': 'float64',
               'start_time': "string", 'end_time': "string",
               'skill': "int32", 'elapsed_time': 'int64',
               'timestamp': "string", 'question_id': "int64"}

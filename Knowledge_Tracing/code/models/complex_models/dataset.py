@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 
 from Knowledge_Tracing.code.data_processing.load_preprocessed.load_preprocessed_data import load_preprocessed_texts, \
     load_preprocessed_interactions
+from Knowledge_Tracing.code.data_processing.preprocess.group_interactions_by_user_id import generate_sequences_of_same_length
 
 
 class DKTDataset(Dataset):
@@ -74,22 +75,22 @@ class DKTDataset(Dataset):
         return inputs, decoder_targets
 
 
+
 def get_dataloaders(interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
-                                       ".csv", texts_filepath='../input/', interaction_sequence_len=25, personal_cleaning=True):
+                                       ".csv", texts_filepath='../input/',  output_filepath='/kaggle/working/',
+                    interaction_sequence_len=25, personal_cleaning=True):
 
     df = load_preprocessed_interactions(interactions_filepath=interactions_filepath)
     print(df)
-    df = df[["user_id", "problem_id", "question_id", "correct", "elapsed_time", "skill"]]
+    group = generate_sequences_of_same_length(df, seq_len=interaction_sequence_len, output_filepath=output_filepath)
+
+    print(group)
+    group = group[["user_id", "problem_id", "question_id", "correct", "elapsed_time", "skill"]]
 
     # grouping based on user_id to get the data supply
     print("Grouping users...")
     nb_questions = len(df['question_id'].unique())
     nb_skills = len(df['skill'].unique())
-
-    group = df.groupby("user_id").apply(lambda r: (r.question_id.values, r.problem_id.values, r.correct.values,
-                                                   r.elapsed_time.values, r.skill.values))
-
-    print(group)
 
     print("splitting")
     train, test = train_test_split(group, test_size=0.2)

@@ -45,7 +45,7 @@ def process_data_assistments_2012(min_questions=2, max_questions=50, interaction
     train_df = train_df.drop_duplicates(subset=['user_id', 'problem_id'], keep='first').reset_index(drop=True)
 
     # Step 1 - Remove users with less than a certain number of answers
-    train_df = train_df.groupby('user_id').tail(max_questions)
+    # train_df = train_df.groupby('user_id').tail(max_questions)
     print("shape after at least 2 interactions:", train_df.shape)
 
     # Step 1 - Remove users with less than a certain number of answers
