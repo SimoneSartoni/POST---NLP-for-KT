@@ -68,16 +68,16 @@ def get_dataloaders(interactions_filepath="../input/assistmentds-2012/2012-2013-
 
     df = load_preprocessed_interactions(interactions_filepath=interactions_filepath)
     print(df)
+    # grouping based on user_id to get the data supply
+    nb_questions = len(df['question_id'].unique())
+    nb_skills = len(df['skill'].unique())
     print("Grouping users...")
+
     group = generate_sequences_of_same_length(df, seq_len=interaction_sequence_len, output_filepath=output_filepath)
     del df
     gc.collect()
     print(group)
     group = group[["user_id", "problem_id", "question_id", "correct", "elapsed_time", "skill"]]
-
-    # grouping based on user_id to get the data supply
-    nb_questions = len(df['question_id'].unique())
-    nb_skills = len(df['skill'].unique())
 
     print("splitting")
     train, test = train_test_split(group, test_size=0.2)
