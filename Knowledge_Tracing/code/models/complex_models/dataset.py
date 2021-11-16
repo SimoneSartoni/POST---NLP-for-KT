@@ -11,26 +11,20 @@ from Knowledge_Tracing.code.data_processing.preprocess.group_interactions_by_use
 
 
 class DKTDataset(Dataset):
-    def __init__(self, group, max_seq=100):
-        self.samples = group
+    def __init__(self, grouped_df, max_seq=100):
         self.max_seq = max_seq
-        self.data = []
-
-        for unique_question_id, text_id, ans, res_time, exe_skill in self.samples:
-            if len(unique_question_id) >= self.max_seq:
-                self.data.extend([(unique_question_id[l:l + self.max_seq], text_id[l:l + self.max_seq],
-                                   ans[l:l + self.max_seq], res_time[l:l + self.max_seq], exe_skill[l:l + self.max_seq])
-                                  for l in range(len(unique_question_id)) if l % self.max_seq == 0])
-            elif self.max_seq > len(unique_question_id) > 1:
-                self.data.append((unique_question_id, text_id, ans, res_time, exe_skill))
-            else:
-                continue
+        self.data = grouped_df
+        print(self.data[1])
+        unique_question_id = self.data[0]['problem_id']
+        print(unique_question_id)
 
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self, idx):
-        unique_question_id, text_id, answered_correctly, response_elapsed_time, exe_skill = self.data[idx]
+        data = self.data[idx]
+        unique_question_id, text_id, answered_correctly, response_elapsed_time, \
+            exe_skill = data['question_id'], data['problem_id'], data['correct'], data['elapsed_time']
         seq_len = len(unique_question_id)
 
         q_ids = np.zeros(self.max_seq, dtype=int)
@@ -41,18 +35,11 @@ class DKTDataset(Dataset):
         input_label = np.zeros(self.max_seq, dtype=int)
         input_r_elapsed_time = np.zeros(self.max_seq, dtype=int)
 
-        if seq_len >= self.max_seq:
-            q_ids[:] = unique_question_id[-self.max_seq:]
-            text_ids[:] = text_id[-self.max_seq]
-            ans[:] = answered_correctly[-self.max_seq:]
-            r_elapsed_time[:] = response_elapsed_time[-self.max_seq:]
-            skill[:] = exe_skill[-self.max_seq:]
-        else:
-            q_ids[-seq_len:] = unique_question_id
-            text_ids[-seq_len:] = text_id
-            ans[-seq_len:] = answered_correctly
-            r_elapsed_time[-seq_len:] = response_elapsed_time
-            skill[-seq_len:] = exe_skill
+        q_ids[-seq_len:] = unique_question_id
+        text_ids[-seq_len:] = text_id
+        ans[-seq_len:] = answered_correctly
+        r_elapsed_time[-seq_len:] = response_elapsed_time
+        skill[-seq_len:] = exe_skill
 
         input_ids = q_ids
         input_text_ids = text_ids
@@ -75,20 +62,20 @@ class DKTDataset(Dataset):
         return inputs, decoder_targets
 
 
-
 def get_dataloaders(interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
                                        ".csv", texts_filepath='../input/',  output_filepath='/kaggle/working/',
                     interaction_sequence_len=25, personal_cleaning=True):
 
     df = load_preprocessed_interactions(interactions_filepath=interactions_filepath)
     print(df)
+    print("Grouping users...")
     group = generate_sequences_of_same_length(df, seq_len=interaction_sequence_len, output_filepath=output_filepath)
-
+    del df
+    gc.collect()
     print(group)
     group = group[["user_id", "problem_id", "question_id", "correct", "elapsed_time", "skill"]]
 
     # grouping based on user_id to get the data supply
-    print("Grouping users...")
     nb_questions = len(df['question_id'].unique())
     nb_skills = len(df['skill'].unique())
 
