@@ -20,14 +20,15 @@ class saint_on_skills_questions_concatenated(nn.Module):
     def forward(self, inputs, decoder_targets):
         first_block = True
         encoder_inputs, decoder_inputs = inputs['encoder'], inputs['decoder']
-        in_exercise, in_skill, in_response = encoder_inputs['question_id'], encoder_inputs['skill'], \
-                                             decoder_inputs['label']
+        in_exercise, in_skill, in_response, text_encoding = encoder_inputs['question_id'], encoder_inputs['skill'], \
+                                             decoder_inputs['label'], encoder_inputs['text_encoding']
         for n in range(self.n_encoder):
             if n >= 1:
                 first_block = False
 
-            enc = self.encoder[n](in_exercise, in_skill, first_block=first_block)
+            enc = self.encoder[n](in_exercise, text_encoding, in_skill, first_block=first_block)
             in_exercise = enc
+            text_encoding = enc
             in_skill = enc
 
         first_block = True
@@ -47,39 +48,40 @@ class EncoderBlock(nn.Module):
         self.seq_len = seq_len
         self.exercise_embed = nn.Embedding(nb_questions, n_dims)
         self.skill_embed = nn.Embedding(nb_skills, n_dims)
-        self.encoding_embed = nn.Embedding()
+        self.total_dim = 2 * n_dims + encoding_size
         self.position_embed = nn.Embedding(seq_len, n_dims)
-        self.layer_norm = nn.LayerNorm(2 * n_dims)
+        self.layer_norm = nn.LayerNorm(self.total_dim)
 
-        self.multihead = MultiHeadWithFFN(n_heads=n_heads, n_dims=2 * n_dims)
+        self.multihead = MultiHeadWithFFN(n_heads=n_heads, n_dims=self.total_dim)
 
-    def forward(self, input_encoding, input_skill, first_block=True):
+    def forward(self, input_exercise, input_encoding, input_skill, first_block=True):
         if first_block:
-            _exe = self.exercise_embed(input_encoding)
+            _exe = self.exercise_embed(input_exercise)
             _skill = self.skill_embed(input_skill)
             position_encoded = pos_encode(self.seq_len).cuda()
             _pos = self.position_embed(position_encoded)
             out_skill = _skill + _pos
             out_ex = _exe + _pos
-            out = torch.cat([out_ex, out_skill], dim=-1)
+            out = torch.cat([out_ex, out_skill, input_encoding], dim=-1)
         else:
-            out = input_encoding
+            out = input_exercise
         output = self.multihead(q_input=out, kv_input=out)
         return output
 
 
 class DecoderBlock(nn.Module):
-    def __init__(self, n_heads, n_dims, nb_responses, seq_len):
+    def __init__(self, n_heads, n_dims, nb_responses, encoding_size, seq_len):
         super(DecoderBlock, self).__init__()
         self.seq_len = seq_len
+        self.total_dim = 2*n_dims + encoding_size
         self.response_embed = nn.Embedding(nb_responses, n_dims)
         self.position_embed = nn.Embedding(seq_len, n_dims)
-        self.layer_norm = nn.LayerNorm(2 * n_dims)
-        self.multihead_attention = nn.MultiheadAttention(embed_dim=2 * n_dims,
+        self.layer_norm = nn.LayerNorm(self.total_dim)
+        self.multihead_attention = nn.MultiheadAttention(embed_dim=self.total_dim,
                                                          num_heads=n_heads,
                                                          dropout=0.2)
         self.multihead = MultiHeadWithFFN(n_heads=n_heads,
-                                          n_dims=2 * n_dims)
+                                          n_dims=self.total_dim)
 
     def forward(self, input_r, encoder_output, first_block=True):
         if first_block:

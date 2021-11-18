@@ -11,9 +11,10 @@ from Knowledge_Tracing.code.data_processing.preprocess.group_interactions_by_use
 
 
 class DKTDataset(Dataset):
-    def __init__(self, grouped_df, max_seq=100):
+    def __init__(self, grouped_df, text_encoding_model=None, max_seq=100):
         self.max_seq = max_seq
         self.data = grouped_df
+        self.text_encoding_model = text_encoding_model
 
     def __len__(self):
         return len(self.data)
@@ -38,6 +39,7 @@ class DKTDataset(Dataset):
 
         input_ids = q_ids
         input_text_ids = text_ids
+        input_text_encodings = [self.text_encoding_model.get_encoding(text_id) for text_id in text_ids]
         input_r_elapsed_time[1:] = r_elapsed_time[:-1].copy().astype(np.int)
         input_skill = skill
         input_label[1:] = ans[:-1]
@@ -47,20 +49,18 @@ class DKTDataset(Dataset):
         target_skill = input_skill[:]
         target_label = ans
 
-        encoder_inputs = {"question_id": input_ids, "text_id": input_text_ids, "skill": input_skill}
+        encoder_inputs = {"question_id": input_ids, "text_id": input_text_ids, "skill": input_skill,
+                          "text_encoding": input_text_encodings}
         decoder_inputs = {"label": input_label, "r_elapsed_time": input_r_elapsed_time}
-        decoder_targets = {"target_id": target_ids, "target_text_id": target_text_ids, "target_skill": target_skill, 'target_label': target_label}
-        inputs = {}
-        inputs['encoder'] = encoder_inputs
-        inputs['decoder'] = decoder_inputs
-
+        decoder_targets = {"target_id": target_ids, "target_text_id": target_text_ids, "target_skill": target_skill,
+                           'target_label': target_label}
+        inputs = {'encoder': encoder_inputs, 'decoder': decoder_inputs}
         return inputs, decoder_targets
-
 
 
 def get_dataloaders(interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
                                        ".csv", texts_filepath='../input/',  output_filepath='/kaggle/working/',
-                    interaction_sequence_len=25, personal_cleaning=True):
+                    interaction_sequence_len=25, personal_cleaning=True, text_encoding_model=None):
 
     df = load_preprocessed_interactions(interactions_filepath=interactions_filepath)
     print(df)
@@ -73,16 +73,16 @@ def get_dataloaders(interactions_filepath="../input/assistmentds-2012/2012-2013-
     del df
     gc.collect()
     print(group)
-    group = group[["user_id", "problem_id", "question_id", "correct", "elapsed_time", "skill"]]
+    group = group[["user_id", "question_id", "problem_id", "correct", "elapsed_time", "skill"]]
 
     print("splitting")
     train, test = train_test_split(group, test_size=0.2)
     train, val = train_test_split(train, test_size=0.2)
     print("train size: ", train.shape, "validation size: ", val.shape)
 
-    train_dataset = DKTDataset(train.values, max_seq=interaction_sequence_len)
-    val_dataset = DKTDataset(val.values, max_seq=interaction_sequence_len)
-    test_dataset = DKTDataset(test.values, max_seq=interaction_sequence_len)
+    train_dataset = DKTDataset(train.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len)
+    val_dataset = DKTDataset(val.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len)
+    test_dataset = DKTDataset(test.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len)
     train_loader = DataLoader(train_dataset,
                               batch_size=config.BATCH_SIZE,
                               num_workers=2,

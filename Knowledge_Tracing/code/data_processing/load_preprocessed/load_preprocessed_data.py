@@ -7,6 +7,7 @@ from Knowledge_Tracing.code.utils.utils import try_parsing_date
 from Knowledge_Tracing.code.data_processing.get_assistments_texts import get_assistments_texts
 from ast import literal_eval
 
+
 def load_preprocessed_interactions(interactions_filepath=""):
     dtypes = {'user_id': 'int32', 'problem_id': 'int64',
               'correct': 'float64',
