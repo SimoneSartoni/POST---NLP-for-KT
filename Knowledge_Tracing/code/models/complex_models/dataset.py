@@ -39,7 +39,10 @@ class DKTDataset(Dataset):
 
         input_ids = q_ids
         input_text_ids = text_ids
-        input_text_encodings = [self.text_encoding_model.get_encoding(text_id) for text_id in text_ids]
+        if self.text_encoding_model:
+            input_text_encodings = [self.text_encoding_model.get_encoding(text_id) for text_id in text_ids]
+        else:
+            input_text_encodings = None
         input_r_elapsed_time[1:] = r_elapsed_time[:-1].copy().astype(np.int)
         input_skill = skill
         input_label[1:] = ans[:-1]
