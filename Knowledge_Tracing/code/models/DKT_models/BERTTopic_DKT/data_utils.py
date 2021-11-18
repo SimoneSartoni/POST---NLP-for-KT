@@ -1,34 +1,44 @@
+import gc
+
 import tensorflow as tf
 import numpy as np
-from code.data_processing.preprocess.process_data_assistments_2012 import process_data_assistments_2012
-from code.data_processing.preprocess.process_data_assistments_2009 import process_data_assistments_2009
+from sklearn.model_selection import train_test_split
+
+from Knowledge_Tracing.code.data_processing.load_preprocessed.load_preprocessed_data import \
+    load_preprocessed_interactions, load_preprocessed_texts
+from Knowledge_Tracing.code.data_processing.preprocess.group_interactions_by_user_id import generate_sequences_of_same_length
 from Knowledge_Tracing.code.models.encoding_models.BERTopic_model import BERTopic_model
 
 MASK_VALUE = -1.0  # The masking value cannot be zero.
 
 
-def load_dataset_NLP_skills(batch_size=32, shuffle=True, dataset_name='assistment_2012',
-                            interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
-                                                  ".csv",
-                            encoding_model='all-mpnet-base-v2',
-                            save_filepath='/kaggle/working/', texts_filepath='../input/', min_df=2, max_df=1.0,
-                            min_questions=2, max_features=1000, max_questions=25, n_rows=None, n_texts=None,
-                            personal_cleaning=True):
-    if dataset_name == 'assistment_2012':
-        df, text_df = process_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
-                                                    interactions_filepath=interactions_filepath,
-                                                    texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
-                                                    make_sentences_flag=True, personal_cleaning=personal_cleaning)
-    elif dataset_name == 'assistment_2009':
-        df, text_df = process_data_assistments_2009(min_questions=min_questions, max_questions=max_questions,
-                                                    interactions_filepath=interactions_filepath,
-                                                    texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
-                                                    make_sentences_flag=True, personal_cleaning=personal_cleaning, )
+def load_dataset(batch_size=32, shuffle=True,
+                 interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
+                                       ".csv",
+                 save_filepath='/kaggle/working/', texts_filepath='../input/',
+                 interaction_sequence_len=30, min_df=2, max_df=1.0, max_features=1000):
+    df = load_preprocessed_interactions(interactions_filepath=interactions_filepath)
+    print(df)
+    # grouping based on user_id to get the data supply
+    nb_questions = len(df['question_id'].unique())
+    nb_skills = len(df['skill'].unique())
+    print("Grouping users...")
 
+    group = generate_sequences_of_same_length(df, seq_len=interaction_sequence_len, output_filepath='/kaggle/working')
+    del df
+    gc.collect()
+    print(group)
+    group = group[["user_id", "question_id", "problem_id", "correct", "elapsed_time", "skill"]]
+
+    print("splitting")
+    train, test = train_test_split(group, test_size=0.2)
+    train, val = train_test_split(train, test_size=0.2)
+    print("train size: ", train.shape, "validation size: ", val.shape)
     print(df)
     df = df[['user_id', 'problem_id', 'correct']]
     print(df)
     # Step 3.1 - Generate NLP extracted encoding for problems
+    text_df = load_preprocessed_texts(texts_filepath=texts_filepath)
     encode_model = BERTopic_model()
     encode_model.fit(text_df, save_filepath)
 

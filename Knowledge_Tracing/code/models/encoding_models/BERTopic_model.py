@@ -53,7 +53,7 @@ class BERTopic_model(base_model):
 
     def fit(self, texts_df, save_filepath='./'):
         self.texts_df = texts_df
-        self.topic_model = self.bert_topic.fit(self.texts_df['body'])
+        self.topic_model = self.bert_topic.fit(self.texts_df['body'].values)
         print("topic model created")
         self.words_num = len(self.topic_model.get_topic_freq())
         self.topics, self.probabilities = self.topic_model.transform(self.texts[0])
@@ -109,9 +109,9 @@ class BERTopic_model(base_model):
             return [0.0], [0.0]
         return item_scores, correct_ids
 
-    def get_encoding(self, problem):
-        row = self.texts_df.loc[self.texts_df['question_id'] == problem]
-        encoding = np.array(self.topic_model.transform(row['body']))
+    def get_encoding(self, problem_id):
+        row = self.texts_df.loc[self.texts_df['problem_id'] == problem_id]
+        encoding = np.array(self.topic_model.transform(row['body'].values[0]))
         return encoding
 
     def get_serializable_params(self):
