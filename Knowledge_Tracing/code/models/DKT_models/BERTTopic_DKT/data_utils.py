@@ -41,10 +41,11 @@ def load_dataset(batch_size=32, shuffle=True,
     encode_model.fit(text_df, save_filepath)
 
     def generate_encodings_val():
-        for name, group in val:
+        for x in val:
+            user_id, unique_question_id, text_id, answered_correctly, response_elapsed_time, exe_skill = x
             document_to_term = []
             labels = np.array([], dtype=np.int)
-            for problem, label in list(zip(group['question_id'].values, group['correct'].values)):
+            for problem, label in list(zip(unique_question_id, answered_correctly)):
                 encoding = encode_model.get_encoding(problem)
                 zeros = np.zeros(encoding.shape, dtype=np.float)
                 if label:
@@ -62,10 +63,11 @@ def load_dataset(batch_size=32, shuffle=True,
             yield inputs, outputs
 
     def generate_encodings_test():
-        for name, group in test:
+        for x in test:
+            user_id, unique_question_id, text_id, answered_correctly, response_elapsed_time, exe_skill = x
             document_to_term = []
             labels = np.array([], dtype=np.int)
-            for problem, label in list(zip(group['question_id'].values, group['correct'].values)):
+            for problem, label in list(zip(unique_question_id, answered_correctly)):
                 encoding = encode_model.get_encoding(problem)
                 zeros = np.zeros(encoding.shape, dtype=np.float)
                 if label:
@@ -83,10 +85,11 @@ def load_dataset(batch_size=32, shuffle=True,
             yield inputs, outputs
 
     def generate_encodings_train():
-        for name, group in train:
+        for x in train:
+            user_id, unique_question_id, text_id, answered_correctly, response_elapsed_time, exe_skill = x
             document_to_term = []
             labels = np.array([], dtype=np.int)
-            for problem, label in list(zip(group['question_id'].values, group['correct'].values)):
+            for problem, label in list(zip(unique_question_id, answered_correctly)):
                 encoding = encode_model.get_encoding(problem)
                 zeros = np.zeros(encoding.shape, dtype=np.float)
                 if label:
