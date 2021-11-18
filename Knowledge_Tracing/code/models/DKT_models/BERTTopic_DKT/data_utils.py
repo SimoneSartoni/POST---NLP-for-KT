@@ -34,86 +34,125 @@ def load_dataset(batch_size=32, shuffle=True,
     train, test = train_test_split(group, test_size=0.2)
     train, val = train_test_split(train, test_size=0.2)
     print("train size: ", train.shape, "validation size: ", val.shape)
-    print(df)
-    df = df[['user_id', 'problem_id', 'correct']]
-    print(df)
+
     # Step 3.1 - Generate NLP extracted encoding for problems
     text_df = load_preprocessed_texts(texts_filepath=texts_filepath)
     encode_model = BERTopic_model()
     encode_model.fit(text_df, save_filepath)
 
-    def generate_encodings():
-        for name, group in df.groupby('user_id'):
+    def generate_encodings_val():
+        for name, group in val:
             document_to_term = []
             labels = np.array([], dtype=np.int)
-            for problem, label in list(zip(group['problem_id'].values, group['correct'].values)):
+            for problem, label in list(zip(group['question_id'].values, group['correct'].values)):
                 encoding = encode_model.get_encoding(problem)
+                zeros = np.zeros(encoding.shape, dtype=np.float)
+                if label:
+                    encoding = np.concatenate([encoding, zeros])
+                else:
+                    encoding = np.concatenate([zeros, encoding])
                 encoding = np.expand_dims(encoding, axis=0)
                 document_to_term.append(encoding)
                 labels = np.append(labels, label)
             document_to_term = np.concatenate(document_to_term, axis=0)
             i_doc = document_to_term[:-1]
-            o_doc = document_to_term[1:]
-            i_label = labels[:-1]
             o_label = labels[1:]
-            inputs = (i_doc, i_label)
-            outputs = (o_doc, o_label)
+            inputs = i_doc
+            outputs = o_label
             yield inputs, outputs
 
-    encoding_depth = encode_model.vector_size
+    def generate_encodings_test():
+        for name, group in test:
+            document_to_term = []
+            labels = np.array([], dtype=np.int)
+            for problem, label in list(zip(group['question_id'].values, group['correct'].values)):
+                encoding = encode_model.get_encoding(problem)
+                zeros = np.zeros(encoding.shape, dtype=np.float)
+                if label:
+                    encoding = np.concatenate([encoding, zeros])
+                else:
+                    encoding = np.concatenate([zeros, encoding])
+                encoding = np.expand_dims(encoding, axis=0)
+                document_to_term.append(encoding)
+                labels = np.append(labels, label)
+            document_to_term = np.concatenate(document_to_term, axis=0)
+            i_doc = document_to_term[:-1]
+            o_label = labels[1:]
+            inputs = i_doc
+            outputs = o_label
+            yield inputs, outputs
 
-    types = ((tf.float32, tf.float32),
-             (tf.float32, tf.float32))
-    shapes = (([None, encode_model.vector_size], [None]),
-              ([None, encode_model.vector_size], [None]))
-    # Step 5 - Get Tensorflow Dataset
-    dataset = tf.data.Dataset.from_generator(
-        generator=generate_encodings,
-        output_types=types,
-        output_shapes=shapes
-    )
+    def generate_encodings_train():
+        for name, group in train:
+            document_to_term = []
+            labels = np.array([], dtype=np.int)
+            for problem, label in list(zip(group['question_id'].values, group['correct'].values)):
+                encoding = encode_model.get_encoding(problem)
+                zeros = np.zeros(encoding.shape, dtype=np.float)
+                if label:
+                    encoding = np.concatenate([encoding, zeros])
+                else:
+                    encoding = np.concatenate([zeros, encoding])
+                encoding = np.expand_dims(encoding, axis=0)
+                document_to_term.append(encoding)
+                labels = np.append(labels, label)
+            document_to_term = np.concatenate(document_to_term, axis=0)
+            i_doc = document_to_term[:-1]
+            o_label = labels[1:]
+            inputs = i_doc
+            outputs = o_label
+            yield inputs, outputs
 
-    nb_users = len(df.groupby('user_id'))
-    if shuffle:
-        dataset = dataset.shuffle(buffer_size=nb_users)
+    encoding_depth = 2 * encode_model.vector_size
 
-    print(dataset)
-    dataset = dataset.map(
-        lambda inputs, outputs: (
-            (inputs[0], tf.expand_dims(inputs[1], axis=-1)),
-            tf.concat(values=[
-                outputs[0],
-                tf.expand_dims(outputs[1], axis=-1)],
-                axis=-1)
+    def create_dataset(generate_encodings, shape, encoding_depth):
+        # Step 5 - Get Tensorflow Dataset
+        types = (tf.float32,
+                 tf.float32)
+        shapes = ([None, encoding_depth], [None])
+        # Step 5 - Get Tensorflow Dataset
+        dataset = tf.data.Dataset.from_generator(
+            generator=generate_encodings,
+            output_types=types,
+            output_shapes=shapes
         )
-    )
 
-    # Step 6 - Encode categorical features and merge skills with labels to compute target loss.
-    # More info: https://github.com/tensorflow/tensorflow/issues/32142
+        nb_users = shape[0]
+        if shuffle:
+            dataset = dataset.shuffle(buffer_size=nb_users, reshuffle_each_iteration=True)
 
-    print(dataset)
+        print(dataset)
+        dataset = dataset.map(
+            lambda inputs, outputs: (
+                inputs,
+                tf.expand_dims(outputs, axis=-1)
+            )
+        )
 
-    # Step 7 - Pad sequences per batch
-    dataset = dataset.padded_batch(
-        batch_size=batch_size,
-        padding_values=MASK_VALUE,
-        drop_remainder=True
-    )
+        # Step 6 - Encode categorical features and merge skills with labels to compute target loss.
+        # More info: https://github.com/tensorflow/tensorflow/issues/32142
 
-    print(dataset)
+        print(dataset)
 
-    length = nb_users // batch_size
-    return dataset, length, encoding_depth
+        # Step 7 - Pad sequences per batch
+        dataset = dataset.padded_batch(
+            batch_size=batch_size,
+            padding_values=MASK_VALUE,
+            drop_remainder=True
+        )
+
+        print(dataset)
+        return dataset
+
+    train_set = create_dataset(generate_encodings_train, train.shape, encoding_depth)
+    val_set = create_dataset(generate_encodings_val, val.shape, encoding_depth)
+    test_set = create_dataset(generate_encodings_test, test.shape, encoding_depth)
+
+    return train_set, val_set, test_set, encoding_depth
 
 
 def get_target(y_true, y_pred, nb_encodings=300):
-    # Get skills and labels from y_true
-
     mask = 1 - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
     y_true = y_true * mask
-    encodings_true, y_true = tf.split(y_true, num_or_size_splits=[-1, 1], axis=-1)
-    encodings_pred, y_pred = tf.split(y_pred, num_or_size_splits=[-1, 1], axis=-1)
-
-    # Get predictions for each skill
-
+    y_pred = y_pred * mask
     return y_true, y_pred
