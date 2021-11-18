@@ -94,13 +94,13 @@ def get_dataloaders(interactions_filepath="../input/assistmentds-2012/2012-2013-
     val_loader = DataLoader(val_dataset,
                             batch_size=config.BATCH_SIZE,
                             num_workers=2,
-                            shuffle=True)
+                            shuffle=False)
     del val_dataset
     gc.collect()
     test_loader = DataLoader(test_dataset,
                              batch_size=config.BATCH_SIZE,
                              num_workers=2,
-                             shuffle=True)
+                             shuffle=False)
     del test_dataset
     gc.collect()
     return train_loader, val_loader, test_loader, nb_questions, nb_skills
