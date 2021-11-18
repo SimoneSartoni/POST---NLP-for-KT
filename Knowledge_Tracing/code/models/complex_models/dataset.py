@@ -41,8 +41,6 @@ class DKTDataset(Dataset):
         input_text_ids = text_ids
         if self.text_encoding_model:
             input_text_encodings = [self.text_encoding_model.get_encoding(text_id) for text_id in text_ids]
-        else:
-            input_text_encodings = None
         input_r_elapsed_time[1:] = r_elapsed_time[:-1].copy().astype(np.int)
         input_skill = skill
         input_label[1:] = ans[:-1]
@@ -52,8 +50,9 @@ class DKTDataset(Dataset):
         target_skill = input_skill[:]
         target_label = ans
 
-        encoder_inputs = {"question_id": input_ids, "text_id": input_text_ids, "skill": input_skill,
-                          "text_encoding": input_text_encodings}
+        encoder_inputs = {"question_id": input_ids, "text_id": input_text_ids, "skill": input_skill}
+        if self.text_encoding_model:
+            encoder_inputs["text_encoding"]=input_text_encodings
         decoder_inputs = {"label": input_label, "r_elapsed_time": input_r_elapsed_time}
         decoder_targets = {"target_id": target_ids, "target_text_id": target_text_ids, "target_skill": target_skill,
                            'target_label': target_label}
