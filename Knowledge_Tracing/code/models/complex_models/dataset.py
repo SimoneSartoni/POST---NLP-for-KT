@@ -11,9 +11,10 @@ from Knowledge_Tracing.code.data_processing.preprocess.group_interactions_by_use
 
 
 class DKTDataset(Dataset):
-    def __init__(self, grouped_df, text_encoding_model=None, max_seq=100):
+    def __init__(self, grouped_df, text_encoding_model=None, max_seq=100, negative_correctness=False):
         self.max_seq = max_seq
         self.data = grouped_df
+        self.negative_correctness = negative_correctness
         self.text_encoding_model = text_encoding_model
 
     def __len__(self):
@@ -33,7 +34,10 @@ class DKTDataset(Dataset):
 
         q_ids[-seq_len:] = unique_question_id
         text_ids[-seq_len:] = text_id
-        ans[-seq_len:] = answered_correctly
+        if self.negative_correctness:
+            ans[-seq_len:] = [1.0 if x == 1.0 else -1.0 for x in answered_correctly]
+        else:
+            ans[-seq_len:] = answered_correctly
         r_elapsed_time[-seq_len:] = response_elapsed_time
         skill[-seq_len:] = exe_skill
 
@@ -62,7 +66,7 @@ class DKTDataset(Dataset):
 
 def get_dataloaders(interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
                                        ".csv", texts_filepath='../input/',  output_filepath='/kaggle/working/',
-                    interaction_sequence_len=25, personal_cleaning=True, text_encoding_model=None):
+                    interaction_sequence_len=25, personal_cleaning=True, text_encoding_model=None, negative_correctness=True):
 
     df = load_preprocessed_interactions(interactions_filepath=interactions_filepath)
     print(df)
@@ -82,9 +86,12 @@ def get_dataloaders(interactions_filepath="../input/assistmentds-2012/2012-2013-
     train, val = train_test_split(train, test_size=0.2)
     print("train size: ", train.shape, "validation size: ", val.shape)
 
-    train_dataset = DKTDataset(train.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len)
-    val_dataset = DKTDataset(val.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len)
-    test_dataset = DKTDataset(test.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len)
+    train_dataset = DKTDataset(train.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len,
+                               negative_correctness=negative_correctness)
+    val_dataset = DKTDataset(val.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len,
+                             negative_correctness=negative_correctness)
+    test_dataset = DKTDataset(test.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len,
+                              negative_correctness=negative_correctness)
     train_loader = DataLoader(train_dataset,
                               batch_size=config.BATCH_SIZE,
                               num_workers=2,
