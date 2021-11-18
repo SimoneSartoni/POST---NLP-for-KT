@@ -7,8 +7,8 @@ import pandas as pd
 import numpy as np
 from scipy import sparse
 
-from Knowledge_Tracing.code.data_processing.get_data_assistments_2012 import get_data_assistments_2012
-from Knowledge_Tracing.code.data_processing.get_data_assistments_2009 import get_data_assistments_2009
+from code.data_processing.preprocess.process_data_assistments_2012 import process_data_assistments_2012
+from code.data_processing.preprocess.process_data_assistments_2009 import process_data_assistments_2009
 
 
 class DataProcess:
@@ -27,11 +27,11 @@ class DataProcess:
         data_path = os.path.join(self.data_folder, self.file_name)
         print(data_path)
         if dataset_name == 'assistment_2012':
-            df, texts_df = get_data_assistments_2012(interactions_filepath=data_path, max_questions=30,
-                                                     make_sentences_flag=False, texts_filepath=texts_filepath)
+            df, texts_df = process_data_assistments_2012(interactions_filepath=data_path, max_questions=30,
+                                                         make_sentences_flag=False, texts_filepath=texts_filepath)
         elif dataset_name == 'assistment_2009':
-            df, texts_df = get_data_assistments_2009(interactions_filepath=data_path, max_questions=30,
-                                                     make_sentences_flag=False, texts_filepath=texts_filepath)
+            df, texts_df = process_data_assistments_2009(interactions_filepath=data_path, max_questions=30,
+                                                         make_sentences_flag=False, texts_filepath=texts_filepath)
         del texts_df
         df.to_csv(os.path.join(self.output_folder, '%s_processed.csv' % self.file_name))
         del df

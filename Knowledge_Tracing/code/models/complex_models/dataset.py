@@ -33,7 +33,7 @@ class DKTDataset(Dataset):
 
         q_ids[-seq_len:] = unique_question_id
         text_ids[-seq_len:] = text_id
-        ans[-seq_len:] = [-1.0 if not x else 1.0 for x in answered_correctly]
+        ans[-seq_len:] = answered_correctly
         r_elapsed_time[-seq_len:] = response_elapsed_time
         skill[-seq_len:] = exe_skill
 
