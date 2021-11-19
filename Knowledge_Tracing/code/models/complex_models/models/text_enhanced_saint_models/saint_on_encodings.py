@@ -14,7 +14,7 @@ class saint_on_encodings(nn.Module):
         self.n_decoder = n_decoder
         self.encoder = get_clones(EncoderBlock(enc_heads, n_dims, nb_questions, encoding_size, nb_skills, seq_len),
                                   n_encoder)
-        self.decoder = get_clones(DecoderBlock(dec_heads, n_dims, nb_responses, seq_len), n_decoder)
+        self.decoder = get_clones(DecoderBlock(dec_heads, n_dims, nb_responses, encoding_size, seq_len), n_decoder)
         self.fc = nn.Linear(2 * n_dims, 1)
 
     def forward(self, inputs, decoder_targets):
