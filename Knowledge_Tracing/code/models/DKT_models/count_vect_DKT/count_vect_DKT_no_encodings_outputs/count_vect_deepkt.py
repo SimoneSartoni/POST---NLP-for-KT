@@ -2,7 +2,6 @@ from tensorflow.keras import Model, Input, layers, losses
 
 from Knowledge_Tracing.code.models.DKT_models.count_vect_DKT.count_vect_DKT_no_encodings_outputs.data_utils import get_target as NLP_get_target
 
-
 class clean_count_vect_DKTModel(Model):
     """ The Deep Knowledge Tracing model.
     Arguments in __init__:
