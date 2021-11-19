@@ -28,14 +28,14 @@ class clean_count_vect_DKTModel(Model):
 
         output_encodings = layers.TimeDistributed(dense_encodings, name='output_encodings')(lstm)
 
-        dense_class = layers.Dense(1, activation='sigmoid')
+        # dense_class = layers.Dense(1, activation='sigmoid')
 
-        output_class = layers.TimeDistributed(dense_class, name='output_class')(output_encodings)
+        # output_class = layers.TimeDistributed(dense_class, name='output_class')(output_encodings)
 
-        outputs = layers.concatenate([output_encodings, output_class])
+        # outputs = layers.concatenate([output_encodings])
 
         super(clean_count_vect_DKTModel, self).__init__(inputs=[input_encodings, input_labels],
-                                                        outputs=outputs,
+                                                        outputs=output_encodings,
                                                         name="DKT_count_vect_Model")
         self.nb_encodings = nb_encodings
 
