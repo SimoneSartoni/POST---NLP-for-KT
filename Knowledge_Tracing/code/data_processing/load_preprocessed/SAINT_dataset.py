@@ -9,7 +9,7 @@ def encode_correctness_in_encodings(text_encoding_model, text_id, correctness):
         encoding = np.concatenate([encoding, zeros])
     else:
         encoding = np.concatenate([zeros, encoding])
-    return encoding
+    return np.array(encoding)
 
 
 class SAINT_Dataset(Dataset):
@@ -36,6 +36,8 @@ class SAINT_Dataset(Dataset):
         skill = np.zeros(self.max_seq, dtype=int)
         input_label = np.zeros(self.max_seq, dtype=int)
         input_r_elapsed_time = np.zeros(self.max_seq, dtype=int)
+        if self.text_encoding_model:
+            input_text_encoding = np.zeros((self.max_seq, self.text_encoding_model.vector_size), dtype=int)
 
         q_ids[-seq_len:] = unique_question_id
         text_ids[-seq_len:] = text_id
@@ -50,10 +52,10 @@ class SAINT_Dataset(Dataset):
         input_text_ids = text_ids
         if self.text_encoding_model:
             if self.encode_correct_in_encodings:
-                input_text_encodings = [encode_correctness_in_encodings(self.text_encoding_model, text_id, correct)
-                                        for text_id, correct in list(zip(text_ids, answered_correctly))]
+                input_text_encoding[-seq_len:] = np.stack([encode_correctness_in_encodings(self.text_encoding_model, text_id, correct)
+                                        for text_id, correct in list(zip(text_ids, answered_correctly))])
             else:
-                input_text_encodings = [self.text_encoding_model.get_encoding(text_id) for text_id in text_ids]
+                input_text_encoding = [self.text_encoding_model.get_encoding(text_id) for text_id in text_ids]
         input_r_elapsed_time[1:] = r_elapsed_time[:-1].copy().astype(np.int)
         input_skill = skill
         input_label[1:] = ans[:-1]
@@ -64,7 +66,7 @@ class SAINT_Dataset(Dataset):
         target_label = ans
         encoder_inputs = {"question_id": input_ids, "text_id": input_text_ids, "skill": input_skill}
         if self.text_encoding_model:
-            encoder_inputs["text_encoding"] = input_text_encodings
+            encoder_inputs["text_encoding"] = input_text_encoding
         decoder_inputs = {"label": input_label, "r_elapsed_time": input_r_elapsed_time}
         decoder_targets = {"target_id": target_ids, "target_text_id": target_text_ids, "target_skill": target_skill,
                            'target_label': target_label}
