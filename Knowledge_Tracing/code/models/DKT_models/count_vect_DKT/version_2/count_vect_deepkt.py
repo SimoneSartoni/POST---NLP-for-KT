@@ -30,8 +30,8 @@ class clean_count_vect_DKTModel(Model):
 
         output_encodings = layers.TimeDistributed(dense_encodings, name='output_encodings')(lstm)
 
-        output_encodings = tensorflow.multiply(output_encodings, mask_target_encodings
-                                               )
+        output_encodings = tensorflow.multiply(output_encodings, mask_target_encodings)
+
         dense_class = layers.Dense(1, activation='sigmoid')
 
         output_class = layers.TimeDistributed(dense_class, name='output_class')(output_encodings)

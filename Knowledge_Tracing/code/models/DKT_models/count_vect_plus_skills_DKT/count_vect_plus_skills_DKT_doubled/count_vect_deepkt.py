@@ -1,3 +1,4 @@
+import tensorflow
 from tensorflow.keras import Model, Input, layers, losses
 
 from Knowledge_Tracing.code.models.DKT_models.count_vect_plus_skills_DKT.count_vect_plus_skills_DKT_doubled.data_utils import get_target as NLP_get_target
@@ -17,9 +18,13 @@ class count_vect_plus_skill_doubled_DKT(Model):
     def __init__(self, nb_encodings, nb_features, hidden_units=100, dropout_rate=0.2):
         input_encodings = Input(shape=[None, nb_encodings], name='input_encodings')
         input_features = Input(shape=(None, nb_features), name='input_features')
+        target_encodings = Input(shape=[None, nb_encodings], name='target_encodings')
+        target_features = Input(shape=[None, nb_features], name='target_features')
 
+        mask_target_encodings = layers.Masking(mask_value=-1.0)(target_encodings)
         mask_encodings = layers.Masking(mask_value=-1.0)(input_encodings)
         mask_features = layers.Masking(mask_value=-1.0)(input_features)
+        mask_target_features = layers.Masking(mask_value=-1.0)(target_features)
 
         lstm_encodings = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_encodings)
         lstm_features = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_features)
@@ -30,16 +35,25 @@ class count_vect_plus_skill_doubled_DKT(Model):
         output_encodings = layers.TimeDistributed(dense_encodings, name='output_encodings')(lstm_encodings)
         output_features = layers.TimeDistributed(dense_features, name='output_encodings')(lstm_features)
 
+        output_encodings = tensorflow.multiply(output_encodings, mask_target_encodings)
+        output_features = tensorflow.multiply(output_features, mask_target_features)
+
+
         outputs = layers.concatenate([output_encodings, output_features])
 
         dense_class = layers.Dense(1, activation='sigmoid')
 
         output_class = layers.TimeDistributed(dense_class, name='output_class')(outputs)
 
-        super(count_vect_plus_skill_doubled_DKT, self).__init__(inputs=[input_encodings, input_features],
+        inputs = {"text_encoding": input_encodings, "features": input_features, "target_text_encoding": target_encodings,
+                  "target_features": target_features}
+        outputs = {"labels": output_class}
+
+        super(count_vect_plus_skill_doubled_DKT, self).__init__(inputs=inputs,
                                                                 outputs=output_class,
                                                                 name="count_vect_plus_skill_doubled_DKT")
         self.nb_encodings = nb_encodings
+        self.nb_features = nb_features
 
     def compile(self, optimizer, metrics=None):
         """Configures the model for training.
