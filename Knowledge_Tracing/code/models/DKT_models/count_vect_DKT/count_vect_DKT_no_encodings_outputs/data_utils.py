@@ -18,10 +18,10 @@ def load_dataset(batch_size=32, shuffle=True,
                  save_filepath='/kaggle/working/', texts_filepath='../input/', min_df=2, max_df=1.0,
                  max_features=1000, interaction_sequence_len=30):
     df = load_preprocessed_interactions(interactions_filepath=interactions_filepath)
-    text_df = load_preprocessed_texts(texts_filepath=texts_filepath)
     group = generate_sequences_of_same_length(df, seq_len=interaction_sequence_len, output_filepath='/kaggle/working')
     del df
     gc.collect()
+    text_df = load_preprocessed_texts(texts_filepath=texts_filepath)
     print(group)
     group = group[["user_id", "question_id", "problem_id", "correct", "elapsed_time", "skill"]]
 
