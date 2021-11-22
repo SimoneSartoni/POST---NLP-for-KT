@@ -30,7 +30,7 @@ class clean_count_vect_DKTModel(Model):
 
         dense_bias = layers.Dense(1, activation='sigmoid')
 
-        output_bias = layers.TimeDistributed(dense_bias, name='output_bias')(hidden_units)
+        output_bias = layers.TimeDistributed(dense_bias, name='output_bias')(lstm)
 
         # dense_class = layers.Dense(1, activation='sigmoid')
 
