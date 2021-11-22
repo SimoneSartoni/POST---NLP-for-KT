@@ -93,7 +93,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             yield inputs, outputs
     encoding_depth = encode_model.vector_size
 
-    def create_dataset(generate_encodings, dataset, encoding_depth):
+    def create_dataset(generate_encodings, input_dataset, encoding_depth):
         # Step 5 - Get Tensorflow Dataset
         types = ((tf.float32, tf.float32, tf.float32),
                  tf.float32)
@@ -106,7 +106,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             output_shapes=shapes
         )
 
-        nb_users = len(dataset.values)
+        nb_users = len(input_dataset.values)
         if shuffle:
             dataset = dataset.shuffle(buffer_size=nb_users, reshuffle_each_iteration=True)
 
