@@ -114,7 +114,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         dataset = dataset.map(
             lambda inputs, outputs: (
                 (inputs[0], tf.expand_dims(inputs[1], axis=-1), inputs[2]),
-                tf.expand_dims(outputs[0], axis=-1)
+                tf.expand_dims(outputs, axis=-1)
             )
         )
 
@@ -143,5 +143,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
 def get_target(y_true, y_pred, nb_encodings=300):
     mask = 1 - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
     y_true = y_true * mask
+    print(y_true.shape)
+    print(y_pred.shape)
     y_pred = y_pred * mask
     return y_true, y_pred
