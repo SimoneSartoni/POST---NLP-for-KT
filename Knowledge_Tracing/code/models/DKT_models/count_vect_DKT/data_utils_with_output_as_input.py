@@ -40,11 +40,12 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
 
 
     def generate_encodings_val():
-        for name, group in val:
+        for group in val.values:
             document_to_term = []
             labels = np.array([], dtype=np.int)
-            for problem, label in list(zip(group['question_id'].values, group['correct'].values)):
-                encoding = encode_model.get_encoding(problem)
+            user_ids, unique_question_ids, text_ids, corrects, response_elapsed_times, exe_skills = group
+            for text_id, label in text_ids, corrects:
+                encoding = encode_model.get_encoding(text_id)
                 encoding = np.expand_dims(encoding, axis=0)
                 document_to_term.append(encoding)
                 labels = np.append(labels, label)
@@ -58,11 +59,12 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             yield inputs, outputs
 
     def generate_encodings_test():
-        for name, group in test:
+        for group in test.values:
             document_to_term = []
             labels = np.array([], dtype=np.int)
-            for problem, label in list(zip(group['question_id'].values, group['correct'].values)):
-                encoding = encode_model.get_encoding(problem)
+            user_ids, unique_question_ids, text_ids, corrects, response_elapsed_times, exe_skills = group
+            for text_id, label in text_ids, corrects:
+                encoding = encode_model.get_encoding(text_id)
                 encoding = np.expand_dims(encoding, axis=0)
                 document_to_term.append(encoding)
                 labels = np.append(labels, label)
@@ -74,12 +76,14 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             inputs = (i_doc, i_label, o_doc)
             outputs = o_label
             yield inputs, outputs
+
     def generate_encodings_train():
-        for name, group in train:
+        for group in train.values:
             document_to_term = []
             labels = np.array([], dtype=np.int)
-            for problem, label in list(zip(group['question_id'].values, group['correct'].values)):
-                encoding = encode_model.get_encoding(problem)
+            user_ids, unique_question_ids, text_ids, corrects, response_elapsed_times, exe_skills = group
+            for text_id, label in text_ids, corrects:
+                encoding = encode_model.get_encoding(text_id)
                 encoding = np.expand_dims(encoding, axis=0)
                 document_to_term.append(encoding)
                 labels = np.append(labels, label)
@@ -91,6 +95,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             inputs = (i_doc, i_label, o_doc)
             outputs = o_label
             yield inputs, outputs
+
     encoding_depth = encode_model.vector_size
 
     def create_dataset(generate_encodings, input_dataset, encoding_depth):
