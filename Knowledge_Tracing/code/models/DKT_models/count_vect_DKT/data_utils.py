@@ -161,7 +161,7 @@ def get_target(y_true, y_pred, nb_encodings=300):
     y_true = y_true * mask
     ones = tf.ones(shape=tf.shape(y_pred))
     encodings_true, y_true = tf.split(y_true, num_or_size_splits=[-1, 1], axis=-1)
-    encodings_pred, bias_pred = tf.split(y_true, num_or_size_splits=[-1, 1], axis=-1)
+    encodings_pred, bias_pred = tf.split(y_pred, num_or_size_splits=[-1, 1], axis=-1)
 
     y_pred = tf.reduce_sum(encodings_pred * encodings_true, axis=-1, keepdims=True)
     y_true_sum = tf.reduce_sum(ones * encodings_true, axis=-1, keepdims=True)
