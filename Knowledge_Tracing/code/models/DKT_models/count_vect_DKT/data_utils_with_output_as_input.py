@@ -49,8 +49,8 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             o_doc = document_to_term[1:]
             i_label = labels[:-1]
             o_label = labels[1:]
-            inputs = (i_doc, i_label)
-            outputs = (o_doc, o_label)
+            inputs = (i_doc, i_label, o_doc)
+            outputs = o_label
             yield inputs, outputs
 
     def generate_encodings_test():
@@ -67,8 +67,8 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             o_doc = document_to_term[1:]
             i_label = labels[:-1]
             o_label = labels[1:]
-            inputs = (i_doc, i_label)
-            outputs = (o_doc, o_label)
+            inputs = (i_doc, i_label, o_doc)
+            outputs = o_label
             yield inputs, outputs
     def generate_encodings_train():
         for name, group in df.loc[df['user_id'].isin(train_users)].groupby('user_id'):
@@ -84,17 +84,17 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             o_doc = document_to_term[1:]
             i_label = labels[:-1]
             o_label = labels[1:]
-            inputs = (i_doc, i_label)
-            outputs = (o_doc, o_label)
+            inputs = (i_doc, i_label, o_doc)
+            outputs = o_label
             yield inputs, outputs
     encoding_depth = encode_model.vector_size
 
     def create_dataset(generate_encodings, users, encoding_depth):
         # Step 5 - Get Tensorflow Dataset
-        types = ((tf.float32, tf.float32),
-                 (tf.float32, tf.float32))
-        shapes = (([None, encoding_depth], [None]),
-                  ([None, encoding_depth], [None]))
+        types = ((tf.float32, tf.float32, tf.float32),
+                 tf.float32)
+        shapes = (([None, encoding_depth], [None], [None, encoding_depth]),
+                  [None])
         # Step 5 - Get Tensorflow Dataset
         dataset = tf.data.Dataset.from_generator(
             generator=generate_encodings,
@@ -109,11 +109,8 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         print(dataset)
         dataset = dataset.map(
             lambda inputs, outputs: (
-                (inputs[0], tf.expand_dims(inputs[1], axis=-1)),
-                tf.concat(values=[
-                    outputs[0],
-                    tf.expand_dims(outputs[1], axis=-1)],
-                    axis=-1)
+                (inputs[0], tf.expand_dims(inputs[1], axis=-1), inputs[2]),
+                tf.expand_dims(outputs[0], axis=-1)
             )
         )
 
@@ -156,14 +153,7 @@ def split_dataset(generator, total_size, test_fraction, val_fraction=None):
 
 
 def get_target(y_true, y_pred, nb_encodings=300):
-
     mask = 1 - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
     y_true = y_true * mask
-    ones = tf.ones(shape=tf.shape(y_pred))
-    encodings_true, y_true = tf.split(y_true, num_or_size_splits=[-1, 1], axis=-1)
-    y_pred = tf.reduce_sum(y_pred * encodings_true, axis=-1, keepdims=True)
-    y_true_sum = tf.reduce_sum(ones * encodings_true, axis=-1, keepdims=True)
-    y_true_sum = tf.where(tf.is_nan(y_true_sum), tf.zeros_like(y_true_sum), y_true_sum)
-    y_true_sum = tf.where(tf.equal(y_true_sum, 0), tf.ones_like(y_true_sum), y_true_sum)
-    y_pred = tf.divide(y_pred, y_true_sum)
+    y_pred = y_pred * mask
     return y_true, y_pred

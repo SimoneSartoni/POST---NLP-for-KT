@@ -9,7 +9,7 @@ from Knowledge_Tracing.code.data_processing.load_preprocessed.DKT_dataset import
 
 def get_DKT_dataloaders(batch_size=128, shuffle=False, interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final."
                                                 "csv", output_filepath='/kaggle/working/', interaction_sequence_len=25,
-                          text_encoding_model=None, negative_correctness=False, **encodings_kwargs):
+                          text_encoding_model=None, negative_correctness=False, inputs={}, outputs={}):
 
 
     df = load_preprocessed_interactions(interactions_filepath=interactions_filepath)
@@ -31,11 +31,11 @@ def get_DKT_dataloaders(batch_size=128, shuffle=False, interactions_filepath="..
     print("train size: ", train.shape, "validation size: ", val.shape)
 
     train_dataset = DKT_Dataset(train.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len,
-                               negative_correctness=negative_correctness, **encodings_kwargs)
+                               negative_correctness=negative_correctness, inputs=inputs, outputs=outputs)
     val_dataset = DKT_Dataset(val.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len,
-                             negative_correctness=negative_correctness, **encodings_kwargs)
+                             negative_correctness=negative_correctness, inputs=inputs, outputs=outputs)
     test_dataset = DKT_Dataset(test.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len,
-                              negative_correctness=negative_correctness, **encodings_kwargs)
+                              negative_correctness=negative_correctness, inputs=inputs, outputs=outputs)
     train_loader = DataLoader(train_dataset,
                               batch_size=batch_size,
                               num_workers=2,

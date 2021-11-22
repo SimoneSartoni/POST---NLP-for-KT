@@ -14,13 +14,16 @@ def encode_correctness_in_encodings(text_encoding_model, text_id, correctness):
 
 class SAINT_Dataset(Dataset):
     def __init__(self, grouped_df, text_encoding_model=None, max_seq=100, negative_correctness=False,
-                 encode_correct_in_encodings=True, **encodings_inputs):
+                 encode_correct_in_encodings=True):
         self.max_seq = max_seq
         self.data = grouped_df
         self.encode_correct_in_encodings = encode_correct_in_encodings
         self.negative_correctness = negative_correctness
         self.text_encoding_model = text_encoding_model
-        self.encodings_inputs = encodings_inputs
+        if encode_correct_in_encodings:
+            self.encoding_size = 2*self.text_encoding_model.vector_size
+        else:
+            self.encoding_size = self.text_encoding_model.vector_size
 
     def __len__(self):
         return len(self.data)
@@ -53,7 +56,7 @@ class SAINT_Dataset(Dataset):
         if self.text_encoding_model:
             if self.encode_correct_in_encodings:
                 input_text_encoding[-seq_len:] = np.stack([encode_correctness_in_encodings(self.text_encoding_model, text_id, correct)
-                                        for text_id, correct in list(zip(text_ids, answered_correctly))])
+                                        for text_id, correct in list(zip(*(text_ids, answered_correctly)))])
             else:
                 input_text_encoding = [self.text_encoding_model.get_encoding(text_id) for text_id in text_ids]
         input_r_elapsed_time[1:] = r_elapsed_time[:-1].copy().astype(np.int)

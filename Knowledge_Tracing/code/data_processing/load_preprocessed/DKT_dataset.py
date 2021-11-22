@@ -14,13 +14,14 @@ def encode_correctness_in_encodings(text_encoding_model, text_id, correctness):
 
 class DKT_Dataset(Dataset):
     def __init__(self, grouped_df, text_encoding_model=None, max_seq=100, negative_correctness=False,
-                 encode_correct_in_encodings=True, **inputs_outputs):
+                 encode_correct_in_encodings=True, inputs={}, outputs={}):
         self.max_seq = max_seq
         self.data = grouped_df
         self.encode_correct_in_encodings = encode_correct_in_encodings
         self.negative_correctness = negative_correctness
         self.text_encoding_model = text_encoding_model
-        self.inputs_outputs = inputs_outputs
+        self.inputs = inputs
+        self.outputs = outputs
 
     def __len__(self):
         return len(self.data)
@@ -55,13 +56,13 @@ class DKT_Dataset(Dataset):
             else:
                 input_text_encodings = [self.text_encoding_model.get_encoding(text_id) for text_id in text_ids]
         input_r_elapsed_time[1:] = r_elapsed_time[:-1].copy().astype(np.int)
-        input_skill = skill
-        input_label[1:] = ans[:-1]
+        input_skill = skill[:-1]
+        input_label = ans[:-1]
 
-        target_ids = input_ids[:]
-        target_text_ids = input_text_ids
-        target_skill = input_skill[:]
-        target_label = ans
+        target_ids = input_ids[1:]
+        target_text_ids = input_text_ids[1:]
+        target_skill = input_skill[1:]
+        target_label = ans[1:]
         possible_inputs = {"question_id": input_ids, "text_id": input_text_ids, "skill": input_skill,
                            "label": input_label, "r_elapsed_time": input_r_elapsed_time}
         if self.text_encoding_model:
@@ -70,10 +71,10 @@ class DKT_Dataset(Dataset):
                            'target_label': target_label}
         inputs = {}
         for key in possible_inputs.keys():
-            if self.encodings_inputs[key]:
+            if self.inputs[key]:
                 inputs[key] = possible_inputs[key]
         outputs = {}
         for key in possible_outputs.keys():
-            if self.encodings_inputs[key]:
+            if self.outputs[key]:
                 outputs[key] = possible_outputs[key]
         return inputs, outputs
