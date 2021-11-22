@@ -38,14 +38,13 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
     train, val = train_test_split(train, test_size=0.2)
     print("train size: ", train.shape, "validation size: ", val.shape)
 
-
     def generate_encodings_val():
         for group in val.values:
             document_to_term = []
             labels = np.array([], dtype=np.int)
             user_ids, unique_question_ids, text_ids, corrects, response_elapsed_times, exe_skills = group
-            for text_id, label in text_ids, corrects:
-                encoding = encode_model.get_encoding(text_id)
+            for text_id, label in list(zip(text_ids, corrects)):
+                encoding = encode_model.get_encoding(problem=text_id)
                 encoding = np.expand_dims(encoding, axis=0)
                 document_to_term.append(encoding)
                 labels = np.append(labels, label)
@@ -63,8 +62,8 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             document_to_term = []
             labels = np.array([], dtype=np.int)
             user_ids, unique_question_ids, text_ids, corrects, response_elapsed_times, exe_skills = group
-            for text_id, label in text_ids, corrects:
-                encoding = encode_model.get_encoding(text_id)
+            for text_id, label in list(zip(text_ids, corrects)):
+                encoding = encode_model.get_encoding(problem=text_id)
                 encoding = np.expand_dims(encoding, axis=0)
                 document_to_term.append(encoding)
                 labels = np.append(labels, label)
@@ -83,7 +82,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             labels = np.array([], dtype=np.int)
             user_ids, unique_question_ids, text_ids, corrects, response_elapsed_times, exe_skills = group
             for text_id, label in list(zip(text_ids, corrects)):
-                encoding = encode_model.get_encoding(text_id)
+                encoding = encode_model.get_encoding(problem=text_id)
                 encoding = np.expand_dims(encoding, axis=0)
                 document_to_term.append(encoding)
                 labels = np.append(labels, label)
