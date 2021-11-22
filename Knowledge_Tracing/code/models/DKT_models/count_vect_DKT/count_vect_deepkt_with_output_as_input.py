@@ -1,3 +1,4 @@
+import tensorflow
 from tensorflow.keras import Model, Input, layers, losses
 
 from Knowledge_Tracing.code.models.DKT_models.count_vect_DKT.data_utils_with_output_as_input import get_target as NLP_get_target
@@ -29,7 +30,8 @@ class clean_count_vect_DKTModel(Model):
 
         output_encodings = layers.TimeDistributed(dense_encodings, name='output_encodings')(lstm)
 
-        output_encodings = output_encodings * mask_encodings
+        output_encodings = tensorflow.multiply(output_encodings, mask_target_encodings
+                                               )
         dense_class = layers.Dense(1, activation='sigmoid')
 
         output_class = layers.TimeDistributed(dense_class, name='output_class')(output_encodings)
