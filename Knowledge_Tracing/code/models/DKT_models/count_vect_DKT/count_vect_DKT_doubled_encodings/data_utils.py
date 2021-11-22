@@ -5,7 +5,6 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 
 from Knowledge_Tracing.code.models.encoding_models.count_vectorizer import count_vectorizer
-from Knowledge_Tracing.code.models.encoding_models.count_vectorizer import count_vectorizer
 from Knowledge_Tracing.code.data_processing.load_preprocessed.load_preprocessed_data import load_preprocessed_texts, \
     load_preprocessed_interactions
 from Knowledge_Tracing.code.data_processing.load_preprocessed.get_DKT_dataloaders import get_DKT_dataloaders
@@ -30,14 +29,14 @@ def load_dataset(batch_size=32, shuffle=True,
     encode_model.fit(text_df, save_filepath)
 
     train_loader, val_loader, test_loader, nb_questions = get_DKT_dataloaders(batch_size, shuffle, interactions_filepath,
-                                                                       output_filepath='/kaggle/working/',
-                                                                       interaction_sequence_len=interaction_sequence_len
-                                                                       , min_seq_len=min_seq_len,
-                                                                       text_encoding_model=encode_model,
-                                                                       negative_correctness=False,
-                                                                       inputs=inputs, outputs=outputs,
-                                                                       encode_correct_in_encodings=
-                                                                       encode_correct_in_encodings)
+                                                                              output_filepath='/kaggle/working/',
+                                                                              interaction_sequence_len=interaction_sequence_len
+                                                                              , min_seq_len=min_seq_len,
+                                                                              text_encoding_model=encode_model,
+                                                                              negative_correctness=False,
+                                                                              inputs=inputs, outputs=outputs,
+                                                                              encode_correct_in_encodings=
+                                                                              encode_correct_in_encodings)
     encoding_depth = 2 * encode_model.vector_size
 
     return train_loader, val_loader, test_loader, encoding_depth
