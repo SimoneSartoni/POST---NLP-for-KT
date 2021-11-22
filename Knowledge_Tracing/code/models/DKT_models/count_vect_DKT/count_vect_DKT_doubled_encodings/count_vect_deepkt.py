@@ -1,7 +1,7 @@
 import tensorflow
 from tensorflow.keras import Model, Input, layers, losses
 
-from code.models.DKT_models.count_vect_DKT.count_vect_DKT_doubled_encodings.data_utils import get_target as NLP_get_target
+from Knowledge_Tracing.code.models.DKT_models.count_vect_DKT.count_vect_DKT_doubled_encodings.data_utils import get_target as NLP_get_target
 
 
 class clean_count_vect_DKTModel(Model):
