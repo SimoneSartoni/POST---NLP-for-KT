@@ -5,7 +5,6 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 
 from Knowledge_Tracing.code.models.encoding_models.count_vectorizer import count_vectorizer
-from Knowledge_Tracing.code.models.encoding_models.count_vectorizer import count_vectorizer
 from Knowledge_Tracing.code.data_processing.load_preprocessed.load_preprocessed_data import load_preprocessed_texts, \
     load_preprocessed_interactions
 MASK_VALUE = -1.0  # The masking value cannot be zero.
