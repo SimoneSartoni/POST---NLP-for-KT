@@ -1,6 +1,7 @@
+import tensorflow
 from tensorflow.keras import Model, Input, layers, losses
 
-from Knowledge_Tracing.code.models.DKT_models.count_vect_DKT.count_vect_DKT_doubled_encodings.data_utils import get_target as NLP_get_target
+from code.models.DKT_models.count_vect_DKT.count_vect_DKT_doubled_encodings.data_utils import get_target as NLP_get_target
 
 
 class clean_count_vect_DKTModel(Model):
@@ -16,23 +17,29 @@ class clean_count_vect_DKTModel(Model):
 
     def __init__(self, nb_encodings, hidden_units=100, dropout_rate=0.2):
         input_encodings = Input(shape=[None, nb_encodings], name='input_encodings')
-
+        input_labels = Input(shape=[None, 1], name='input_labels')
+        target_encodings = Input(shape=[None, nb_encodings], name='target_encodings')
         mask_encodings = layers.Masking(mask_value=-1.0)(input_encodings)
+        mask_labels = layers.Masking(mask_value=-1.0)(input_labels)
+        mask_target_encodings = layers.Masking(mask_value=-1.0)(target_encodings)
 
-        lstm = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_encodings)
+        mask = layers.concatenate([mask_encodings, mask_labels], axis=-1)
+        lstm = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask)
 
         dense_encodings = layers.Dense(nb_encodings, activation='sigmoid')
 
         output_encodings = layers.TimeDistributed(dense_encodings, name='output_encodings')(lstm)
 
+        output_encodings = tensorflow.multiply(output_encodings, mask_target_encodings
+                                               )
         dense_class = layers.Dense(1, activation='sigmoid')
 
         output_class = layers.TimeDistributed(dense_class, name='output_class')(output_encodings)
 
-        outputs = layers.concatenate([output_encodings, output_class])
+        # outputs = layers.concatenate([output_encodings])
 
-        super(clean_count_vect_DKTModel, self).__init__(inputs=input_encodings,
-                                                        outputs=outputs,
+        super(clean_count_vect_DKTModel, self).__init__(inputs=[input_encodings, input_labels, target_encodings],
+                                                        outputs=output_class,
                                                         name="DKT_count_vect_Model")
         self.nb_encodings = nb_encodings
 

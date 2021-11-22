@@ -16,9 +16,9 @@ def load_dataset(batch_size=32, shuffle=True,
                  interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final.csv",
                  save_filepath='/kaggle/working/', texts_filepath='../input/', min_df=2, max_df=1.0,
                  max_features=1000, interaction_sequence_len=25, min_seq_len=5, encode_correct_in_encodings=False):
-    inputs = {"question_id": False, "text_id": True, "skill": False,
-              "label": False, "r_elapsed_time": False, "target_id": False,
-              "target_text_id": True, "target_skill": False, 'target_label': False}
+    inputs = {"question_id": False, "text_id": False, "skill": False,
+              "label": False, "r_elapsed_time": False, 'text_encoding': True, "target_id": False,
+              "target_text_id": False, "target_skill": False, 'target_label': False, 'target_text_encoding': True}
     outputs = {"question_id": False, "text_id": False, "skill": False,
                "label": False, "r_elapsed_time": False, "target_id": False,
                "target_text_id": False, "target_skill": False, 'target_label': True}
