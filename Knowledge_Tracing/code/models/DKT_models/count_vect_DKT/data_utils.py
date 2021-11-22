@@ -139,29 +139,14 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
     return train_set, val_set, test_set, encoding_depth
 
 
-def split_dataset(generator, total_size, test_fraction, val_fraction=None):
-    if not 0 < test_fraction < 1:
-        raise ValueError("test_fraction must be between (0, 1)")
-
-    if val_fraction is not None and not 0 < val_fraction < 1:
-        raise ValueError("val_fraction must be between (0, 1)")
-
-    train_set, test_set = train_test_split(generator, test_size=test_fraction)
-
-    val_set = None
-    if val_fraction:
-        train_set, val_set = train_test_split(train_set, test_size=val_fraction)
-
-    return train_set, test_set, val_set
-
-
 def get_target(y_true, y_pred, nb_encodings=300):
 
     mask = 1 - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
     y_true = y_true * mask
-    ones = tf.ones(shape=tf.shape(y_pred))
     encodings_true, y_true = tf.split(y_true, num_or_size_splits=[-1, 1], axis=-1)
     encodings_pred, bias_pred = tf.split(y_pred, num_or_size_splits=[-1, 1], axis=-1)
+
+    ones = tf.ones(shape=tf.shape(encodings_pred))
 
     y_pred = tf.reduce_sum(encodings_pred * encodings_true, axis=-1, keepdims=True)
     y_true_sum = tf.reduce_sum(ones * encodings_true, axis=-1, keepdims=True)
