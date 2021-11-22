@@ -13,9 +13,8 @@ from Knowledge_Tracing.code.data_processing.preprocess.group_interactions_by_use
 MASK_VALUE = -1.0  # The masking value cannot be zero.
 
 
-def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
-                 interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
-                                       ".csv",
+def load_dataset(batch_size=32, shuffle=True,
+                 interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final.csv",
                  save_filepath='/kaggle/working/', texts_filepath='../input/', min_df=2, max_df=1.0,
                  max_features=1000, interaction_sequence_len=25, min_seq_len=5):
     df = load_preprocessed_interactions(interactions_filepath=interactions_filepath)
