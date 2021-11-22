@@ -37,9 +37,11 @@ class clean_count_vect_DKTModel(Model):
         output_class = layers.TimeDistributed(dense_class, name='output_class')(output_encodings)
 
         # outputs = layers.concatenate([output_encodings])
+        inputs = {"text_encoding": input_encodings, "labels": input_labels,  "target_text_encoding": target_encodings}
+        outputs = {"labels": output_class}
 
-        super(clean_count_vect_DKTModel, self).__init__(inputs=[input_encodings, input_labels, target_encodings],
-                                                        outputs=output_class,
+        super(clean_count_vect_DKTModel, self).__init__(inputs=inputs,
+                                                        outputs=outputs,
                                                         name="DKT_count_vect_Model")
         self.nb_encodings = nb_encodings
 
