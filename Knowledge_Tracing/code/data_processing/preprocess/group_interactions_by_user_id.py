@@ -23,7 +23,7 @@ def generate_sequences_of_same_length(df, seq_len, min_seq_len, output_filepath=
             elapsed_time.append(group['elapsed_time'].values[index:index+seq_len])
             timestamp.append(group['timestamp'].values[index:index+seq_len])
             index += seq_len
-        if  len(group['question_id'].values) - index > min_seq_len:
+        if len(group['question_id'].values) - index > min_seq_len:
             user_id.append(name)
             problem_id.append(group['problem_id'].values[index:])
             question_id.append(group['question_id'].values[index:])
