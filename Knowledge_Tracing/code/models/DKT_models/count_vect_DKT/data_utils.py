@@ -39,7 +39,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         for name, group in df.loc[df['user_id'].isin(val_users)].groupby('user_id'):
             document_to_term = []
             labels = np.array([], dtype=np.int)
-            for problem, label in list(zip(group['question_id'].values[0:max_questions], group['correct'].values[0:max_questions])):
+            for problem, label in list(zip(group['problem_id'].values[0:max_questions], group['correct'].values[0:max_questions])):
                 encoding = encode_model.get_encoding(problem)
                 encoding = np.expand_dims(encoding, axis=0)
                 document_to_term.append(encoding)
@@ -57,7 +57,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         for name, group in df.loc[df['user_id'].isin(test_users)].groupby('user_id'):
             document_to_term = []
             labels = np.array([], dtype=np.int)
-            for problem, label in list(zip(group['question_id'].values[0:max_questions], group['correct'].values[0:max_questions])):
+            for problem, label in list(zip(group['problem_id'].values[0:max_questions], group['correct'].values[0:max_questions])):
                 encoding = encode_model.get_encoding(problem)
                 encoding = np.expand_dims(encoding, axis=0)
                 document_to_term.append(encoding)
@@ -74,7 +74,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
         for name, group in df.loc[df['user_id'].isin(train_users)].groupby('user_id'):
             document_to_term = []
             labels = np.array([], dtype=np.int)
-            for problem, label in list(zip(group['question_id'].values[0:max_questions], group['correct'].values[0:max_questions])):
+            for problem, label in list(zip(group['problem_id'].values[0:max_questions], group['correct'].values[0:max_questions])):
                 encoding = encode_model.get_encoding(problem)
                 encoding = np.expand_dims(encoding, axis=0)
                 document_to_term.append(encoding)
