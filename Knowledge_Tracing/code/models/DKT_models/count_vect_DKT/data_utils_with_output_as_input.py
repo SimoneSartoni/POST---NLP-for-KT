@@ -82,7 +82,7 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
             document_to_term = []
             labels = np.array([], dtype=np.int)
             user_ids, unique_question_ids, text_ids, corrects, response_elapsed_times, exe_skills = group
-            for text_id, label in text_ids, corrects:
+            for text_id, label in list(zip(text_ids, corrects)):
                 encoding = encode_model.get_encoding(text_id)
                 encoding = np.expand_dims(encoding, axis=0)
                 document_to_term.append(encoding)
