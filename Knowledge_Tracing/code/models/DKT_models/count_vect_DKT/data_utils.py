@@ -153,4 +153,6 @@ def get_target(y_true, y_pred, nb_encodings=300):
     y_true_sum = tf.where(tf.math.is_nan(y_true_sum), tf.zeros_like(y_true_sum), y_true_sum)
     y_true_sum = tf.where(tf.equal(y_true_sum, 0), tf.ones_like(y_true_sum), y_true_sum)
     y_pred = tf.divide(y_pred, y_true_sum) + bias_pred
+    y_pred = tf.minimum(y_pred, tf.ones_like(y_pred))
+    y_pred = tf.maximum(y_pred, tf.zeros_like(y_pred))
     return y_true, y_pred
