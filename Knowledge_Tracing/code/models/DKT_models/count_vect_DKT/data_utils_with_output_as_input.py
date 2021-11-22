@@ -33,7 +33,6 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
     del text_df
     gc.collect()
     print("number of words is: " + str(max_value))
-    users = df['user_id'].unique()
     print("splitting")
     train, test = train_test_split(group, test_size=0.2)
     train, val = train_test_split(train, test_size=0.2)
