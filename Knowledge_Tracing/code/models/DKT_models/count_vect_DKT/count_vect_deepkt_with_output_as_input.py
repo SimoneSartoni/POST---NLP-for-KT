@@ -36,7 +36,7 @@ class clean_count_vect_DKTModel(Model):
 
         # outputs = layers.concatenate([output_encodings])
 
-        super(clean_count_vect_DKTModel, self).__init__(inputs=[input_encodings, input_labels],
+        super(clean_count_vect_DKTModel, self).__init__(inputs=[input_encodings, input_labels, target_encodings],
                                                         outputs=output_class,
                                                         name="DKT_count_vect_Model")
         self.nb_encodings = nb_encodings
