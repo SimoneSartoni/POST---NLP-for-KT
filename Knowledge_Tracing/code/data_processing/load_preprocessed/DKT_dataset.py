@@ -56,7 +56,9 @@ class DKT_Dataset(Dataset):
                            "target_text_id": target_text_ids, "target_skill": target_skill,
                            'target_label': target_label}
         if self.text_encoding_model:
-            possible_inputs["text_encoding"] = input_text_encodings
+            possible_inputs["text_encoding"] = input_text_encodings[:-1]
+            possible_inputs["target_text_encoding"] = input_text_encodings[1:]
+
         possible_outputs = possible_inputs
         inputs = {}
         for key in possible_inputs.keys():
