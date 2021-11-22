@@ -17,9 +17,9 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
                  interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
                                        ".csv",
                  save_filepath='/kaggle/working/', texts_filepath='../input/', min_df=2, max_df=1.0,
-                 max_features=1000, interaction_sequence_len=25):
+                 max_features=1000, interaction_sequence_len=25, min_seq_len=5):
     df = load_preprocessed_interactions(interactions_filepath=interactions_filepath)
-    group = generate_sequences_of_same_length(df, seq_len=interaction_sequence_len, output_filepath='/kaggle/working')
+    group = generate_sequences_of_same_length(df, seq_len=interaction_sequence_len, min_seq_len=min_seq_len, output_filepath='/kaggle/working')
     del df
     gc.collect()
     text_df = load_preprocessed_texts(texts_filepath=texts_filepath)
@@ -148,7 +148,5 @@ def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
 def get_target(y_true, y_pred, nb_encodings=300):
     mask = 1 - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
     y_true = y_true * mask
-    print(y_true.shape)
-    print(y_pred.shape)
     y_pred = y_pred * mask
     return y_true, y_pred

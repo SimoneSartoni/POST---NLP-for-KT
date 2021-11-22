@@ -27,27 +27,15 @@ class DKT_Dataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        user_id, unique_question_id, text_id, answered_correctly, response_elapsed_time, exe_skill = self.data[idx]
+        user_id, unique_question_id, text_ids, answered_correctly, response_elapsed_time, exe_skill = self.data[idx]
         seq_len = len(unique_question_id)
 
-        q_ids = np.zeros(self.max_seq, dtype=int)
-        text_ids = np.zeros(self.max_seq, dtype=int)
-        ans = np.zeros(self.max_seq, dtype=int)
-        r_elapsed_time = np.zeros(self.max_seq, dtype=int)
-        skill = np.zeros(self.max_seq, dtype=int)
-        input_label = np.zeros(self.max_seq, dtype=int)
-        input_r_elapsed_time = np.zeros(self.max_seq, dtype=int)
-
-        q_ids[-seq_len:] = unique_question_id
-        text_ids[-seq_len:] = text_id
         if self.negative_correctness:
-            ans[-seq_len:] = [1.0 if x == 1.0 else -1.0 for x in answered_correctly]
+            ans = [1.0 if x == 1.0 else -1.0 for x in answered_correctly]
         else:
-            ans[-seq_len:] = answered_correctly
-        r_elapsed_time[-seq_len:] = response_elapsed_time
-        skill[-seq_len:] = exe_skill
+            ans = answered_correctly
 
-        input_ids = q_ids
+        input_ids = unique_question_id
         input_text_ids = text_ids
         if self.text_encoding_model:
             if self.encode_correct_in_encodings:
@@ -55,8 +43,8 @@ class DKT_Dataset(Dataset):
                                         for text_id, correct in list(zip(text_ids, answered_correctly))]
             else:
                 input_text_encodings = [self.text_encoding_model.get_encoding(text_id) for text_id in text_ids]
-        input_r_elapsed_time[1:] = r_elapsed_time[:-1].copy().astype(np.int)
-        input_skill = skill[:-1]
+        input_r_elapsed_time = response_elapsed_time[:-1].copy().astype(np.int)
+        input_skill = exe_skill[:-1]
         input_label = ans[:-1]
 
         target_ids = input_ids[1:]
@@ -64,11 +52,12 @@ class DKT_Dataset(Dataset):
         target_skill = input_skill[1:]
         target_label = ans[1:]
         possible_inputs = {"question_id": input_ids, "text_id": input_text_ids, "skill": input_skill,
-                           "label": input_label, "r_elapsed_time": input_r_elapsed_time}
+                           "label": input_label, "r_elapsed_time": input_r_elapsed_time, "target_id": target_ids,
+                           "target_text_id": target_text_ids, "target_skill": target_skill,
+                           'target_label': target_label}
         if self.text_encoding_model:
             possible_inputs["text_encoding"] = input_text_encodings
-        possible_outputs = {"target_id": target_ids, "target_text_id": target_text_ids, "target_skill": target_skill,
-                           'target_label': target_label}
+        possible_outputs = possible_inputs
         inputs = {}
         for key in possible_inputs.keys():
             if self.inputs[key]:
