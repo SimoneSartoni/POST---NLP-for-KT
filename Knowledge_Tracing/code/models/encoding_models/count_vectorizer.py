@@ -139,6 +139,8 @@ class count_vectorizer(base_model):
 
     def get_encoding(self, problem):
         row = self.texts_df.loc[self.texts_df['question_id'] == problem]
+        print(row)
+        print(row['body'])
         encoding = np.array(self.count_vectorizer.transform(row['body']).todense()).squeeze()
         return encoding
 
