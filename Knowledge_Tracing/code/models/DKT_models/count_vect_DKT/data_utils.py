@@ -163,7 +163,7 @@ def get_target(y_true, y_pred, nb_encodings=300):
     encodings_true, y_true = tf.split(y_true, num_or_size_splits=[-1, 1], axis=-1)
     y_pred = tf.reduce_sum(y_pred * encodings_true, axis=-1, keepdims=True)
     y_true_sum = tf.reduce_sum(ones * encodings_true, axis=-1, keepdims=True)
-    y_true_sum = tf.where(tf.is_nan(y_true_sum), tf.zeros_like(y_true_sum), y_true_sum)
+    y_true_sum = tf.where(tf.math.is_nan(y_true_sum), tf.zeros_like(y_true_sum), y_true_sum)
     y_true_sum = tf.where(tf.equal(y_true_sum, 0), tf.ones_like(y_true_sum), y_true_sum)
     y_pred = tf.divide(y_pred, y_true_sum)
     return y_true, y_pred
