@@ -46,7 +46,7 @@ def create_dataset(generator, encoding_depth, shuffle=True, batch_size=1024):
     print(dataset)
     dataset = dataset.map(
         lambda inputs, outputs: (
-            {"input_encoding": inputs['text_encoding'], "label": tf.expand_dims(inputs['label'], axis=-1),
+            {"input_encoding": inputs['text_encoding'], "input_label": tf.expand_dims(inputs['label'], axis=-1),
              "target_encoding": inputs['target_text_encoding']},
             tf.expand_dims(outputs['target_label'], axis=-1)
         )
