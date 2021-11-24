@@ -1,5 +1,5 @@
 import tensorflow as tf
-from code.models.DKT_models.DKT.standard import data_utils, metrics, deepkt
+from Knowledge_Tracing.code.models.DKT_models.DKT.standard import data_utils, metrics, deepkt
 
 fn = ""  # Dataset path
 verbose = 1  # Verbose = {0,1,2}
