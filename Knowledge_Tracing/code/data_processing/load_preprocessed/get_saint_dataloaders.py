@@ -11,7 +11,8 @@ from Knowledge_Tracing.code.data_processing.load_preprocessed.SAINT_dataset impo
 
 def get_saint_dataloaders(interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
                                        ".csv", texts_filepath='../input/', output_filepath='/kaggle/working/',
-                          interaction_sequence_len=25, min_seq_len=5, text_encoding_model=None, negative_correctness=False):
+                          interaction_sequence_len=25, min_seq_len=5, text_encoding_model=None,
+                          negative_correctness=False, encode_correct_in_encodings=True):
 
     df = load_preprocessed_interactions(interactions_filepath=interactions_filepath)
     print(df)
@@ -32,11 +33,11 @@ def get_saint_dataloaders(interactions_filepath="../input/assistmentds-2012/2012
     print("train size: ", train.shape, "validation size: ", val.shape)
 
     train_dataset = SAINT_Dataset(train.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len,
-                                  negative_correctness=negative_correctness)
+                                  negative_correctness=negative_correctness, encode_correct_in_encodings=encode_correct_in_encodings)
     val_dataset = SAINT_Dataset(val.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len,
-                                negative_correctness=negative_correctness)
+                                negative_correctness=negative_correctness, encode_correct_in_encodings=encode_correct_in_encodings)
     test_dataset = SAINT_Dataset(test.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len,
-                                 negative_correctness=negative_correctness)
+                                 negative_correctness=negative_correctness, encode_correct_in_encodings=encode_correct_in_encodings)
     encoding_depth = train_dataset.encoding_depth
     train_loader = DataLoader(train_dataset,
                               batch_size=config.BATCH_SIZE,
