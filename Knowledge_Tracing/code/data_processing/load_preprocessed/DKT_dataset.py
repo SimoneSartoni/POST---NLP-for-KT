@@ -57,6 +57,8 @@ class DKT_Dataset:
 
             input_ids = unique_question_id
             input_text_ids = text_ids
+            input_skill = exe_skill[:-1]
+
             if self.text_encoding_model:
                 if self.encode_correct_in_encodings:
                     input_text_encodings = [encode_correctness_in_encodings(self.text_encoding_model, text_id, correct)
@@ -71,7 +73,6 @@ class DKT_Dataset:
             target_text_ids = input_text_ids[1:]
             target_skill = input_skill[1:]
             target_label = ans[1:]
-            input_skill = exe_skill[:-1]
             features = []
             target_features = []
             if self.encode_correct_in_skills:
@@ -81,6 +82,7 @@ class DKT_Dataset:
                     target_features.append(skill_repeated)
                 input_features = features[:-1]
                 target_features = target_features[1:]
+
             possible_inputs = {"question_id": input_ids, "text_id": input_text_ids, "skill": input_skill,
                                "label": input_label, "r_elapsed_time": input_r_elapsed_time,
                                "target_id": target_ids, "target_text_id": target_text_ids, "target_skill": target_skill,

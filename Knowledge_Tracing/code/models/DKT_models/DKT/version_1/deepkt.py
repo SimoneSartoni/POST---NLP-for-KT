@@ -1,4 +1,6 @@
-from code.models.DKT_models.DKT.standard.data_utils import *
+import tensorflow
+
+from Knowledge_Tracing.code.models.DKT_models.DKT.version_1.data_utils import *
 
 
 class DKTModel(tf.keras.Model):
@@ -14,19 +16,27 @@ class DKTModel(tf.keras.Model):
     """
 
     def __init__(self, nb_features, nb_skills, hidden_units=100, dropout_rate=0.2):
-        inputs = tf.keras.Input(shape=(None, nb_features), name='inputs')
+        input_feature = tf.keras.Input(shape=(None, nb_features), name='inputs')
+        target_feature = tf.keras.Input(shape=(None, nb_features), name='inputs')
 
-        x = tf.keras.layers.Masking(mask_value=MASK_VALUE)(inputs)
+        mask_feature = tf.keras.layers.Masking(mask_value=MASK_VALUE)(input_feature)
+        mask_target_feature = tf.keras.layers.Masking(mask_value=MASK_VALUE)(target_feature)
 
-        x = tf.keras.layers.LSTM(hidden_units,
-                                 return_sequences=True,
-                                 dropout=dropout_rate)(x)
+        lstm = tf.keras.layers.LSTM(hidden_units,
+                                    return_sequences=True,
+                                    dropout=dropout_rate)(mask_feature)
 
-        dense = tf.keras.layers.Dense(nb_skills, activation='sigmoid')
-        outputs = tf.keras.layers.TimeDistributed(dense, name='outputs')(x)
+        dense_feature = tf.keras.layers.Dense(nb_skills, activation='sigmoid')
+        outputs_feature = tf.keras.layers.TimeDistributed(dense_feature, name='outputs')(lstm)
 
-        super(DKTModel, self).__init__(inputs=inputs,
-                                       outputs=outputs,
+        feature_pred = tensorflow.multiply(outputs_feature, mask_target_feature)
+
+        dense_class = tf.keras.layers.Dense(1, activation='sigmoid')
+
+        output_class = tf.keras.layers.TimeDistributed(dense_class, name='output_class')(feature_pred)
+
+        super(DKTModel, self).__init__(inputs={"input_feature": input_feature, "target_feature": target_feature},
+                                       outputs=output_class,
                                        name="DKTModel")
 
     def compile(self, optimizer, metrics=None):
