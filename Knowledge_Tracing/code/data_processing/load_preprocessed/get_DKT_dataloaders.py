@@ -32,13 +32,13 @@ def get_DKT_dataloaders(batch_size=128, shuffle=False,
     print("train size: ", train.shape, "validation size: ", val.shape)
 
     train_dataset = DKT_Dataset(train.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len,
-                                negative_correctness=negative_correctness, inputs=inputs, outputs=outputs,
+                                negative_correctness=negative_correctness, inputs=inputs_dict, outputs=outputs_dict,
                                 encode_correct_in_encodings=encode_correct_in_encodings)
     val_dataset = DKT_Dataset(val.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len,
-                              negative_correctness=negative_correctness, inputs=inputs, outputs=outputs,
+                              negative_correctness=negative_correctness, inputs=inputs_dict, outputs=outputs_dict,
                               encode_correct_in_encodings=encode_correct_in_encodings)
     test_dataset = DKT_Dataset(test.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len,
-                               negative_correctness=negative_correctness, inputs=inputs, outputs=outputs,
+                               negative_correctness=negative_correctness, inputs=inputs_dict, outputs=outputs_dict,
                                encode_correct_in_encodings=encode_correct_in_encodings)
 
     return train_dataset, val_dataset, test_dataset, nb_questions
