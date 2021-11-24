@@ -31,11 +31,17 @@ def get_saint_dataloaders(interactions_filepath="../input/assistmentds-2012/2012
     train, test = train_test_split(group, test_size=0.2)
     train, val = train_test_split(train, test_size=0.2)
     print("train size: ", train.shape, "validation size: ", val.shape)
-
+    encoder_inputs_dict = inputs = {"question_id": True, "text_id": True, "skill": True,
+              "label": True, "r_elapsed_time": True, 'text_encoding': True, "target_id": True,
+              "target_text_id": True, "target_skill": True, 'target_label': True, 'target_text_encoding': True}
+    outputs = {"question_id": True, "text_id": True, "skill": True,
+               "label": True, "r_elapsed_time": True, "target_id": True,
+               "target_text_id": True, "target_skill": True, 'target_label': True}
+    decoder_inputs_dict = encoder_inputs_dict
     train_dataset = SAINT_Dataset(train.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len,
                                   negative_correctness=negative_correctness, encode_correct_in_encodings=encode_correct_in_encodings)
     val_dataset = SAINT_Dataset(val.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len,
-                                negative_correctness=negative_correctness, encode_correct_in_encodings=encode_correct_in_encodings)
+                                negative_correctness=negative_correctness, inputs_dict=inputs_dict, outputs_dict=outputs_dict, encode_correct_in_encodings=encode_correct_in_encodings)
     test_dataset = SAINT_Dataset(test.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len,
                                  negative_correctness=negative_correctness, encode_correct_in_encodings=encode_correct_in_encodings)
     encoding_depth = train_dataset.encoding_depth

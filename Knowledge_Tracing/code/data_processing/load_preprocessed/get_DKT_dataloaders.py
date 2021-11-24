@@ -10,8 +10,8 @@ from Knowledge_Tracing.code.data_processing.load_preprocessed.DKT_dataset import
 def get_DKT_dataloaders(batch_size=128, shuffle=False,
                         interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final."
                         "csv", output_filepath='/kaggle/working/', interaction_sequence_len=25, min_seq_len=5,
-                        text_encoding_model=None, negative_correctness=False, inputs_dict={}, outputs_dict={},
-                        encode_correct_in_encodings=False):
+                        text_encoding_model=None, negative_correctness=False, decoder_inputs_dict={}, encoder_inputs_dict={},
+                        encode_correct_in_encodings=False, ):
     df = load_preprocessed_interactions(interactions_filepath=interactions_filepath)
     print(df)
     # grouping based on user_id to get the data supply
@@ -30,15 +30,16 @@ def get_DKT_dataloaders(batch_size=128, shuffle=False,
     train, test = train_test_split(group, test_size=0.2)
     train, val = train_test_split(train, test_size=0.2)
     print("train size: ", train.shape, "validation size: ", val.shape)
-
+    print(train.values[0:10])
+    print(val.values[0:10])
     train_dataset = DKT_Dataset(train.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len,
-                                negative_correctness=negative_correctness, inputs_dict=inputs_dict, outputs_dict=outputs_dict,
+                                negative_correctness=negative_correctness, encoder_inputs_dict={}, decoder_inputs_dict={},
                                 encode_correct_in_encodings=encode_correct_in_encodings)
     val_dataset = DKT_Dataset(val.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len,
-                              negative_correctness=negative_correctness, inputs_dict=inputs_dict, outputs_dict=outputs_dict,
+                              negative_correctness=negative_correctness, encoder_inputs_dict={}, decoder_inputs_dict={},
                               encode_correct_in_encodings=encode_correct_in_encodings)
     test_dataset = DKT_Dataset(test.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len,
-                               negative_correctness=negative_correctness, inputs_dict=inputs_dict, outputs_dict=outputs_dict,
+                               negative_correctness=negative_correctness, encoder_inputs_dict={}, decoder_inputs_dict={},
                                encode_correct_in_encodings=encode_correct_in_encodings)
 
     return train_dataset, val_dataset, test_dataset, nb_questions, nb_skills
