@@ -17,19 +17,20 @@ MASK_VALUE = -1.0  # The masking value cannot be zero.
                             "label": tf.float32, "r_elapsed_time": tf.float32, "target_id": tf.float32,
                             "target_text_id": tf.float32, "target_skill": tf.float32,
                             'target_label': tf.float32}
-    possible_input_shapes = {"question_id": [None, 1], "text_id": [None, 1], "skill": [None, 1],
+    possible_input_shapes = {"question_id": [None], "text_id": [None, 1], "skill": [None],
                              "label": [None], "r_elapsed_time": [None], "target_id": [None],
                              "target_text_id": [None], "target_skill": [None],
                              'target_label': [None]}
 """
 
 
-def create_dataset(generator, encoding_depth, shuffle=True, batch_size=1024):
-    input_types = {"text_encoding": tf.float32, "label": tf.float32, "target_text_encoding": tf.float32}
+def create_dataset(generator, encoding_depth, nb_skills, shuffle=True, batch_size=1024):
+    input_types = {"text_encoding": tf.float32, "label": tf.float32, "target_text_encoding": tf.float32,
+                   "skill": tf.float32, "target_skill": tf.float32}
     output_types = {"target_label": tf.float32}
 
     input_shapes = {"text_encoding": [None, encoding_depth], "label": [None],
-                    "target_text_encoding": [None, encoding_depth]}
+                    "target_text_encoding": [None, encoding_depth], "skill": [None], "target_skill": [None]}
     output_shapes = {"target_label": [None]}
     types = (input_types, output_types)
     shapes = (input_shapes, output_shapes)
@@ -46,8 +47,11 @@ def create_dataset(generator, encoding_depth, shuffle=True, batch_size=1024):
     print(dataset)
     dataset = dataset.map(
         lambda inputs, outputs: (
-            {"input_encoding": inputs['text_encoding'], "input_label": tf.expand_dims(inputs['label'], axis=-1),
-             "target_encoding": inputs['target_text_encoding']},
+            {"input_encoding": inputs['text_encoding'],
+             "input_skill": tf.one_hot(inputs['target_text_encoding'], depth=nb_skills),
+             "input_label": tf.expand_dims(inputs['label'], axis=-1),
+             "target_encoding": inputs['target_text_encoding'],
+             "target_skill": tf.one_hot(inputs['target_skill'], depth=nb_skills)},
             tf.expand_dims(outputs['target_label'], axis=-1)
         )
     )
@@ -71,8 +75,8 @@ def load_dataset(batch_size=32, shuffle=True,
               "label": False, "r_elapsed_time": False, 'text_encoding': True, "target_id": False,
               "target_text_id": False, "target_skill": False, 'target_label': False, 'target_text_encoding': True}
     outputs = {"question_id": False, "text_id": False, "skill": False,
-               "label": False, "r_elapsed_time": False, 'text_encoding': False, "target_id": False,
-               "target_text_id": False, "target_skill": False, 'target_label': True, 'target_text_encoding': False}
+               "label": False, "r_elapsed_time": False, "target_id": False,
+               "target_text_id": False, "target_skill": False, 'target_label': True}
 
     text_df = load_preprocessed_texts(texts_filepath=texts_filepath)
     # Step 3.1 - Generate NLP extracted encoding for problems

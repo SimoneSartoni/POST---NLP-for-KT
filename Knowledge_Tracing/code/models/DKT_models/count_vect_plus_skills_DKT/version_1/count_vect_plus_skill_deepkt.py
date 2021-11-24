@@ -1,6 +1,7 @@
+import tensorflow
 from tensorflow.keras import Model, Input, layers, losses
 
-from Knowledge_Tracing.code.models.DKT_models.count_vect_plus_skills_DKT.data_utils import get_target as NLP_get_target
+from Knowledge_Tracing.code.models.DKT_models.count_vect_plus_skills_DKT.version_1.data_utils import get_target as NLP_get_target
 
 
 class count_vect_plus_skill_DKTModel(Model):
@@ -15,34 +16,46 @@ class count_vect_plus_skill_DKTModel(Model):
     """
 
     def __init__(self, nb_encodings, nb_skills, hidden_units=100, dropout_rate=0.2):
-        input_encodings = Input(shape=[None, nb_encodings], name='input_encodings')
-        input_labels = Input(shape=[None, 1], name='input_labels')
-        input_skills = Input(shape=[None, nb_skills], name='input_skills')
+        input_encoding = Input(shape=[None, nb_encodings], name='input_encodings')
+        input_label = Input(shape=[None, 1], name='input_labels')
+        input_skill = Input(shape=[None, nb_skills], name='input_skills')
+        target_encoding = Input(shape=[None, nb_encodings], name='target_encoding')
+        target_skill = Input(shape=[None, nb_encodings], name='target_encoding')
 
-        mask_encodings = layers.Masking(mask_value=-1.0)(input_encodings)
-        mask_labels = layers.Masking(mask_value=-1.0)(input_labels)
-        mask_skills = layers.Masking(mask_value=-1.0)(input_skills)
-        mask_encodings_labels = layers.concatenate([mask_encodings, mask_labels], axis=-1)
-        mask_skills_labels = layers.concatenate([mask_skills, mask_labels], axis=-1)
+        mask_encoding = layers.Masking(mask_value=-1.0)(input_encoding)
+        mask_label = layers.Masking(mask_value=-1.0)(input_label)
+        mask_skill = layers.Masking(mask_value=-1.0)(input_skill)
+        mask_encoding_label = layers.concatenate([mask_encoding, mask_label], axis=-1)
+        mask_skill_label = layers.concatenate([mask_skill, mask_label], axis=-1)
 
-        lstm_encodings = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_encodings_labels)
-        lstm_skill = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_skills_labels)
-        lstm = layers.concatenate([lstm_encodings, lstm_skill])
+        mask_target_encoding = layers.Masking(mask_value=-1.0)(target_encoding)
+        mask_target_skill = layers.Masking(mask_value=-1.0)(target_skill)
 
-        dense_encodings = layers.Dense(nb_encodings, activation='sigmoid')
-        dense_skills = layers.Dense(nb_skills, activation='sigmoid')
+        lstm_encoding = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_encoding_label)
+        lstm_skill = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_skill_label)
+        lstm = layers.concatenate([lstm_encoding, lstm_skill])
 
-        output_encodings = layers.TimeDistributed(dense_encodings, name='output_encodings')(lstm)
-        output_skills = layers.TimeDistributed(dense_skills, name='output_skills')(lstm)
-        outputs_encodings_skills = layers.concatenate([output_encodings, output_skills])
+        dense_encoding = layers.Dense(nb_encodings, activation='sigmoid')
+        dense_skill = layers.Dense(nb_skills, activation='sigmoid')
+
+        output_encoding = layers.TimeDistributed(dense_encoding, name='output_encodings')(lstm)
+        output_skill = layers.TimeDistributed(dense_skill, name='output_skills')(lstm)
+
+        encoding_pred = tensorflow.multiply(output_encoding, mask_target_encoding)
+        skill_pred = tensorflow.multiply(output_skill, mask_target_skill)
+
+        output_encoding_skill = layers.concatenate([encoding_pred, skill_pred])
 
         dense_label = layers.Dense(1, activation='sigmoid')
 
-        output_label = layers.TimeDistributed(dense_label, name='output_class')(outputs_encodings_skills)
-        outputs = layers.concatenate([outputs_encodings_skills, output_label])
+        output_class = layers.TimeDistributed(dense_label, name='output_class')(output_encoding_skill)
 
-        super(count_vect_plus_skill_DKTModel, self).__init__(inputs=[input_encodings, input_skills, input_labels],
-                                                             outputs=outputs,
+        super(count_vect_plus_skill_DKTModel, self).__init__(inputs={"input_encoding": input_encoding,
+                                                                     "input_skill": input_skill,
+                                                                     "input_label": input_label,
+                                                                     "target_encoding": target_encoding,
+                                                                     "target_skill": target_skill},
+                                                             outputs=output_class,
                                                              name="count_vect_plus_skill_DKTModel")
         self.nb_encodings = nb_encodings
         self.nb_skills = nb_skills
