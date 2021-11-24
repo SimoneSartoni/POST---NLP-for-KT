@@ -17,13 +17,11 @@ class clean_count_vect_DKTModel(Model):
 
     def __init__(self, nb_encodings, hidden_units=100, dropout_rate=0.2):
         input_encoding = Input(shape=[None, nb_encodings], name='input_encoding')
-        input_label = Input(shape=[None, 1], name='input_labels')
         target_encoding = Input(shape=[None, nb_encodings], name='target_encoding')
         mask_encoding = layers.Masking(mask_value=-1.0)(input_encoding)
-        mask_label = layers.Masking(mask_value=-1.0)(input_label)
         mask_target_encoding = layers.Masking(mask_value=-1.0)(target_encoding)
 
-        mask = layers.concatenate([mask_encoding, mask_label], axis=-1)
+        mask = mask_encoding
         lstm = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask)
 
         dense_encoding = layers.Dense(nb_encodings, activation='sigmoid')
@@ -36,10 +34,7 @@ class clean_count_vect_DKTModel(Model):
 
         output_class = layers.TimeDistributed(dense_class, name='output_class')(encoding_pred)
 
-        # outputs = layers.concatenate([output_encodings])
-
         super(clean_count_vect_DKTModel, self).__init__(inputs={"input_encoding": input_encoding,
-                                                                "input_label": input_label,
                                                                 "target_encoding": target_encoding},
                                                         outputs=output_class,
                                                         name="DKT_count_vect_Model")
