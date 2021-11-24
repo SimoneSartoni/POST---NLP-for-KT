@@ -87,7 +87,6 @@ class DecoderBlock(nn.Module):
             position_encoded = pos_encode(self.seq_len)
             _pos = self.position_embed(position_encoded.cuda())
             out = _response + _pos
-            out = torch.cat([out, out], dim=-1)
         else:
             out = input_r
         out = out.permute(1, 0, 2)
