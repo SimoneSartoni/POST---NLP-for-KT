@@ -1,5 +1,5 @@
 
-from Knowledge_Tracing.code.models.DKT_models.DKT.data_utils import *
+from code.models.DKT_models.DKT.standard.data_utils import *
 
 
 class BinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
