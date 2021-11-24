@@ -34,7 +34,7 @@ def create_dataset(generator, encoding_depth, shuffle=True, batch_size=1024):
     types = (input_types, output_types)
     shapes = (input_shapes, output_shapes)
     dataset = tf.data.Dataset.from_generator(
-        generator=generator,
+        generator=generator.generator,
         output_types=types,
         output_shapes=shapes
     )
