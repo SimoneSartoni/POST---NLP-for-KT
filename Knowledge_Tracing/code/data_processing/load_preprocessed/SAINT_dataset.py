@@ -14,16 +14,21 @@ def encode_correctness_in_encodings(text_encoding_model, text_id, correctness):
 
 class SAINT_Dataset(Dataset):
     def __init__(self, grouped_df, text_encoding_model=None, max_seq=100, negative_correctness=False,
-                 encode_correct_in_encodings=True):
+                 encode_correct_in_encodings=True, encoder_inputs_dict={}, decoder_inputs_dict={}):
         self.max_seq = max_seq
         self.data = grouped_df
         self.encode_correct_in_encodings = encode_correct_in_encodings
         self.negative_correctness = negative_correctness
         self.text_encoding_model = text_encoding_model
-        if encode_correct_in_encodings:
-            self.encoding_size = 2*self.text_encoding_model.vector_size
+        if text_encoding_model:
+            if encode_correct_in_encodings:
+                self.encoding_depth = 2*self.text_encoding_model.vector_size
+            else:
+                self.encoding_depth = self.text_encoding_model.vector_size
         else:
-            self.encoding_size = self.text_encoding_model.vector_size
+            self.encoding_depth = 0
+        self.encoder_inputs_dict = encoder_inputs_dict
+        self.decoder_inputs_dict = decoder_inputs_dict
 
     def __len__(self):
         return len(self.data)
@@ -55,23 +60,40 @@ class SAINT_Dataset(Dataset):
         input_text_ids = text_ids
         if self.text_encoding_model:
             if self.encode_correct_in_encodings:
-                input_text_encoding[-seq_len:] = np.stack([encode_correctness_in_encodings(self.text_encoding_model, text_id, correct)
-                                        for text_id, correct in list(zip(*(text_ids, answered_correctly)))])
+                input_text_encoding[-seq_len:] = [encode_correctness_in_encodings(self.text_encoding_model, text_id, correct)
+                                                  for text_id, correct in list(zip(text_ids, answered_correctly))]
+                self.encoding_depth = 2 * self.text_encoding_model.vector_size
             else:
-                input_text_encoding = [self.text_encoding_model.get_encoding(text_id) for text_id in text_ids]
+                input_text_encoding[-seq_len:] = [self.text_encoding_model.get_encoding(text_id) for text_id in text_ids]
+                self.encoding_depth = self.text_encoding_model.vector_size
         input_r_elapsed_time[1:] = r_elapsed_time[:-1].copy().astype(np.int)
         input_skill = skill
         input_label[1:] = ans[:-1]
 
-        target_ids = input_ids[:]
+        target_ids = input_ids
         target_text_ids = input_text_ids
-        target_skill = input_skill[:]
+        target_skill = input_skill
         target_label = ans
-        encoder_inputs = {"question_id": input_ids, "text_id": input_text_ids, "skill": input_skill}
+
+        possible_inputs = {"question_id": input_ids, "text_id": input_text_ids, "skill": input_skill,
+                           "label": input_label, "r_elapsed_time": input_r_elapsed_time, 'target_label': target_label}
         if self.text_encoding_model:
-            encoder_inputs["text_encoding"] = input_text_encoding
-        decoder_inputs = {"label": input_label, "r_elapsed_time": input_r_elapsed_time}
-        decoder_targets = {"target_id": target_ids, "target_text_id": target_text_ids, "target_skill": target_skill,
-                           'target_label': target_label}
-        inputs = {'encoder': encoder_inputs, 'decoder': decoder_inputs}
-        return inputs, decoder_targets
+            possible_inputs["text_encoding"] = input_text_encoding
+            possible_inputs["target_text_encoding"] = input_text_encoding[1:]
+        possible_outputs = possible_inputs
+        encoder_inputs = {}
+        for key in possible_inputs.keys():
+            if self.encoder_inputs_dict[key]:
+                encoder_inputs[key] = possible_inputs[key]
+
+        decoder_inputs = {}
+        for key in possible_inputs.keys():
+            if self.decoder_inputs_dict[key]:
+                decoder_inputs[key] = possible_inputs[key]
+
+        outputs = {}
+        for key in possible_outputs.keys():
+            if self.outputs_dict[key]:
+                outputs[key] = possible_outputs[key]
+        inputs = {"decoder_inputs": decoder_inputs, "encoder_inputs": encoder_inputs}
+        yield inputs, outputs

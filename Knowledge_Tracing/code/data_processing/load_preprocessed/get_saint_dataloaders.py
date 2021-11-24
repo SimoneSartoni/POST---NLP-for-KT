@@ -37,6 +37,7 @@ def get_saint_dataloaders(interactions_filepath="../input/assistmentds-2012/2012
                                 negative_correctness=negative_correctness)
     test_dataset = SAINT_Dataset(test.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len,
                                  negative_correctness=negative_correctness)
+    encoding_depth = train_dataset.encoding_depth
     train_loader = DataLoader(train_dataset,
                               batch_size=config.BATCH_SIZE,
                               num_workers=2,
@@ -55,4 +56,4 @@ def get_saint_dataloaders(interactions_filepath="../input/assistmentds-2012/2012
                              shuffle=False)
     del test_dataset
     gc.collect()
-    return train_loader, val_loader, test_loader, nb_questions, nb_skills
+    return train_loader, val_loader, test_loader, nb_questions, nb_skills, encoding_depth

@@ -46,23 +46,21 @@ class EncoderBlock(nn.Module):
     def __init__(self, n_heads, n_dims, nb_questions, encoding_size, nb_skills, seq_len):
         super(EncoderBlock, self).__init__()
         self.seq_len = seq_len
-        self.exercise_embed = nn.Embedding(nb_questions, n_dims)
-        self.skill_embed = nn.Embedding(nb_skills, n_dims)
-        self.total_dim = 2 * n_dims + encoding_size
-        self.position_embed = nn.Embedding(seq_len, n_dims)
+        self.total_dim = encoding_size
+        self.position_embed = nn.Embedding(seq_len, encoding_size)
         self.layer_norm = nn.LayerNorm(self.total_dim)
 
         self.multihead = MultiHeadWithFFN(n_heads=n_heads, n_dims=self.total_dim)
 
     def forward(self, input_exercise, input_encoding, input_skill, first_block=True):
         if first_block:
-            _exe = self.exercise_embed(input_exercise)
-            _skill = self.skill_embed(input_skill)
+            # _exe = self.exercise_embed(input_exercise)
+            # _skill = self.skill_embed(input_skill)
             position_encoded = pos_encode(self.seq_len).cuda()
             _pos = self.position_embed(position_encoded)
-            out_skill = _skill + _pos
-            out_ex = _exe + _pos
-            out = torch.cat([out_ex, out_skill, input_encoding], dim=-1)
+            # out_skill = _skill + _pos
+            # out_ex = _exe + _pos
+            out = input_encoding + _pos
         else:
             out = input_exercise
         output = self.multihead(q_input=out, kv_input=out)
@@ -73,9 +71,9 @@ class DecoderBlock(nn.Module):
     def __init__(self, n_heads, n_dims, nb_responses, encoding_size, seq_len):
         super(DecoderBlock, self).__init__()
         self.seq_len = seq_len
-        self.total_dim = 2*n_dims + encoding_size
-        self.response_embed = nn.Embedding(nb_responses, n_dims)
-        self.position_embed = nn.Embedding(seq_len, n_dims)
+        self.total_dim = encoding_size
+        self.response_embed = nn.Embedding(nb_responses, encoding_size)
+        self.position_embed = nn.Embedding(seq_len, encoding_size)
         self.layer_norm = nn.LayerNorm(self.total_dim)
         self.multihead_attention = nn.MultiheadAttention(embed_dim=self.total_dim,
                                                          num_heads=n_heads,
