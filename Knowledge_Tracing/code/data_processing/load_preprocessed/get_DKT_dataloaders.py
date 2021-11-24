@@ -1,6 +1,5 @@
 import gc
 from sklearn.model_selection import train_test_split
-
 from Knowledge_Tracing.code.data_processing.load_preprocessed.load_preprocessed_data import \
     load_preprocessed_interactions
 from Knowledge_Tracing.code.data_processing.preprocess.group_interactions_by_user_id import \
@@ -41,22 +40,5 @@ def get_DKT_dataloaders(batch_size=128, shuffle=False,
     test_dataset = DKT_Dataset(test.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len,
                                negative_correctness=negative_correctness, inputs=inputs, outputs=outputs,
                                encode_correct_in_encodings=encode_correct_in_encodings)
-    train_loader = DataLoader(train_dataset,
-                              batch_size=batch_size,
-                              num_workers=2,
-                              shuffle=shuffle)
-    del train_dataset
-    gc.collect()
-    val_loader = DataLoader(val_dataset,
-                            batch_size=batch_size,
-                            num_workers=2,
-                            shuffle=False)
-    del val_dataset
-    gc.collect()
-    test_loader = DataLoader(test_dataset,
-                             batch_size=batch_size,
-                             num_workers=2,
-                             shuffle=False)
-    del test_dataset
-    gc.collect()
-    return train_loader, val_loader, test_loader, nb_questions
+
+    return train_dataset, val_dataset, test_dataset, nb_questions

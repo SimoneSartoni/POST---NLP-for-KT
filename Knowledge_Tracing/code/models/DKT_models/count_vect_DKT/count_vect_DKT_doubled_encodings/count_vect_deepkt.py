@@ -30,18 +30,16 @@ class clean_count_vect_DKTModel(Model):
 
         output_encodings = layers.TimeDistributed(dense_encodings, name='output_encodings')(lstm)
 
-        output_encodings = tensorflow.multiply(output_encodings, mask_target_encodings
-                                               )
+        encodings_pred = tensorflow.multiply(output_encodings, mask_target_encodings)
+
         dense_class = layers.Dense(1, activation='sigmoid')
 
-        output_class = layers.TimeDistributed(dense_class, name='output_class')(output_encodings)
+        output_class = layers.TimeDistributed(dense_class, name='output_class')(encodings_pred)
 
         # outputs = layers.concatenate([output_encodings])
-        inputs = {"text_encoding": input_encodings, "labels": input_labels,  "target_text_encoding": target_encodings}
-        outputs = {"labels": output_class}
 
-        super(clean_count_vect_DKTModel, self).__init__(inputs=inputs,
-                                                        outputs=outputs,
+        super(clean_count_vect_DKTModel, self).__init__(inputs=[input_encodings, input_labels, target_encodings],
+                                                        outputs=output_class,
                                                         name="DKT_count_vect_Model")
         self.nb_encodings = nb_encodings
 
