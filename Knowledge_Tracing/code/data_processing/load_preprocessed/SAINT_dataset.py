@@ -76,7 +76,9 @@ class SAINT_Dataset(Dataset):
         target_label = ans
 
         possible_inputs = {"question_id": input_ids, "text_id": input_text_ids, "skill": input_skill,
-                           "label": input_label, "r_elapsed_time": input_r_elapsed_time, 'target_label': target_label}
+                           "label": input_label, "r_elapsed_time": input_r_elapsed_time, "target_id": target_ids,
+                           "target_text_id": target_text_ids, "target_skill": target_skill,
+                           'target_label': target_label}
         if self.text_encoding_model:
             possible_inputs["text_encoding"] = input_text_encoding
             possible_inputs["target_text_encoding"] = input_text_encoding[1:]
