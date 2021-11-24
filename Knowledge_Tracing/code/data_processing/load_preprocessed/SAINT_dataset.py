@@ -95,5 +95,5 @@ class SAINT_Dataset(Dataset):
         for key in possible_outputs.keys():
             if self.outputs_dict[key]:
                 outputs[key] = possible_outputs[key]
-        inputs = {"decoder_inputs": decoder_inputs, "encoder_inputs": encoder_inputs}
+        inputs = {"decoder": decoder_inputs, "encoder": encoder_inputs}
         yield inputs, outputs
