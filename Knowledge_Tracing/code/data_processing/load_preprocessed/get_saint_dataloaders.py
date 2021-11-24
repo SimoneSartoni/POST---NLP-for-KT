@@ -11,7 +11,7 @@ from Knowledge_Tracing.code.data_processing.load_preprocessed.SAINT_dataset impo
 
 def get_saint_dataloaders(interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
                                        ".csv", texts_filepath='../input/', output_filepath='/kaggle/working/',
-                          interaction_sequence_len=25, text_encoding_model=None, negative_correctness=False):
+                          interaction_sequence_len=25, min_seq_len=5, text_encoding_model=None, negative_correctness=False):
 
     df = load_preprocessed_interactions(interactions_filepath=interactions_filepath)
     print(df)
@@ -20,7 +20,7 @@ def get_saint_dataloaders(interactions_filepath="../input/assistmentds-2012/2012
     nb_skills = len(df['skill'].unique())
     print("Grouping users...")
 
-    group = generate_sequences_of_same_length(df, seq_len=interaction_sequence_len, output_filepath=output_filepath)
+    group = generate_sequences_of_same_length(df, seq_len=interaction_sequence_len, min_seq_len=min_seq_len, output_filepath=output_filepath)
     del df
     gc.collect()
     print(group)
