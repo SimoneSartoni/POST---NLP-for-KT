@@ -2,14 +2,22 @@ import numpy as np
 from torch.utils.data import Dataset, DataLoader
 
 
-def encode_correctness_in_encodings(text_encoding_model, text_id, correctness):
-    encoding = text_encoding_model.get_encoding(text_id)
-    zeros = np.zeros(encoding.shape, dtype=np.float)
-    if correctness:
-        encoding = np.concatenate([encoding, zeros])
+def encode_correctness_in_encodings(text_encoding_model, text_ids, corrects, max_seq, encode_correct_in_encodings):
+    i = 0
+    if encode_correct_in_encodings:
+        input_text_encoding = np.zeros((max_seq, 2*text_encoding_model.vector_size), dtype=int)
     else:
-        encoding = np.concatenate([zeros, encoding])
-    return np.array(encoding)
+        input_text_encoding = np.zeros((max_seq, text_encoding_model.vector_size), dtype=int)
+    for text_id, correctness in list(zip(*(text_ids, corrects))):
+        encoding = text_encoding_model.get_encoding(text_id)
+        if encode_correct_in_encodings:
+            zeros = np.zeros(encoding.shape, dtype=np.float)
+            if correctness:
+                encoding = np.concatenate([encoding, zeros])
+            else:
+                encoding = np.concatenate([zeros, encoding])
+        input_text_encoding[i] = encoding
+    return input_text_encoding
 
 
 class SAINT_Dataset(Dataset):
@@ -44,8 +52,6 @@ class SAINT_Dataset(Dataset):
         skill = np.zeros(self.max_seq, dtype=int)
         input_label = np.zeros(self.max_seq, dtype=int)
         input_r_elapsed_time = np.zeros(self.max_seq, dtype=int)
-        if self.text_encoding_model:
-            input_text_encoding = np.zeros((self.max_seq, self.text_encoding_model.vector_size), dtype=int)
 
         q_ids[-seq_len:] = unique_question_id
         text_ids[-seq_len:] = text_id
@@ -59,11 +65,10 @@ class SAINT_Dataset(Dataset):
         input_ids = q_ids
         input_text_ids = text_ids
         if self.text_encoding_model:
-            if self.encode_correct_in_encodings:
-                input_text_encoding[-seq_len:] = [encode_correctness_in_encodings(self.text_encoding_model, text_id, correct)
-                                                  for text_id, correct in list(zip(text_id, answered_correctly))]
-            else:
-                input_text_encoding[-seq_len:] = [self.text_encoding_model.get_encoding(text_id) for text_id in text_id]
+            input_text_encoding = encode_correctness_in_encodings(self.text_encoding_model, text_id,
+                                                                  answered_correctly, self.max_seq,
+                                                                  self.encode_correct_in_encodings)
+
         input_r_elapsed_time[1:] = r_elapsed_time[:-1].copy().astype(np.int)
         input_skill = skill
         input_label[1:] = ans[:-1]
