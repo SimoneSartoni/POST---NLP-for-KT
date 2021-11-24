@@ -61,11 +61,9 @@ class SAINT_Dataset(Dataset):
         if self.text_encoding_model:
             if self.encode_correct_in_encodings:
                 input_text_encoding[-seq_len:] = [encode_correctness_in_encodings(self.text_encoding_model, text_id, correct)
-                                                  for text_id, correct in list(zip(text_ids, answered_correctly))]
-                self.encoding_depth = 2 * self.text_encoding_model.vector_size
+                                                  for text_id, correct in list(zip(text_id, answered_correctly))]
             else:
-                input_text_encoding[-seq_len:] = [self.text_encoding_model.get_encoding(text_id) for text_id in text_ids]
-                self.encoding_depth = self.text_encoding_model.vector_size
+                input_text_encoding[-seq_len:] = [self.text_encoding_model.get_encoding(text_id) for text_id in text_id]
         input_r_elapsed_time[1:] = r_elapsed_time[:-1].copy().astype(np.int)
         input_skill = skill
         input_label[1:] = ans[:-1]
