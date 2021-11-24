@@ -85,7 +85,7 @@ def load_dataset(batch_size=32, shuffle=True,
                                                                      , min_seq_len=min_seq_len,
                                                                      text_encoding_model=encode_model,
                                                                      negative_correctness=False,
-                                                                     inputs=inputs, outputs=outputs,
+                                                                     inputs_dict=inputs, outputs_dict=outputs,
                                                                      encode_correct_in_encodings=True)
     encoding_depth = 2 * encode_model.vector_size
 
