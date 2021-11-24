@@ -22,7 +22,7 @@ def encode_correctness_in_encodings(text_encoding_model, text_ids, corrects, max
 
 class SAINT_Dataset(Dataset):
     def __init__(self, grouped_df, text_encoding_model=None, max_seq=100, negative_correctness=False,
-                 encode_correct_in_encodings=True, encoder_inputs_dict={}, decoder_inputs_dict={}):
+                 encode_correct_in_encodings=True, encoder_inputs_dict={}, decoder_inputs_dict={}, outputs_dict={}):
         self.max_seq = max_seq
         self.data = grouped_df
         self.encode_correct_in_encodings = encode_correct_in_encodings
@@ -37,6 +37,7 @@ class SAINT_Dataset(Dataset):
             self.encoding_depth = 0
         self.encoder_inputs_dict = encoder_inputs_dict
         self.decoder_inputs_dict = decoder_inputs_dict
+        self.outputs_dict = outputs_dict
 
     def __len__(self):
         return len(self.data)

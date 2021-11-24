@@ -35,18 +35,20 @@ def get_saint_dataloaders(interactions_filepath="../input/assistmentds-2012/2012
                            "label": True, "r_elapsed_time": True, 'text_encoding': True, "target_id": True,
                            "target_text_id": True, "target_skill": True, 'target_label': True, 'target_text_encoding': True}
     decoder_inputs_dict = encoder_inputs_dict
+    outputs_dict = decoder_inputs_dict
     train_dataset = SAINT_Dataset(train.values, text_encoding_model=text_encoding_model,
                                   max_seq=interaction_sequence_len, negative_correctness=negative_correctness,
                                   encode_correct_in_encodings=encode_correct_in_encodings,
-                                  encoder_inputs_dict=encoder_inputs_dict, decoder_inputs_dict=decoder_inputs_dict)
+                                  encoder_inputs_dict=encoder_inputs_dict, decoder_inputs_dict=decoder_inputs_dict,
+                                  outputs_dict=outputs_dict)
     val_dataset = SAINT_Dataset(val.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len,
                                 negative_correctness=negative_correctness, encoder_inputs_dict=encoder_inputs_dict,
-                                decoder_inputs_dict=decoder_inputs_dict,
+                                decoder_inputs_dict=decoder_inputs_dict, outputs_dict=outputs_dict,
                                 encode_correct_in_encodings=encode_correct_in_encodings)
     test_dataset = SAINT_Dataset(test.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len,
                                  negative_correctness=negative_correctness, encode_correct_in_encodings=
                                  encode_correct_in_encodings, encoder_inputs_dict=encoder_inputs_dict,
-                                 decoder_inputs_dict=decoder_inputs_dict)
+                                 decoder_inputs_dict=decoder_inputs_dict, outputs_dict=outputs_dict)
     encoding_depth = train_dataset.encoding_depth
     train_loader = DataLoader(train_dataset,
                               batch_size=config.BATCH_SIZE,
