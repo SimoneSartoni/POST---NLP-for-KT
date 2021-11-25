@@ -29,8 +29,6 @@ def get_DKT_dataloaders(batch_size=128, shuffle=False,
     print("splitting")
     train, test = train_test_split(group, test_size=0.2)
     train, val = train_test_split(train, test_size=0.2)
-    print(train.values)
-    print(val.values)
     print("train size: ", train.shape, "validation size: ", val.shape)
 
     train_dataset = DKT_Dataset(train.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len,
