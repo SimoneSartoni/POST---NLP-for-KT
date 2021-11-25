@@ -59,7 +59,7 @@ def load_dataset(batch_size=32, shuffle=True,
               "label": False, "r_elapsed_time": False, 'text_encoding': False, "target_id": False, "feature": False,
               "target_text_id": False, "target_skill": False, 'target_label': False, 'target_text_encoding': False,
               "target_feature": False, "target_feature_id": False}
-    outputs = {"question_id": False, "text_id": False, "skill": False, "feature_id": True,
+    outputs = {"question_id": False, "text_id": False, "skill": False, "feature_id": False,
                "label": False, "r_elapsed_time": False, 'text_encoding': False, "target_id": True, "feature": False,
                "target_text_id": False, "target_skill": False, 'target_label': True, 'target_text_encoding': False,
                "target_feature": False, "target_feature_id": False, "target_feature_id": False}
