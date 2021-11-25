@@ -15,7 +15,7 @@ class DKTModel(tf.keras.Model):
             and what the model expects.
     """
 
-    def __init__(self, nb_features, nb_skills, hidden_units=100, dropout_rate=0.2):
+    def __init__(self, nb_features, hidden_units=100, dropout_rate=0.2):
         input_feature = tf.keras.Input(shape=(None, nb_features), name='inputs')
         target_feature = tf.keras.Input(shape=(None, nb_features), name='inputs')
 
@@ -26,7 +26,7 @@ class DKTModel(tf.keras.Model):
                                     return_sequences=True,
                                     dropout=dropout_rate)(mask_feature)
 
-        dense_feature = tf.keras.layers.Dense(nb_skills, activation='sigmoid')
+        dense_feature = tf.keras.layers.Dense(nb_features, activation='sigmoid')
         outputs_feature = tf.keras.layers.TimeDistributed(dense_feature, name='outputs')(lstm)
 
         feature_pred = tensorflow.multiply(outputs_feature, mask_target_feature)
