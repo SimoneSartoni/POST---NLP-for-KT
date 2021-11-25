@@ -75,13 +75,13 @@ def load_dataset(batch_size=32, shuffle=True,
                                                       encode_correct_in_encodings=False,
                                                       encode_correct_in_skills=False,
                                                       dictionary=dictionary)
-    features_depth = 2 * nb_skills
-    skill_depth = nb_skills
+
+    ids_depth = 2 * nb_questions
     train_loader = create_dataset(train_gen, nb_questions, shuffle=shuffle, batch_size=batch_size)
     val_loader = create_dataset(val_gen, nb_questions, shuffle=shuffle, batch_size=batch_size)
     test_loader = create_dataset(test_gen, nb_questions, shuffle=shuffle, batch_size=batch_size)
 
-    return train_loader, val_loader, test_loader, features_depth, skill_depth
+    return train_loader, val_loader, test_loader, ids_depth, nb_questions
 
 
 def get_target(y_true, y_pred):
