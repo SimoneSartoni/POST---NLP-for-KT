@@ -69,11 +69,11 @@ def load_dataset(batch_size=32, shuffle=True,
     inputs = {"question_id": False, "text_id": False, "skill": False,
               "label": False, "r_elapsed_time": False, 'text_encoding': False, "target_id": False, "features": True,
               "target_text_id": False, "target_skill": False, 'target_label': False, 'target_text_encoding': False,
-              "target_features": True}
+              "target_feature": True}
     outputs = {"question_id": False, "text_id": False, "skill": False,
                "label": False, "r_elapsed_time": False, 'text_encoding': False, "target_id": False, "features": False,
                "target_text_id": False, "target_skill": False, 'target_label': True, 'target_text_encoding': False,
-               "target_features": False}
+               "target_feature": False}
 
     text_df = load_preprocessed_texts(texts_filepath=texts_filepath)
     # Step 3.1 - Generate NLP extracted encoding for problems

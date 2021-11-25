@@ -100,8 +100,8 @@ class DKT_Dataset:
                 possible_inputs["text_encoding"] = text_encodings
                 possible_inputs["target_text_encoding"] = target_text_encodings
             if self.encode_correct_in_skills:
-                possible_inputs["features"] = input_features
-                possible_inputs["target_features"] = target_features
+                possible_inputs["feature"] = input_features
+                possible_inputs["target_feature"] = target_features
             possible_outputs = possible_inputs
             inputs = {}
             for key in possible_inputs.keys():
