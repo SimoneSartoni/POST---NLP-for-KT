@@ -56,8 +56,8 @@ class DKT_Dataset:
             else:
                 ans = answered_correctly
 
-            input_ids = unique_question_id
-            input_text_ids = text_ids
+            input_ids = unique_question_id[:-1]
+            input_text_ids = text_ids[:-1]
             input_skill = exe_skill[:-1]
             text_encodings = []
             target_text_encodings = []
@@ -78,9 +78,9 @@ class DKT_Dataset:
             input_r_elapsed_time = response_elapsed_time[:-1].copy().astype(np.int)
             input_label = ans[:-1]
 
-            target_ids = input_ids[1:]
-            target_text_ids = input_text_ids[1:]
-            target_skill = input_skill[1:]
+            target_ids = unique_question_id[1:]
+            target_text_ids = text_ids[1:]
+            target_skill = exe_skill[1:]
             target_label = ans[1:]
             features = []
             target_features = []
