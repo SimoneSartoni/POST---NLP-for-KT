@@ -67,11 +67,11 @@ def load_dataset(batch_size=32, shuffle=True,
                  save_filepath='/kaggle/working/', texts_filepath='../input/',
                  interaction_sequence_len=30, min_seq_len=5, dictionary=None):
     inputs = {"question_id": False, "text_id": False, "skill": False,
-              "label": False, "r_elapsed_time": False, 'text_encoding': False, "target_id": False, "features": True,
+              "label": False, "r_elapsed_time": False, 'text_encoding': False, "target_id": False, "feature": True,
               "target_text_id": False, "target_skill": False, 'target_label': False, 'target_text_encoding': False,
               "target_feature": True}
     outputs = {"question_id": False, "text_id": False, "skill": False,
-               "label": False, "r_elapsed_time": False, 'text_encoding': False, "target_id": False, "features": False,
+               "label": False, "r_elapsed_time": False, 'text_encoding': False, "target_id": False, "feature": False,
                "target_text_id": False, "target_skill": False, 'target_label': True, 'target_text_encoding': False,
                "target_feature": False}
 
