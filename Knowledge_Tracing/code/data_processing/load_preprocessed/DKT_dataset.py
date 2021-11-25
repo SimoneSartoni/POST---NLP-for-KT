@@ -85,7 +85,7 @@ class DKT_Dataset:
             target_features = []
             if self.encode_correct_in_skills:
                 for skill, correct in list(zip(exe_skill, answered_correctly)):
-                    feature, skill_repeated = encode_correctness_in_encodings(skill, correct, self.nb_skills)
+                    feature, skill_repeated = encode_correctness_in_skills(skill, correct, self.nb_skills)
                     features.append(feature)
                     target_features.append(skill_repeated)
                 input_features = features[:-1]
