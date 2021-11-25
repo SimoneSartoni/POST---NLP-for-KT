@@ -1,4 +1,4 @@
-from Knowledge_Tracing.code.models.DKT_models.DKT.standard.data_utils import *
+from Knowledge_Tracing.code.models.DKT_models.DKT.standard_on_id.data_utils import *
 
 
 class DKTModel(tf.keras.Model):
@@ -13,8 +13,8 @@ class DKTModel(tf.keras.Model):
             and what the model expects.
     """
 
-    def __init__(self, nb_features, nb_skills, hidden_units=100, dropout_rate=0.2):
-        input_feature = tf.keras.Input(shape=(None, nb_features), name='input_feature')
+    def __init__(self, nb_questions, hidden_units=100, dropout_rate=0.2):
+        input_feature = tf.keras.Input(shape=(None, nb_questions), name='input_feature')
 
         mask_feature = tf.keras.layers.Masking(mask_value=MASK_VALUE)(input_feature)
 
@@ -22,7 +22,7 @@ class DKTModel(tf.keras.Model):
                                     return_sequences=True,
                                     dropout=dropout_rate)(mask_feature)
 
-        dense_skill = tf.keras.layers.Dense(nb_skills, activation='sigmoid')
+        dense_skill = tf.keras.layers.Dense(nb_questions, activation='sigmoid')
         outputs = tf.keras.layers.TimeDistributed(dense_skill, name='outputs')(lstm)
 
         super(DKTModel, self).__init__(inputs={"input_feature": input_feature},
