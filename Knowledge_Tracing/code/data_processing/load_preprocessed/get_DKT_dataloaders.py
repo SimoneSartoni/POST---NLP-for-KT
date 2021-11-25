@@ -36,16 +36,19 @@ def get_DKT_dataloaders(batch_size=128, shuffle=False,
                                 negative_correctness=negative_correctness, inputs_dict=inputs_dict, outputs_dict=outputs_dict,
                                 encode_correct_in_encodings=encode_correct_in_encodings,
                                 encode_correct_in_id=encode_correct_in_id,
-                                encode_correct_in_skills=encode_correct_in_skills, nb_skills=nb_skills)
+                                encode_correct_in_skills=encode_correct_in_skills, nb_skills=nb_skills,
+                                nb_questions=nb_questions)
     val_dataset = DKT_Dataset(val.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len,
                               negative_correctness=negative_correctness, inputs_dict=inputs_dict, outputs_dict=outputs_dict,
                               encode_correct_in_encodings=encode_correct_in_encodings,
                               encode_correct_in_id=encode_correct_in_id,
-                              encode_correct_in_skills=encode_correct_in_skills, nb_skills=nb_skills)
+                              encode_correct_in_skills=encode_correct_in_skills, nb_skills=nb_skills,
+                              nb_questions=nb_questions)
     test_dataset = DKT_Dataset(test.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len,
                                negative_correctness=negative_correctness, inputs_dict=inputs_dict, outputs_dict=outputs_dict,
                                encode_correct_in_encodings=encode_correct_in_encodings,
                                encode_correct_in_id=encode_correct_in_id,
-                               encode_correct_in_skills=encode_correct_in_skills, nb_skills=nb_skills)
+                               encode_correct_in_skills=encode_correct_in_skills, nb_skills=nb_skills,
+                               nb_questions=nb_questions)
 
     return train_dataset, val_dataset, test_dataset, nb_questions, nb_skills
