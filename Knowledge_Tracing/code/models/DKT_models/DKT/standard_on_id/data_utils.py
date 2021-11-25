@@ -77,9 +77,9 @@ def load_dataset(batch_size=32, shuffle=True,
                                                       dictionary=dictionary)
 
     ids_depth = 2 * nb_questions
-    train_loader = create_dataset(train_gen, nb_questions, shuffle=shuffle, batch_size=batch_size)
-    val_loader = create_dataset(val_gen, nb_questions, shuffle=shuffle, batch_size=batch_size)
-    test_loader = create_dataset(test_gen, nb_questions, shuffle=shuffle, batch_size=batch_size)
+    train_loader = create_dataset(train_gen, ids_depth, nb_questions, shuffle=shuffle, batch_size=batch_size)
+    val_loader = create_dataset(val_gen, ids_depth, nb_questions, shuffle=shuffle, batch_size=batch_size)
+    test_loader = create_dataset(test_gen, ids_depth, nb_questions, shuffle=shuffle, batch_size=batch_size)
 
     return train_loader, val_loader, test_loader, ids_depth, nb_questions
 
