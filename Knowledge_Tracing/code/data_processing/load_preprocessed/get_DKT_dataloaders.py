@@ -11,8 +11,8 @@ def get_DKT_dataloaders(batch_size=128, shuffle=False,
                         interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final."
                         "csv", output_filepath='/kaggle/working/', interaction_sequence_len=25, min_seq_len=5,
                         text_encoding_model=None, negative_correctness=False, inputs_dict={}, outputs_dict={},
-                        encode_correct_in_encodings=False, encode_correct_in_skills=False):
-    df = load_preprocessed_interactions(interactions_filepath=interactions_filepath)
+                        encode_correct_in_encodings=False, encode_correct_in_skills=False, dictionary=None):
+    df = load_preprocessed_interactions(interactions_filepath=interactions_filepath, dictionary=dictionary)
     print(df)
     # grouping based on user_id to get the data supply
     nb_questions = len(df['question_id'].unique())
