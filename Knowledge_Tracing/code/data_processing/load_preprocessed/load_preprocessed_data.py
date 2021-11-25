@@ -17,7 +17,7 @@ def load_preprocessed_interactions(interactions_filepath="", dictionary=None):
         train_df = pd.read_csv(interactions_filepath, dtype=dictionary)
         for key in dtypes.keys():
             if key not in dictionary:
-                train_df[key] = [0.0 for x in train_df]
+                train_df[key] = 0.0
     else:
         train_df = pd.read_csv(interactions_filepath, dtype=dtypes)
     print("loading csv.....")
