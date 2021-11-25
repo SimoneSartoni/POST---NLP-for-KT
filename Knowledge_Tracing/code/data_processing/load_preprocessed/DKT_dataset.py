@@ -1,5 +1,4 @@
 import numpy as np
-import tensorflow as tf
 
 
 def encode_correctness_in_encodings(text_encoding_model, text_id, correctness):

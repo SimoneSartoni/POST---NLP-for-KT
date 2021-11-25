@@ -8,14 +8,19 @@ from Knowledge_Tracing.code.data_processing.get_assistments_texts import get_ass
 from ast import literal_eval
 
 
-def load_preprocessed_interactions(interactions_filepath=""):
+def load_preprocessed_interactions(interactions_filepath="", dictionary=None):
     dtypes = {'user_id': 'int32', 'problem_id': 'int64',
-              'correct': 'float64',
-              'start_time': "string", 'end_time': "string",
-              'skill': "int32", 'elapsed_time': 'int64',
-              'timestamp': "string", 'question_id': "int64"}
+                'correct': 'float64',
+                'skill': "int32", 'elapsed_time': 'int64',
+                'timestamp': "string", 'question_id': "int64"}
+    if dictionary:
+        train_df = pd.read_csv(interactions_filepath, dtype=dictionary)
+        for key in dtypes.keys():
+            if key not in dictionary:
+                train_df[key] = [0.0 for x in train_df]
+    else:
+        train_df = pd.read_csv(interactions_filepath, dtype=dtypes)
     print("loading csv.....")
-    train_df = pd.read_csv(interactions_filepath, dtype=dtypes)
     print("shape of dataframe :", train_df.shape)
     return train_df
 
