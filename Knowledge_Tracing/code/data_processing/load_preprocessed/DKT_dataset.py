@@ -23,20 +23,33 @@ def encode_correctness_in_skills(skill, correctness, nb_skills):
         features = np.concatenate([zeros, skill_one_hot_encoding])
     return features, target_features
 
+def encode_correctness_in_id(question_id, correctness, nb_questions):
+    zeros = np.zeros(nb_questions, dtype=np.int)
+    id_one_hot_encoding = zeros
+    id_one_hot_encoding[question_id] = 1
+    target_feature_ids = np.concatenate([id_one_hot_encoding, id_one_hot_encoding])
+    if correctness:
+        feature_ids = np.concatenate([id_one_hot_encoding, zeros])
+    else:
+        feature_ids = np.concatenate([zeros, id_one_hot_encoding])
+    return feature_ids, target_feature_ids
+
 
 class DKT_Dataset:
     def __init__(self, grouped_df, text_encoding_model=None, max_seq=100, negative_correctness=False,
-                 encode_correct_in_encodings=True, encode_correct_in_skills=True, inputs_dict={}, outputs_dict={},
-                 nb_skills=300):
+                 encode_correct_in_encodings=True, encode_correct_in_skills=True, encode_correct_in_id=False, inputs_dict={}, outputs_dict={},
+                 nb_skills=300, nb_questions=10000):
         self.max_seq = max_seq
         self.data = grouped_df
         self.encode_correct_in_encodings = encode_correct_in_encodings
         self.encode_correct_in_skills = encode_correct_in_skills
+        self.encode_correct_in_id = encode_correct_in_id
         self.negative_correctness = negative_correctness
         self.text_encoding_model = text_encoding_model
         self.inputs_dict = inputs_dict
         self.outputs_dict = outputs_dict
         self.nb_skills = nb_skills
+        self.nb_questions = nb_questions
         if self.text_encoding_model:
             if self.encode_correct_in_encodings:
                 self.encoding_depth = 2 * self.text_encoding_model.vector_size
@@ -74,7 +87,6 @@ class DKT_Dataset:
                     target_text_encodings = all_text_encodings[1:]
                     text_encodings = all_text_encodings[:-1]
 
-
             input_r_elapsed_time = response_elapsed_time[:-1].copy().astype(np.int)
             input_label = ans[:-1]
 
@@ -92,6 +104,16 @@ class DKT_Dataset:
                 input_features = features[:-1]
                 target_features = target_features[1:]
 
+            feature_ids = []
+            target_feature_ids = []
+            if self.encode_correct_in_id:
+                for question_id, correct in list(zip(unique_question_id, answered_correctly)):
+                    feature_id, target_feature_id = encode_correctness_in_id(question_id, correct, self.nb_questions)
+                    feature_ids.append(feature_id)
+                    target_feature_ids.append(target_feature_id)
+                input_feature_ids = feature_ids[:-1]
+                target_feature_ids = target_feature_ids[1:]
+
             possible_inputs = {"question_id": input_ids, "text_id": input_text_ids, "skill": input_skill,
                                "label": input_label, "r_elapsed_time": input_r_elapsed_time,
                                "target_id": target_ids, "target_text_id": target_text_ids, "target_skill": target_skill,
@@ -102,6 +124,9 @@ class DKT_Dataset:
             if self.encode_correct_in_skills:
                 possible_inputs["feature"] = input_features
                 possible_inputs["target_feature"] = target_features
+            if self.encode_correct_in_id:
+                possible_inputs["feature_id"] = input_feature_ids
+                possible_inputs["target_feature_id"] = target_feature_ids
             possible_outputs = possible_inputs
             inputs = {}
             for key in possible_inputs.keys():

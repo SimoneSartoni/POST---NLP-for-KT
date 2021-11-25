@@ -74,6 +74,7 @@ def load_dataset(batch_size=32, shuffle=True,
                                                       inputs_dict=inputs, outputs_dict=outputs,
                                                       encode_correct_in_encodings=False,
                                                       encode_correct_in_skills=False,
+                                                      encode_correct_in_ids=True,
                                                       dictionary=dictionary)
 
     ids_depth = 2 * nb_questions
