@@ -65,7 +65,7 @@ def create_dataset(generator, features_depth, shuffle=True, batch_size=1024):
 def load_dataset(batch_size=32, shuffle=True,
                  interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final.csv",
                  save_filepath='/kaggle/working/', texts_filepath='../input/',
-                 interaction_sequence_len=30, min_seq_len=5):
+                 interaction_sequence_len=30, min_seq_len=5, dictionary=None):
     inputs = {"question_id": False, "text_id": False, "skill": False,
               "label": True, "r_elapsed_time": False, 'text_encoding': False, "target_id": False, "features": True,
               "target_text_id": False, "target_skill": False, 'target_label': False, 'target_text_encoding': False,
@@ -87,7 +87,8 @@ def load_dataset(batch_size=32, shuffle=True,
                                                       negative_correctness=False,
                                                       inputs_dict=inputs, outputs_dict=outputs,
                                                       encode_correct_in_encodings=False,
-                                                      encode_correct_in_skills=True)
+                                                      encode_correct_in_skills=True,
+                                                      dictionary=dictionary)
     features_depth = 2*nb_skills
     train_loader = create_dataset(train_gen, features_depth, shuffle=shuffle, batch_size=batch_size)
     val_loader = create_dataset(val_gen, features_depth, shuffle=shuffle, batch_size=batch_size)
