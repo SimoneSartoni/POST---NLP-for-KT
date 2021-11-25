@@ -13,10 +13,10 @@ class DKTModel(tf.keras.Model):
             and what the model expects.
     """
 
-    def __init__(self, nb_questions, hidden_units=100, dropout_rate=0.2):
-        input_feature = tf.keras.Input(shape=(None, nb_questions), name='input_feature')
+    def __init__(self, id_depth, nb_questions, hidden_units=100, dropout_rate=0.2):
+        input_feature_id = tf.keras.Input(shape=(None, id_depth), name='input_feature')
 
-        mask_feature = tf.keras.layers.Masking(mask_value=MASK_VALUE)(input_feature)
+        mask_feature = tf.keras.layers.Masking(mask_value=MASK_VALUE)(input_feature_id)
 
         lstm = tf.keras.layers.LSTM(hidden_units,
                                     return_sequences=True,
@@ -25,7 +25,7 @@ class DKTModel(tf.keras.Model):
         dense_skill = tf.keras.layers.Dense(nb_questions, activation='sigmoid')
         outputs = tf.keras.layers.TimeDistributed(dense_skill, name='outputs')(lstm)
 
-        super(DKTModel, self).__init__(inputs={"input_feature": input_feature},
+        super(DKTModel, self).__init__(inputs={"input_feature_id": input_feature_id},
                                        outputs=outputs,
                                        name="DKTModel")
 
