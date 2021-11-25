@@ -86,6 +86,7 @@ def load_dataset(batch_size=32, shuffle=True,
                                                       inputs_dict=inputs, outputs_dict=outputs,
                                                       encode_correct_in_encodings=False,
                                                       encode_correct_in_skills=True,
+                                                      encode_correct_in_id=True,
                                                       dictionary=dictionary)
     ids_depth = 2 * nb_questions
     train_loader = create_dataset(train_gen, ids_depth, shuffle=shuffle, batch_size=batch_size)
