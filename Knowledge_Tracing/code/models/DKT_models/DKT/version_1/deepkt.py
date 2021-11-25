@@ -16,8 +16,8 @@ class DKTModel(tf.keras.Model):
     """
 
     def __init__(self, nb_features, hidden_units=100, dropout_rate=0.2):
-        input_feature = tf.keras.Input(shape=(None, nb_features), name='inputs')
-        target_feature = tf.keras.Input(shape=(None, nb_features), name='inputs')
+        input_feature = tf.keras.Input(shape=(None, nb_features), name='input_feature')
+        target_feature = tf.keras.Input(shape=(None, nb_features), name='target_feature')
 
         mask_feature = tf.keras.layers.Masking(mask_value=MASK_VALUE)(input_feature)
         mask_target_feature = tf.keras.layers.Masking(mask_value=MASK_VALUE)(target_feature)
@@ -27,7 +27,7 @@ class DKTModel(tf.keras.Model):
                                     dropout=dropout_rate)(mask_feature)
 
         dense_feature = tf.keras.layers.Dense(nb_features, activation='sigmoid')
-        outputs_feature = tf.keras.layers.TimeDistributed(dense_feature, name='outputs')(lstm)
+        outputs_feature = tf.keras.layers.TimeDistributed(dense_feature, name='outputs_feature')(lstm)
 
         feature_pred = tensorflow.multiply(outputs_feature, mask_target_feature)
 
