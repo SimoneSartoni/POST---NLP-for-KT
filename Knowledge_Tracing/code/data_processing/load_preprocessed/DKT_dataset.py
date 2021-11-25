@@ -16,11 +16,12 @@ def encode_correctness_in_skills(skill, correctness, nb_skills):
     zeros = np.zeros(nb_skills, dtype=np.int)
     skill_one_hot_encoding = zeros
     skill_one_hot_encoding[skill] = 1
+    target_features = np.np.concatenate([skill_one_hot_encoding, skill_one_hot_encoding])
     if correctness:
         features = np.concatenate([skill_one_hot_encoding, zeros])
     else:
         features = np.concatenate([zeros, skill_one_hot_encoding])
-    return features
+    return features, target_features
 
 
 class DKT_Dataset:
