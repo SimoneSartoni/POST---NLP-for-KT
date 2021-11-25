@@ -16,29 +16,31 @@ class clean_count_vect_DKTModel(Model):
     """
 
     def __init__(self, nb_encodings, hidden_units=100, dropout_rate=0.2):
-        input_encodings = Input(shape=[None, nb_encodings], name='input_encodings')
-        input_labels = Input(shape=[None, 1], name='input_labels')
-        target_encodings = Input(shape=[None, nb_encodings], name='target_encodings')
-        mask_encodings = layers.Masking(mask_value=-1.0)(input_encodings)
-        mask_labels = layers.Masking(mask_value=-1.0)(input_labels)
-        mask_target_encodings = layers.Masking(mask_value=-1.0)(target_encodings)
+        input_encoding = Input(shape=[None, nb_encodings], name='input_encoding')
+        input_label = Input(shape=[None, 1], name='input_labels')
+        target_encoding = Input(shape=[None, nb_encodings], name='target_encodings')
+        mask_encoding = layers.Masking(mask_value=-1.0)(input_encoding)
+        mask_label = layers.Masking(mask_value=-1.0)(input_label)
+        mask_target_encoding = layers.Masking(mask_value=-1.0)(target_encoding)
 
-        mask = layers.concatenate([mask_encodings, mask_labels], axis=-1)
+        mask = layers.concatenate([mask_encoding, mask_label], axis=-1)
         lstm = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask)
 
-        dense_encodings = layers.Dense(nb_encodings, activation='sigmoid')
+        dense_encoding = layers.Dense(nb_encodings, activation='sigmoid')
 
-        output_encodings = layers.TimeDistributed(dense_encodings, name='output_encodings')(lstm)
+        output_encoding = layers.TimeDistributed(dense_encoding, name='output_encodings')(lstm)
 
-        encodings_pred = tensorflow.multiply(output_encodings, mask_target_encodings)
+        encoding_pred = tensorflow.multiply(output_encoding, mask_target_encoding)
 
         dense_class = layers.Dense(1, activation='sigmoid')
 
-        output_class = layers.TimeDistributed(dense_class, name='output_class')(encodings_pred)
+        output_class = layers.TimeDistributed(dense_class, name='output_class')(encoding_pred)
 
         # outputs = layers.concatenate([output_encodings])
 
-        super(clean_count_vect_DKTModel, self).__init__(inputs=[input_encodings, input_labels, target_encodings],
+        super(clean_count_vect_DKTModel, self).__init__(inputs={"input_encoding": input_encoding,
+                                                                "input_label": input_label,
+                                                                "target_encoding": target_encoding},
                                                         outputs=output_class,
                                                         name="DKT_count_vect_Model")
         self.nb_encodings = nb_encodings
