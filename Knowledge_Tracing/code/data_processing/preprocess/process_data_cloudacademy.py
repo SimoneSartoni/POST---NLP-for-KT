@@ -18,18 +18,27 @@ def process_data_cloudacademy(min_questions=2, max_questions=50, interactions_fi
         'elapsed_time', 'action', 'correct', 'question_id', 'session_id', 'source',
         '_platform', 'certification_id'
     ]
+    dtype = {'_actor_id': 'string', 'session_mode': 'string', '_time_stamp': 'string', 'session_step': 'int32',
+            'timer': 'int32', 'elapsed_time': 'int32', 'action': 'string', 'correct': 'string', 'question_id':'int64',
+            'session_id': 'int64', 'source': 'string', '_platform': 'string', 'certification_id': 'int32'}
     print("loading csv.....")
     if n_rows:
-        train_df = pd.read_csv(interactions_filepath, names=input_columns, nrows=n_rows)
+        train_df = pd.read_csv(interactions_filepath, names=input_columns, dtype=dtype, nrows=n_rows)
     else:
-        train_df = pd.read_csv(interactions_filepath, names=input_columns)
+        train_df = pd.read_csv(interactions_filepath, names=input_columns, dtype=dtype)
     print("shape of dataframe :", train_df.shape)
     print(train_df)
     renaming_dict = {"_actor_id": "user_id", "_time_stamp": "timestamp", "question_id": "problem_id", }
     train_df = train_df.rename(columns=renaming_dict, errors="raise")
     # Step 3.1 - Define start, end and elapsed time, fill no timed elapsed time and cap values under a max
+
+
+    print("removing session_mode different from test or exam")
+    train_df = train_df.loc[train_df['session_mode'] == 'exam' or train_df['session_mode'] == 'test']
+    print("shape after exclusion:", train_df.shape)
     print(train_df)
     # Step 4 - Sort interactions according to timestamp
+    train_df['timestamp'] = [try_parsing_date(x) for x in train_df['timestamp']]
     train_df = train_df.sort_values(["timestamp"], ascending=True)
 
     train_df = train_df.drop_duplicates(subset=['user_id', 'problem_id'], keep='first').reset_index(drop=True)
@@ -43,8 +52,8 @@ def process_data_cloudacademy(min_questions=2, max_questions=50, interactions_fi
     print("shape after at least " + str(min_questions) + " interactions:", train_df.shape)
 
     # Step 2.1 - Fill no skilled question with "no_skill" token
-    train_df.fillna("unknown", inplace=True)
-    print("shape after filling unknown values:", train_df.shape)
+    train_df.fillna("NA", inplace=True)
+    print("shape after filling NA values:", train_df.shape)
 
     """# Step 2.2 - Enumerate skill ids and question ids
     train_df['skill'], _ = pd.factorize(train_df['skill'], sort=True)
@@ -60,13 +69,13 @@ def process_data_cloudacademy(min_questions=2, max_questions=50, interactions_fi
 
     print("Get texts, intersection...")
 
-    train_df = train_df.loc[train_df['session_mode'] == 'exam' or train_df['session_mode'] == 'test']
-
     # Step 6 - Remove questions interactions we do not have text
     texts_df = get_cloudacademy_texts(personal_cleaning=personal_cleaning, texts_filepath=texts_filepath,
                                       n_texts=n_texts, make_sentences_flag=make_sentences_flag)
     train_df = train_df.loc[train_df['problem_id'].isin(texts_df['problem_id'])]
     texts_df = texts_df.loc[texts_df['problem_id'].isin(train_df['problem_id'])]
+
+    train_df['answer'] = [1.0 if answer == 't' else 0.0 for answer in train_df['answer']]
 
     n_ids = len(questions_ids)
     # n_skills = len(train_df['skill'].unique())
