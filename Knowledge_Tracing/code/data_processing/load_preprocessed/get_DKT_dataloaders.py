@@ -9,7 +9,7 @@ from Knowledge_Tracing.code.data_processing.load_preprocessed.DKT_dataset import
 
 def get_DKT_dataloaders(batch_size=128, shuffle=False,
                         interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final."
-                        "csv", output_filepath='/kaggle/working/', interaction_sequence_len=25, min_seq_len=5,
+                        "csv", output_filepath='/content/', interaction_sequence_len=25, min_seq_len=5,
                         text_encoding_model=None, negative_correctness=False, inputs_dict={}, outputs_dict={},
                         encode_correct_in_encodings=False, encode_correct_in_skills=False, encode_correct_in_id=False,
                         dictionary=None):
