@@ -62,8 +62,8 @@ def create_dataset(generator, encoding_depth, shuffle=True, batch_size=1024):
 
 def load_dataset(batch_size=32, shuffle=True,
                  interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final.csv",
-                 save_filepath='/kaggle/working/', texts_filepath='../input/', min_df=2, max_df=1.0,
-                 max_features=1000, interaction_sequence_len=30, min_seq_len=5, encode_correct_in_encodings=False,
+                 save_filepath='/kaggle/working/', texts_filepath='../input/',
+                 interaction_sequence_len=30, min_seq_len=5, encode_correct_in_encodings=False,
                  dictionary=None):
     inputs = {"question_id": False, "text_id": False, "skill": False,
               "label": False, "r_elapsed_time": False, 'text_encoding': True, "target_id": False,
@@ -74,7 +74,7 @@ def load_dataset(batch_size=32, shuffle=True,
 
     text_df = load_preprocessed_texts(texts_filepath=texts_filepath)
     # Step 3.1 - Generate NLP extracted encoding for problems
-    encode_model = BERTopic_model(min_df=min_df, max_df=max_df, binary=False, max_features=max_features)
+    encode_model = BERTopic_model()
     encode_model.fit(text_df, save_filepath)
 
     train_gen, val_gen, test_gen, nb_questions, nb_skills = get_DKT_dataloaders(batch_size, shuffle, interactions_filepath,
