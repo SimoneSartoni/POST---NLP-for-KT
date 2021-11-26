@@ -28,7 +28,7 @@ def process_data_cloudacademy(min_questions=2, max_questions=50, interactions_fi
     renaming_dict = {"_actor_id": "user_id", "_time_stamp": "timestamp", "question_id": "problem_id", }
     train_df = train_df.rename(columns=renaming_dict)
     # Step 3.1 - Define start, end and elapsed time, fill no timed elapsed time and cap values under a max
-
+    print(train_df)
     # Step 4 - Sort interactions according to timestamp
     train_df = train_df.sort_values(["timestamp"], ascending=True)
 
