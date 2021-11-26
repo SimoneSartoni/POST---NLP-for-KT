@@ -25,7 +25,7 @@ MASK_VALUE = -1.0  # The masking value cannot be zero.
 
 
 def create_dataset(generator, encoding_depth, shuffle=True, batch_size=1024):
-    input_types = {"text_encoding": tf.float32, "label":tf.float32, "target_text_encoding": tf.float32}
+    input_types = {"text_encoding": tf.float32, "label": tf.float32, "target_text_encoding": tf.float32}
     output_types = {"target_label": tf.float32}
 
     input_shapes = {"text_encoding": [None, encoding_depth], "label": [None], "target_text_encoding": [None, encoding_depth]}
