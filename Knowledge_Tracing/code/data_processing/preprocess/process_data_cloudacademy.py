@@ -9,24 +9,24 @@ from Knowledge_Tracing.code.data_processing.get_cloudacademy_texts import get_cl
 
 
 def process_data_cloudacademy(min_questions=2, max_questions=50, interactions_filepath="../input/assistmentds"
-                                                                                           "-2012/2012-2013-data-with"
-                                                                                           "-predictions-4-final.csv",
-                                  texts_filepath='../input/', output_filepath="/kaggle/working/", n_rows=None,
-                                  n_texts=None, personal_cleaning=True, make_sentences_flag=True):
+                                                                                       "-2012/2012-2013-data-with"
+                                                                                       "-predictions-4-final.csv",
+                              texts_filepath='../input/', output_filepath="/kaggle/working/", n_rows=None,
+                              n_texts=None, personal_cleaning=True, make_sentences_flag=True):
     input_columns = [
         '_actor_id', 'session_mode', '_time_stamp', 'session_step', 'timer',
         'elapsed_time', 'action', 'correct', 'question_id', 'session_id', 'source',
         '_platform', 'certification_id'
     ]
-
     print("loading csv.....")
     if n_rows:
         train_df = pd.read_csv(interactions_filepath, names=input_columns, nrows=n_rows)
     else:
         train_df = pd.read_csv(interactions_filepath, names=input_columns)
     print("shape of dataframe :", train_df.shape)
+    print(train_df)
     renaming_dict = {"_actor_id": "user_id", "_time_stamp": "timestamp", "question_id": "problem_id", }
-    train_df = train_df.rename(columns=renaming_dict)
+    train_df = train_df.rename(columns=renaming_dict, errors="raise")
     # Step 3.1 - Define start, end and elapsed time, fill no timed elapsed time and cap values under a max
     print(train_df)
     # Step 4 - Sort interactions according to timestamp
@@ -40,7 +40,7 @@ def process_data_cloudacademy(min_questions=2, max_questions=50, interactions_fi
 
     # Step 1 - Remove users with less than a certain number of answers
     train_df = train_df.groupby('user_id').filter(lambda q: len(q) >= min_questions).copy()
-    print("shape after at least "+str(min_questions)+" interactions:", train_df.shape)
+    print("shape after at least " + str(min_questions) + " interactions:", train_df.shape)
 
     # Step 2.1 - Fill no skilled question with "no_skill" token
     train_df.fillna("unknown", inplace=True)
@@ -60,8 +60,11 @@ def process_data_cloudacademy(min_questions=2, max_questions=50, interactions_fi
 
     print("Get texts, intersection...")
 
+    train_df = train_df.loc[train_df['session_mode'] == 'exam' or train_df['session_mode'] == 'test']
+
     # Step 6 - Remove questions interactions we do not have text
-    texts_df = get_cloudacademy_texts(personal_cleaning=personal_cleaning, texts_filepath=texts_filepath, n_texts=n_texts, make_sentences_flag=make_sentences_flag)
+    texts_df = get_cloudacademy_texts(personal_cleaning=personal_cleaning, texts_filepath=texts_filepath,
+                                      n_texts=n_texts, make_sentences_flag=make_sentences_flag)
     train_df = train_df.loc[train_df['problem_id'].isin(texts_df['problem_id'])]
     texts_df = texts_df.loc[texts_df['problem_id'].isin(train_df['problem_id'])]
 
@@ -74,6 +77,6 @@ def process_data_cloudacademy(min_questions=2, max_questions=50, interactions_fi
     texts_df['question_id'], _ = pd.factorize(texts_df['problem_id'], sort=True)
     train_df['question_id'], _ = pd.factorize(train_df['problem_id'], sort=True)
 
-    texts_df.to_csv(output_filepath+'texts_processed.csv')
-    train_df.to_csv(output_filepath+'interactions_processed.csv')
+    texts_df.to_csv(output_filepath + 'texts_processed.csv')
+    train_df.to_csv(output_filepath + 'interactions_processed.csv')
     return train_df, texts_df
