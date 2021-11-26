@@ -34,7 +34,7 @@ def process_data_cloudacademy(min_questions=2, max_questions=50, interactions_fi
 
 
     print("removing session_mode different from test or exam")
-    train_df = train_df.loc[train_df['session_mode'] == 'exam' or train_df['session_mode'] == 'test']
+    train_df = train_df.loc[train_df['session_mode'].isin(['test', 'exam'])]
     print("shape after exclusion:", train_df.shape)
     print(train_df)
     # Step 4 - Sort interactions according to timestamp
