@@ -3,12 +3,16 @@ import re
 import pandas as pd
 
 import nltk
+
+nltk.download('stopwords')
+
 from bs4 import BeautifulSoup
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from Knowledge_Tracing.code.data_processing.data_processing import remove_issues
 import hunspell
+
 
 # Function to preprocess the tweets data
 def preprocess_data(data, name):
