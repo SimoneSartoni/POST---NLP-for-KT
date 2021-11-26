@@ -32,7 +32,7 @@ class BERTopic_model(base_model):
         self.hdbscan = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size,
                                   metric=metric,
                                   cluster_selection_method=cluster_selection_method)"""
-        self.bert_topic = BERTopic(embedding_model='bert-large-nli-mean-tokens', language="english",
+        self.bert_topic = BERTopic(embedding_model='all-MiniLM-L6-v2', language="english",
                                    calculate_probabilities=calculate_probabilities)
         self.topic_model = None
         self.topics, self.probabilities = None, None
