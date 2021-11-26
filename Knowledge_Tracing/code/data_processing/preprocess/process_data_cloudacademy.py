@@ -19,8 +19,8 @@ def process_data_cloudacademy(min_questions=2, max_questions=50, interactions_fi
         '_platform', 'certification_id'
     ]
     dtype = {'_actor_id': 'string', 'session_mode': 'string', '_time_stamp': 'string', 'session_step': 'int32',
-            'timer': 'int32', 'elapsed_time': 'int32', 'action': 'string', 'correct': 'string', 'question_id':'int64',
-            'session_id': 'int64', 'source': 'string', '_platform': 'string', 'certification_id': 'int32'}
+            'timer': 'int32', 'elapsed_time': 'int32', 'action': 'string', 'correct': 'string', 'question_id': 'int64',
+            'session_id': 'int64', 'source': 'string', '_platform': 'string', 'certification_id': 'float64'}
     print("loading csv.....")
     if n_rows:
         train_df = pd.read_csv(interactions_filepath, names=input_columns, dtype=dtype, nrows=n_rows)
