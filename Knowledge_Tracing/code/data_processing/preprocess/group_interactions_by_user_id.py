@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def generate_sequences_of_same_length(df, seq_len, min_seq_len, output_filepath="/kaggle/working/"):
+def generate_sequences_of_same_length(df, seq_len, min_seq_len, output_filepath="/content/"):
     grouped = df.groupby("user_id")
     user_id = []
     problem_id = []
