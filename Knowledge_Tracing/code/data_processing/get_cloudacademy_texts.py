@@ -113,6 +113,8 @@ def get_cloudacademy_texts(personal_cleaning=True, texts_filepath='../input/', n
         df = pd.read_csv(texts_filepath, low_memory=False, dtype=input_types)
     # Using the preprocessing function to preprocess the tweet data
     renaming_dict = {"id": "problem_id", "description": "body"}
+    df = df.rename(columns=renaming_dict, errors="raise")
+
     preprocess_data(df, 'body')
     print("df after preprocess data:")
     print(df)
