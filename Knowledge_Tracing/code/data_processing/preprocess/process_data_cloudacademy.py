@@ -26,7 +26,7 @@ def process_data_cloudacademy(min_questions=2, max_questions=50, interactions_fi
         train_df = pd.read_csv(interactions_filepath, names=input_columns)
     print("shape of dataframe :", train_df.shape)
     renaming_dict = {"_actor_id": "user_id", "_time_stamp": "timestamp", "question_id": "problem_id", }
-    train_df.rename(renaming_dict)
+    train_df = train_df.rename(renaming_dict)
     # Step 3.1 - Define start, end and elapsed time, fill no timed elapsed time and cap values under a max
 
     # Step 4 - Sort interactions according to timestamp
