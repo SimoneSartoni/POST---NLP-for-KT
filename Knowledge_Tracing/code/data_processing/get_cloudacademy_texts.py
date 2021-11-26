@@ -4,7 +4,6 @@ import pandas as pd
 
 import nltk
 
-nltk.download('stopwords')
 
 from bs4 import BeautifulSoup
 from nltk.stem import WordNetLemmatizer

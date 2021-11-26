@@ -75,8 +75,8 @@ def process_data_cloudacademy(min_questions=2, max_questions=50, interactions_fi
     train_df = train_df.loc[train_df['problem_id'].isin(texts_df['problem_id'])]
     texts_df = texts_df.loc[texts_df['problem_id'].isin(train_df['problem_id'])]
 
-    train_df['answer'] = [1.0 if answer == 't' else 0.0 for answer in train_df['answer']]
-    print(train_df['answer'].mean())
+    train_df['correct'] = [1.0 if answer == 't' else 0.0 if answer == 'f' else -1.0 for answer in train_df['correct']]
+    print(train_df['correct'].mean())
     print(train_df.describe())
     n_ids = len(questions_ids)
     # n_skills = len(train_df['skill'].unique())
