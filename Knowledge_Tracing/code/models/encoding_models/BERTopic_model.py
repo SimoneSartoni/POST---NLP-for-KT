@@ -111,7 +111,12 @@ class BERTopic_model(base_model):
 
     def get_encoding(self, problem_id):
         row = self.texts_df.loc[self.texts_df['problem_id'] == problem_id]
+        print(row)
+        print(row['body'].values)
+        print(row['body'].values[0])
+        print(self.topic_model.transform(row['body'].values[0]))
         encoding = np.array(self.topic_model.transform(row['body'].values[0]))
+        print(encoding)
         return encoding
 
     def get_serializable_params(self):
