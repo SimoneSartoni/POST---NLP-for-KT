@@ -28,8 +28,10 @@ def load_preprocessed_texts(texts_filepath="", text_as_sentence=True):
     print("loading csv.....")
     texts_df = pd.read_csv(texts_filepath, dtype=dtypes)
     texts_df['body'].fillna("no text", inplace=True)
-    texts_df['list_of_words'] = texts_df['body'].apply(lambda x: literal_eval(x))
+    texts_df['list_of_words'] = texts_df['body']
+    texts_df['list_of_words'] = texts_df['list_of_words'].apply(lambda x: literal_eval(x))
     if text_as_sentence:
-        texts_df['sentence'] = texts_df['body'].apply(lambda x: ' '.join(x))
+        texts_df['sentence'] = texts_df['body']
+        texts_df['sentence'] = texts_df['sentence'] .apply(lambda x: ' '.join(x))
     print("shape of dataframe :", texts_df.shape)
     return texts_df
