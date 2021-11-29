@@ -3,8 +3,6 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 
-from Knowledge_Tracing.code.utils.utils import try_parsing_date
-from Knowledge_Tracing.code.data_processing.get_assistments_texts import get_assistments_texts
 from ast import literal_eval
 
 
@@ -25,10 +23,11 @@ def load_preprocessed_interactions(interactions_filepath="", dictionary=None):
     return train_df
 
 
-def load_preprocessed_texts(texts_filepath=""):
+def load_preprocessed_texts(texts_filepath="", text_as_sentence=False):
     dtypes = {'problem_id': 'int64', 'body': "string", 'question_id': "int64"}
     print("loading csv.....")
     texts_df = pd.read_csv(texts_filepath, dtype=dtypes)
-    texts_df['body'] = texts_df['body'].apply(lambda x: literal_eval(x))
+    if not text_as_sentence:
+        texts_df['body'] = texts_df['body'].apply(lambda x: literal_eval(x))
     print("shape of dataframe :", texts_df.shape)
     return texts_df

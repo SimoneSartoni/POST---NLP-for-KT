@@ -72,7 +72,7 @@ def load_dataset(batch_size=32, shuffle=True,
                "label": False, "r_elapsed_time": False, 'text_encoding': False, "target_id": False,
                "target_text_id": False, "target_skill": False, 'target_label': True, 'target_text_encoding': False}
 
-    text_df = load_preprocessed_texts(texts_filepath=texts_filepath)
+    text_df = load_preprocessed_texts(texts_filepath=texts_filepath, text_as_sentence=True)
     # Step 3.1 - Generate NLP extracted encoding for problems
     encode_model = BERTopic_model()
     encode_model.fit(text_df, save_filepath)
