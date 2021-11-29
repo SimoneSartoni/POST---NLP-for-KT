@@ -1,3 +1,4 @@
+import tensorflow
 from tensorflow.keras import Model, Input, layers, losses
 
 from Knowledge_Tracing.code.models.DKT_models.BERTTopic_DKT.data_utils import get_target as NLP_get_target
@@ -15,28 +16,28 @@ class BERTopic_DKTModel(Model):
     """
 
     def __init__(self, nb_encodings, hidden_units=100, dropout_rate=0.2):
-        input_encodings = Input(shape=[None, nb_encodings], name='input_encodings')
-        input_labels = Input(shape=[None, 1], name='input_labels')
+        input_encoding = Input(shape=[None, nb_encodings], name='input_encoding')
+        target_encoding = Input(shape=[None, nb_encodings], name='target_encoding')
+        mask_encoding = layers.Masking(mask_value=-1.0)(input_encoding)
+        mask_target_encoding = layers.Masking(mask_value=-1.0)(target_encoding)
 
-        mask_encodings = layers.Masking(mask_value=-1.0)(input_encodings)
-        mask_labels = layers.Masking(mask_value=-1.0)(input_labels)
-
-        mask = layers.concatenate([mask_encodings, mask_labels], axis=-1)
+        mask = mask_encoding
         lstm = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask)
 
-        dense_encodings = layers.Dense(nb_encodings, activation='sigmoid')
+        dense_encoding = layers.Dense(nb_encodings, activation='sigmoid')
 
-        output_encodings = layers.TimeDistributed(dense_encodings, name='output_encodings')(lstm)
+        output_encoding = layers.TimeDistributed(dense_encoding, name='output_encoding')(lstm)
+
+        encoding_pred = tensorflow.multiply(output_encoding, mask_target_encoding)
 
         dense_class = layers.Dense(1, activation='sigmoid')
 
-        output_class = layers.TimeDistributed(dense_class, name='output_class')(lstm)
+        output_class = layers.TimeDistributed(dense_class, name='output_class')(encoding_pred)
 
-        outputs = layers.concatenate([output_encodings, output_class])
-
-        super(BERTopic_DKTModel, self).__init__(inputs=[input_encodings, input_labels],
-                                                        outputs=outputs,
-                                                        name="DKT_count_vect_Model")
+        super(BERTopic_DKTModel, self).__init__(inputs={"input_encoding": input_encoding,
+                                                                "target_encoding": target_encoding},
+                                                        outputs=output_class,
+                                                        name="DKT_BERTopics_Model")
         self.nb_encodings = nb_encodings
 
     def compile(self, optimizer, metrics=None):
