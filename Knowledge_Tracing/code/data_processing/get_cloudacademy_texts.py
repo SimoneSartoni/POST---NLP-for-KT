@@ -75,9 +75,12 @@ def rem_stopwords_tokenize(data, name, personal_cleaning):
 
     def filter_existing_words(text):
         filtered_text = []
+        print("filtering existing words has removed:")
         for word in text:
             if dictionary.spell(word):
                 filtered_text.append(word)
+            else:
+                print(word)
         return filtered_text
 
     data[name] = data[name].apply(lambda text: escape_values(text))
