@@ -53,10 +53,10 @@ class count_vectorizer(base_model):
 
     def fit(self, texts_df, save_filepath='./'):
         self.texts_df = texts_df
-        self.count_vectorizer = self.count_vectorizer.fit(self.texts_df['body'])
+        self.count_vectorizer = self.count_vectorizer.fit(self.texts_df['list_of_words'])
 
         # Save sparse matrix in current directory
-        self.vector_size = self.count_vectorizer.transform(self.texts_df['body']).shape[1]
+        self.vector_size = self.count_vectorizer.transform(self.texts_df['list_of_words']).shape[1]
 
         self.pro_num = len(self.texts_df['problem_id'])
         self.words_num = self.vector_size
@@ -139,7 +139,7 @@ class count_vectorizer(base_model):
 
     def get_encoding(self, problem):
         row = self.texts_df.loc[self.texts_df['problem_id'] == problem]
-        encoding = np.array(self.count_vectorizer.transform(row['body']).todense()).squeeze()
+        encoding = np.array(self.count_vectorizer.transform(row['list_of_words']).todense()).squeeze()
         return encoding
 
     def get_serializable_params(self):

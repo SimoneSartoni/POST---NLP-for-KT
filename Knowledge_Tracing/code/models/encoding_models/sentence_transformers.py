@@ -42,7 +42,7 @@ class sentence_transformer(base_model):
 
     def fit(self, texts_df, save_filepath='./'):
         self.texts_df = texts_df
-        self.vectors = self.sentence_transformer.encode(sentences=self.texts_df['body'].values, show_progress_bar=True)
+        self.vectors = self.sentence_transformer.encode(sentences=self.texts_df['list_of_words'].values, show_progress_bar=True)
 
         # Save sparse matrix in current directory
         self.vector_size = self.vectors.shape[1]
@@ -126,7 +126,7 @@ class sentence_transformer(base_model):
 
     def get_encoding(self, problem):
         row = self.texts_df.loc[self.texts_df['question_id'] == problem]
-        encoding = np.array(self.vectors[row['body']])
+        encoding = np.array(self.vectors[row['list_of_words']])
         return encoding
 
     def get_serializable_params(self):

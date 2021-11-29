@@ -53,12 +53,12 @@ class BERTopic_model(base_model):
 
     def fit(self, texts_df, save_filepath='./'):
         self.texts_df = texts_df
-        self.topic_model = self.bert_topic.fit(self.texts_df['body'].values)
+        self.topic_model = self.bert_topic.fit(self.texts_df['sentence'].values)
         print("topic model created")
         self.words_num = len(self.topic_model.get_topic_freq())
-        self.topics, self.probabilities = self.topic_model.transform(self.texts_df['body'].values[0])
+        self.topics, self.probabilities = self.topic_model.transform(self.texts_df['sentence'].values[0])
         self.vector_size = len(self.probabilities[0])
-        self.pro_num = len(self.texts_df['body'].values)
+        self.pro_num = len(self.texts_df['sentence'].values)
 
     def write_words_unique(self, data_folder):
         write_txt(os.path.join(data_folder, 'words_set.txt'), self.words_unique)
@@ -111,7 +111,7 @@ class BERTopic_model(base_model):
 
     def get_encoding(self, problem_id):
         row = self.texts_df.loc[self.texts_df['problem_id'] == problem_id]
-        topics, encoding = self.topic_model.transform(row['body'].values[0])
+        topics, encoding = self.topic_model.transform(row['sentence'].values[0])
         encoding = np.array(encoding)
         return encoding
 

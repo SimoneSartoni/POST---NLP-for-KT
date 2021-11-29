@@ -27,8 +27,9 @@ def load_preprocessed_texts(texts_filepath="", text_as_sentence=False):
     dtypes = {'problem_id': 'int64', 'body': "string", 'question_id': "int64"}
     print("loading csv.....")
     texts_df = pd.read_csv(texts_filepath, dtype=dtypes)
-    if not text_as_sentence:
-        texts_df['body'] = texts_df['body'].apply(lambda x: literal_eval(x))
     texts_df['body'].fillna("no text", inplace=True)
+    texts_df['list_of_words'] = texts_df['body'].apply(lambda x: literal_eval(x))
+    if text_as_sentence:
+        texts_df['sentence'] = texts_df['body'].apply(lambda x: ' '.join(x))
     print("shape of dataframe :", texts_df.shape)
     return texts_df
