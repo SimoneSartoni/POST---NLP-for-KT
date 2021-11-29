@@ -50,7 +50,9 @@ def preprocess_data(data, name):
 # This function is to remove stopwords from a particular column and to tokenize it
 def rem_stopwords_tokenize(data, name, personal_cleaning):
     stop_words = set(stopwords.words('english'))
-    dictionary = hunspell.HunSpell('/usr/share/hunspell/en_US.dic', '/usr/share/hunspell/en_US.aff')
+    dictionary_US = hunspell.HunSpell('/usr/share/hunspell/en_US.dic', '/usr/share/hunspell/en_US.aff')
+    dictionary_GB = hunspell.HunSpell('/usr/share/hunspell/en_GB.dic', '/usr/share/hunspell/en_GB.aff')
+
 
     def escape_values(text):
         text = text.replace(' ', '#').replace('/', '#slash#').replace('<', '#lessthan#').replace('>',
@@ -77,7 +79,7 @@ def rem_stopwords_tokenize(data, name, personal_cleaning):
         filtered_text = []
         print("filtering existing words has removed:")
         for word in text:
-            if dictionary.spell(word):
+            if dictionary_GB.spell(word) or dictionary_US.spell(word):
                 filtered_text.append(word)
             else:
                 print(word)
