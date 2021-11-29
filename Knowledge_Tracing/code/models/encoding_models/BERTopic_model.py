@@ -113,7 +113,7 @@ class BERTopic_model(base_model):
         row = self.texts_df.loc[self.texts_df['problem_id'] == problem_id]
         topics, encoding = self.topic_model.transform(row['sentence'].values[0])
         encoding = np.array(encoding)
-        return encoding
+        return encoding[0]
 
     def get_serializable_params(self):
         return {"min_df": self.min_df, "max_df": self.max_df, "binary": self.binary, "name": self.name,
