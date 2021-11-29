@@ -12,9 +12,9 @@ from Knowledge_Tracing.code.data_processing.load_preprocessed.SAINT_dataset impo
 def get_saint_dataloaders(interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
                                        ".csv", texts_filepath='../input/', output_filepath='/kaggle/working/',
                           interaction_sequence_len=25, min_seq_len=5, text_encoding_model=None,
-                          negative_correctness=False, encode_correct_in_encodings=True):
+                          negative_correctness=False, encode_correct_in_encodings=True, dictionary=None):
 
-    df = load_preprocessed_interactions(interactions_filepath=interactions_filepath)
+    df = load_preprocessed_interactions(interactions_filepath=interactions_filepath, dictionary=dictionary)
     print(df)
     # grouping based on user_id to get the data supply
     nb_questions = len(df['question_id'].unique())
