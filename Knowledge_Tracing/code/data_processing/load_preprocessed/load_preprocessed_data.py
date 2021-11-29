@@ -29,7 +29,7 @@ def load_preprocessed_texts(texts_filepath="", text_as_sentence=True):
     texts_df = pd.read_csv(texts_filepath, dtype=dtypes)
     texts_df['body'].fillna("no text", inplace=True)
     texts_df['body'] = texts_df['body'].apply(lambda x: literal_eval(x))
-    texts_df.rename(columns={'body': 'list_of_words'}, errors="raise")
+    texts_df = texts_df.rename(columns={'body': 'list_of_words'}, errors="raise")
     if text_as_sentence:
         texts_df['sentence'] = texts_df['list_of_words']
         texts_df['sentence'] = texts_df['sentence'].apply(lambda x: ' '.join(x))
