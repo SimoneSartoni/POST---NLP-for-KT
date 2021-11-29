@@ -51,7 +51,7 @@ def preprocess_data(data, name):
 def rem_stopwords_tokenize(data, name, personal_cleaning):
     stop_words = set(stopwords.words('english'))
     dictionary_US = hunspell.HunSpell('/usr/share/hunspell/en_US.dic', '/usr/share/hunspell/en_US.aff')
-    dictionary_GB = hunspell.HunSpell('/usr/share/hunspell/en_GB.dic', '/usr/share/hunspell/en_GB.aff')
+    dictionary_GB = hunspell.HunSpell('/content/drive/MyDrive/Thesis_ NLP for KT/utils/en_GB-large.dic', '/content/drive/MyDrive/Thesis_ NLP for KT/utils/en_GB-large.aff')
 
 
     def escape_values(text):
@@ -124,7 +124,7 @@ def get_cloudacademy_texts(personal_cleaning=True, texts_filepath='../input/', n
     df = df.rename(columns=renaming_dict, errors="raise")
     print("df after hunspell")
     dictionary_US = hunspell.HunSpell('/usr/share/hunspell/en_US.dic', '/usr/share/hunspell/en_US.aff')
-    df['body'] = df['body'].apply(lambda text: dictionary_US.spell(text, format="html"))
+    df['body'] = df['body'].apply(lambda text: dictionary_US.spell(text, format="html", dict=dictionary("en_US")))
     print(df)
     preprocess_data(df, 'body')
     print("df after preprocess data:")
