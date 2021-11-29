@@ -111,8 +111,6 @@ class BERTopic_model(base_model):
 
     def get_encoding(self, problem_id):
         row = self.texts_df.loc[self.texts_df['problem_id'] == problem_id]
-
-        print(self.topic_model.transform(row['body'].values[0]))
         topics, encoding = self.topic_model.transform(row['body'].values[0])
         encoding = np.array(encoding)
         return encoding
