@@ -115,7 +115,8 @@ class BERTopic_model(base_model):
         print(row['body'].values)
         print(row['body'].values[0])
         print(self.topic_model.transform(row['body'].values[0]))
-        encoding = np.array(self.topic_model.transform(row['body'].values[0]))
+        topics, encoding = self.topic_model.transform(row['body'].values[0])
+        print(topics)
         print(encoding)
         return encoding
 
