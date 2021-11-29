@@ -29,5 +29,6 @@ def load_preprocessed_texts(texts_filepath="", text_as_sentence=False):
     texts_df = pd.read_csv(texts_filepath, dtype=dtypes)
     if not text_as_sentence:
         texts_df['body'] = texts_df['body'].apply(lambda x: literal_eval(x))
+    texts_df['body'] = texts_df['body'].fillna("no_text", inplace=True)
     print("shape of dataframe :", texts_df.shape)
     return texts_df
