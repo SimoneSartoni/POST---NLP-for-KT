@@ -58,7 +58,7 @@ class BERTopic_model(base_model):
         self.words_num = len(self.topic_model.get_topic_freq())
         self.topics, self.probabilities = self.topic_model.transform(self.texts_df['body'].values[0])
         self.vector_size = len(self.probabilities[0])
-        self.pro_num = len(self.texts)
+        self.pro_num = len(self.texts_df['body'].values)
 
     def write_words_unique(self, data_folder):
         write_txt(os.path.join(data_folder, 'words_set.txt'), self.words_unique)
