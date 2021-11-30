@@ -35,6 +35,7 @@ class BERTopic_model(base_model):
         self.bert_topic = BERTopic(embedding_model='all-MiniLM-L6-v2', language="english",
                                    calculate_probabilities=calculate_probabilities)
         self.topic_model = None
+        self.probabilities = None
         self.similarity_matrix = None
         self.words_unique = None
         self.pro_num = None
@@ -55,13 +56,15 @@ class BERTopic_model(base_model):
         self.topic_model = self.bert_topic.fit(self.texts_df['sentence'].values)
         print("topic model created")
         self.words_num = len(self.topic_model.get_topic_freq())
-        topic_predictions, probabilities = self.topic_model.transform(self.texts_df['sentence'].values)
-        print(topic_predictions)
-        print(probabilities)
+        names = self.topic_model.get_topics().keys()
+        topic_predictions, self.probabilities = self.topic_model.transform(self.texts_df['sentence'].values)
+        self.probabilities = zip(self.texts_df['problem_id'].values, self.probabilities)
+        print(self.probabilities)
+        self.probabilities = pd.DataFrame(self.probabilities, columns=['problem_id'] + names)
+        print(self.probabilities)
         self.texts_df['topics'] = topic_predictions
-        self.texts_df['probabilities'] = probabilities
-        self.vector_size = len(self.texts_df['probabilities'][0])
-        self.pro_num = len(self.texts_df['probabilities'].values)
+        self.vector_size = len(names)
+        self.pro_num = len(self.probabilities.shape[0])
 
     def write_words_unique(self, data_folder):
         write_txt(os.path.join(data_folder, 'words_set.txt'), self.words_unique)
