@@ -1,3 +1,5 @@
+import gc
+
 import pandas as pd
 import numpy as np
 import os
@@ -57,14 +59,16 @@ class BERTopic_model(base_model):
         print("topic model created")
         self.words_num = len(self.topic_model.get_topic_freq())
         names = self.topic_model.get_topics().keys()
-        topic_predictions, self.probabilities = self.topic_model.transform(self.texts_df['sentence'].values)
-        self.probabilities = zip(self.texts_df['problem_id'].values, self.probabilities)
-        print(self.probabilities)
-        self.probabilities = pd.DataFrame(self.probabilities, columns=['problem_id'] + names)
+        topic_predictions, probabilities = self.topic_model.transform(self.texts_df['sentence'].values)
+        self.probabilities = {}
+        for problem_id, probability in list(zip(self.texts_df['problem_id'], probabilities)):
+            self.probabilities[problem_id] = probability
+        del probabilities
+        gc.collect()
         print(self.probabilities)
         self.texts_df['topics'] = topic_predictions
         self.vector_size = len(names)
-        self.pro_num = len(self.probabilities.shape[0])
+        self.pro_num = len(self.probabilities.keys())
 
     def write_words_unique(self, data_folder):
         write_txt(os.path.join(data_folder, 'words_set.txt'), self.words_unique)
@@ -115,8 +119,7 @@ class BERTopic_model(base_model):
         return item_scores, correct_ids
 
     def get_encoding(self, problem_id):
-        row = self.texts_df.loc[self.texts_df['problem_id'] == problem_id]
-        encodings = np.array(row['probabilities'].values[0])
+        encodings = np.array(self.probabilities[problem_id])
         return encodings
 
     def get_serializable_params(self):
