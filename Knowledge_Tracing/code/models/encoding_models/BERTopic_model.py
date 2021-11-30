@@ -55,7 +55,11 @@ class BERTopic_model(base_model):
         self.topic_model = self.bert_topic.fit(self.texts_df['sentence'].values)
         print("topic model created")
         self.words_num = len(self.topic_model.get_topic_freq())
-        self.texts_df['topics'], self.texts_df['probabilities'] = self.topic_model.transform(self.texts_df['sentence'].values)
+        topic_predictions, probabilities = self.topic_model.transform(self.texts_df['sentence'].values)
+        print(topic_predictions)
+        print(probabilities)
+        self.texts_df['topics'] = topic_predictions
+        self.texts_df['probabilities'] = probabilities
         self.vector_size = len(self.texts_df['probabilities'][0])
         self.pro_num = len(self.texts_df['probabilities'].values)
 
