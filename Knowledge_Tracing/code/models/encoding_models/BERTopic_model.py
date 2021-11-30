@@ -59,6 +59,7 @@ class BERTopic_model(base_model):
         print("topic model created")
         self.words_num = len(self.topic_model.get_topic_freq())
         names = self.topic_model.get_topics().keys()
+        print(names)
         topic_predictions, probabilities = self.topic_model.transform(self.texts_df['sentence'].values)
         self.probabilities = {}
         for problem_id, probability in list(zip(self.texts_df['problem_id'], probabilities)):
