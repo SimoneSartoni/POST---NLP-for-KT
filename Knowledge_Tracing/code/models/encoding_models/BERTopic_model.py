@@ -97,7 +97,6 @@ class BERTopic_model(base_model):
                 # unique_problems_set.add(p)
                 input_ids.append(self.problem_id_to_index[p])
                 correct_ids.append(c)
-        item_scores = 0.0
         if len(input_problems) == 0:
             return [0.0], [0.0]
         if target_problem in self.problem_id_to_index.keys():
@@ -107,6 +106,11 @@ class BERTopic_model(base_model):
         else:
             return [0.0], [0.0]
         return item_scores, correct_ids
+
+    def get_encoding(self, problem_id):
+        row = self.texts_df.loc[self.texts_df['problem_id'] == problem_id]
+        encodings = np.array(row['probabilities'].values[0])
+        return encodings
 
     def get_serializable_params(self):
         return {"min_df": self.min_df, "max_df": self.max_df, "binary": self.binary, "name": self.name,
