@@ -68,6 +68,7 @@ class BERTopic_model(base_model):
         gc.collect()
         print(self.probabilities)
         self.texts_df['topics'] = topic_predictions
+        self.topic_model.visualize_topics()
         self.vector_size = len(names)
         self.pro_num = len(self.probabilities.keys())
 
