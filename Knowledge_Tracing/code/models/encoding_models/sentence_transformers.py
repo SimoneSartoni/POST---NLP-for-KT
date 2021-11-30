@@ -1,3 +1,5 @@
+import gc
+
 import pandas as pd
 import numpy as np
 import os
@@ -25,6 +27,7 @@ class sentence_transformer(base_model):
     def __init__(self, encoding_model='all-mpnet-base-v2'):
         super().__init__("sentence_transformers", "NLP")
         self.sentence_transformer = SentenceTransformer(encoding_model)
+        self.texts_df = None
         self.similarity_matrix = None
         self.words_unique = None
         self.pro_num = None
@@ -34,22 +37,22 @@ class sentence_transformer(base_model):
         self.shrink = 10
         self.normalize = True
         self.similarity = "cosine"
-        self.vectors = None
-        self.problem_id_to_index = {}
-        self.problem_ids = None
-        self.texts = None
+        self.vectors = {}
         self.vector_size = 0
 
     def fit(self, texts_df, save_filepath='./'):
         self.texts_df = texts_df
-        self.vectors = self.sentence_transformer.encode(sentences=self.texts_df['list_of_words'].values, show_progress_bar=True)
-
+        vectors = self.sentence_transformer.encode(sentences=self.texts_df['sentences'].values, show_progress_bar=True)
+        for problem_id, encoding in list(zip(self.texts_df['problem_id'], vectors)):
+            self.vectors[problem_id] = encoding
+        del vectors
+        gc.collect()
         # Save sparse matrix in current directory
-        self.vector_size = self.vectors.shape[1]
+        self.vector_size = len(self.vectors.values()[0])
         np.save(save_filepath, self.vectors)
 
-        self.pro_num = self.vectors.shape[0]
-        self.words_num = self.vectors.shape[1]
+        self.pro_num = len(self.vectors.keys())
+        self.words_num = self.vector_size
 
     def write_words_unique(self, data_folder):
         write_txt(os.path.join(data_folder, 'words_set.txt'), self.words_unique)
@@ -124,9 +127,8 @@ class sentence_transformer(base_model):
         encoding = np.concatenate((pos_mean_encoding, neg_mean_encoding, target_encoding), axis=0)
         return encoding
 
-    def get_encoding(self, problem):
-        row = self.texts_df.loc[self.texts_df['question_id'] == problem]
-        encoding = np.array(self.vectors[row['list_of_words']])
+    def get_encoding(self, problem_id):
+        encoding = np.array(self.vectors[problem_id])
         return encoding
 
     def get_serializable_params(self):

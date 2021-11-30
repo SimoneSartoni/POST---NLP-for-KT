@@ -2,159 +2,89 @@ import tensorflow as tf
 import numpy as np
 from sklearn.model_selection import train_test_split
 
-from Knowledge_Tracing.code.data_processing.get_data_assistments_2012 import get_data_assistments_2012
-from code.models.encoding_models.sentence_transformers import sentence_transformer
-from Knowledge_Tracing.code.data_processing.get_data_assistments_2009 import get_data_assistments_2009
+from Knowledge_Tracing.code.data_processing.load_preprocessed.load_preprocessed_data import load_preprocessed_texts
+from Knowledge_Tracing.code.models.encoding_models.sentence_transformers import sentence_transformer
+from Knowledge_Tracing.code.data_processing.load_preprocessed.get_DKT_dataloaders import get_DKT_dataloaders
 
 MASK_VALUE = -1.0  # The masking value cannot be zero.
 
 
-def load_dataset(batch_size=32, shuffle=True, dataset_name='assistment_2012',
-                 interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
-                                       ".csv",
-                 encoding_model='all-mpnet-base-v2',
-                 save_filepath='/kaggle/working/', texts_filepath='../input/', min_df=2, max_df=1.0,
-                 min_questions=2, max_features=1000, max_questions=25, n_rows=None, n_texts=None,
-                 personal_cleaning=True):
-    if dataset_name == 'assistment_2012':
-        df, text_df = get_data_assistments_2012(min_questions=min_questions, max_questions=max_questions,
-                                                interactions_filepath=interactions_filepath,
-                                                texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
-                                                make_sentences_flag=True, personal_cleaning=personal_cleaning)
-    elif dataset_name == 'assistment_2009':
-        df, text_df = get_data_assistments_2009(min_questions=min_questions, max_questions=max_questions,
-                                                interactions_filepath=interactions_filepath,
-                                                texts_filepath=texts_filepath, n_rows=n_rows, n_texts=n_texts,
-                                                make_sentences_flag=True, personal_cleaning=personal_cleaning, )
+def create_dataset(generator, encoding_depth, shuffle=True, batch_size=1024):
+    input_types = {"text_encoding": tf.float32, "label": tf.float32, "target_text_encoding": tf.float32}
+    output_types = {"target_label": tf.float32}
 
-    print(df)
-    df = df[['user_id', 'problem_id', 'correct']]
-    print(df)
+    input_shapes = {"text_encoding": [None, encoding_depth], "label": [None],
+                    "target_text_encoding": [None, encoding_depth]}
+    output_shapes = {"target_label": [None]}
+    types = (input_types, output_types)
+    shapes = (input_shapes, output_shapes)
+    dataset = tf.data.Dataset.from_generator(
+        generator=generator.generator,
+        output_types=types,
+        output_shapes=shapes
+    )
+
+    nb_users = generator.__len__()
+    if shuffle:
+        dataset = dataset.shuffle(buffer_size=nb_users, reshuffle_each_iteration=True)
+
+    print(dataset)
+    dataset = dataset.map(
+        lambda inputs, outputs: (
+            {"input_encoding": inputs['text_encoding'], "input_label": tf.expand_dims(inputs['label'], axis=-1),
+             "target_encoding": inputs['target_text_encoding']},
+            tf.expand_dims(outputs['target_label'], axis=-1)
+        )
+    )
+
+    print(dataset)
+
+    # Step 7 - Pad sequences per batch
+    dataset = dataset.padded_batch(
+        batch_size=batch_size,
+        padding_values=-1.0,
+        drop_remainder=True
+    )
+    return dataset
+
+
+def load_dataset(batch_size=32, shuffle=True,
+                 interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final.csv",
+                 save_filepath='/kaggle/working/', texts_filepath='../input/', encoding_model='all-mpnet-base-v2',
+                 interaction_sequence_len=30, min_seq_len=5, encode_correct_in_encodings=False):
+    inputs = {"question_id": False, "text_id": False, "skill": False,
+              "label": False, "r_elapsed_time": False, 'text_encoding': True, "target_id": False,
+              "target_text_id": False, "target_skill": False, 'target_label': False, 'target_text_encoding': True}
+    outputs = {"question_id": False, "text_id": False, "skill": False,
+               "label": False, "r_elapsed_time": False, "target_id": False,
+               "target_text_id": False, "target_skill": False, 'target_label': True}
+
+    text_df = load_preprocessed_texts(texts_filepath=texts_filepath)
     # Step 3.1 - Generate NLP extracted encoding for problems
     encode_model = sentence_transformer(encoding_model=encoding_model)
     encode_model.fit(text_df, save_filepath)
 
-    users = df['user_id'].unique()
-    train_users, test_users = train_test_split(users, test_size=0.2)
-    train_users, val_users = train_test_split(train_users, test_size=0.2)
+    train_gen, val_gen, test_gen, nb_questions, nb_skills = get_DKT_dataloaders(batch_size, shuffle,
+                                                                                interactions_filepath,
+                                                                                output_filepath='/kaggle/working/',
+                                                                                interaction_sequence_len=interaction_sequence_len
+                                                                                , min_seq_len=min_seq_len,
+                                                                                text_encoding_model=encode_model,
+                                                                                negative_correctness=False,
+                                                                                inputs_dict=inputs,
+                                                                                outputs_dict=outputs,
+                                                                                encode_correct_in_encodings=True)
+    encoding_depth = 2 * encode_model.vector_size
 
-    def generate_encodings_val():
-        for name, group in df.loc[df['user_id'].isin(val_users)].groupby('user_id'):
-            document_to_term = []
-            labels = np.array([], dtype=np.int)
-            for problem, label in list(zip(group['problem_id'].values, group['correct'].values)):
-                encoding = encode_model.get_encoding(problem)
-                zeros = np.zeros(encoding.shape, dtype=np.float)
-                if label:
-                    encoding = np.concatenate([encoding, zeros])
-                else:
-                    encoding = np.concatenate([zeros, encoding])
-                encoding = np.expand_dims(encoding, axis=0)
-                document_to_term.append(encoding)
-            document_to_term = np.concatenate(document_to_term, axis=0)
-            i_doc = document_to_term[:-1]
-            o_label = labels[1:]
-            inputs = i_doc
-            outputs = o_label
-            yield inputs, outputs
+    train_loader = create_dataset(train_gen, encoding_depth, shuffle=shuffle, batch_size=batch_size)
+    val_loader = create_dataset(val_gen, encoding_depth, shuffle=shuffle, batch_size=batch_size)
+    test_loader = create_dataset(test_gen, encoding_depth, shuffle=shuffle, batch_size=batch_size)
 
-    def generate_encodings_test():
-        for name, group in df.loc[df['user_id'].isin(test_users)].groupby('user_id'):
-            document_to_term = []
-            labels = np.array([], dtype=np.int)
-            for problem, label in list(zip(group['problem_id'].values, group['correct'].values)):
-                encoding = encode_model.get_encoding(problem)
-                zeros = np.zeros(encoding.shape, dtype=np.float)
-                if label:
-                    encoding = np.concatenate([encoding, zeros])
-                else:
-                    encoding = np.concatenate([zeros, encoding])
-                encoding = np.expand_dims(encoding, axis=0)
-                document_to_term.append(encoding)
-            document_to_term = np.concatenate(document_to_term, axis=0)
-            i_doc = document_to_term[:-1]
-            o_label = labels[1:]
-            inputs = i_doc
-            outputs = o_label
-            yield inputs, outputs
-
-    def generate_encodings_train():
-        for name, group in df.loc[df['user_id'].isin(train_users)].groupby('user_id'):
-            document_to_term = []
-            labels = np.array([], dtype=np.int)
-            for problem, label in list(zip(group['problem_id'].values, group['correct'].values)):
-                encoding = encode_model.get_encoding(problem)
-                zeros = np.zeros(encoding.shape, dtype=np.float)
-                if label:
-                    encoding = np.concatenate([encoding, zeros])
-                else:
-                    encoding = np.concatenate([zeros, encoding])
-                encoding = np.expand_dims(encoding, axis=0)
-                document_to_term.append(encoding)
-            document_to_term = np.concatenate(document_to_term, axis=0)
-            i_doc = document_to_term[:-1]
-            o_label = labels[1:]
-            inputs = i_doc
-            outputs = o_label
-            yield inputs, outputs
-
-    encoding_depth = encode_model.vector_size
-
-    def create_dataset(generate_encodings, users, encoding_depth):
-        # Step 5 - Get Tensorflow Dataset
-        types = ((tf.float32, tf.float32),
-                 (tf.float32, tf.float32))
-        shapes = (([None, encoding_depth], [None]),
-                  ([None, encoding_depth], [None]))
-        # Step 5 - Get Tensorflow Dataset
-        dataset = tf.data.Dataset.from_generator(
-            generator=generate_encodings,
-            output_types=types,
-            output_shapes=shapes
-        )
-
-        nb_users = len(users)
-        if shuffle:
-            dataset = dataset.shuffle(buffer_size=nb_users, reshuffle_each_iteration=True)
-
-        print(dataset)
-        dataset = dataset.map(
-            lambda inputs, outputs: (
-                inputs,
-                tf.expand_dims(outputs, axis=-1)
-            )
-        )
-
-        # Step 6 - Encode categorical features and merge skills with labels to compute target loss.
-        # More info: https://github.com/tensorflow/tensorflow/issues/32142
-
-        print(dataset)
-
-        # Step 7 - Pad sequences per batch
-        dataset = dataset.padded_batch(
-            batch_size=batch_size,
-            padding_values=MASK_VALUE,
-            drop_remainder=True
-        )
-
-        print(dataset)
-        return dataset
-
-    train_set = create_dataset(generate_encodings_train, train_users, encoding_depth)
-    val_set = create_dataset(generate_encodings_val, val_users, encoding_depth)
-    test_set = create_dataset(generate_encodings_test, test_users, encoding_depth)
-
-    return train_set, val_set, test_set, encoding_depth
+    return train_loader, val_loader, test_loader, encoding_depth
 
 
 def get_target(y_true, y_pred, nb_encodings=300):
-    # Get skills and labels from y_true
-
     mask = 1 - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
     y_true = y_true * mask
-    encodings_true, y_true = tf.split(y_true, num_or_size_splits=[-1, 1], axis=-1)
-    encodings_pred, y_pred = tf.split(y_pred, num_or_size_splits=[-1, 1], axis=-1)
-
-    # Get predictions for each skill
-
+    y_pred = y_pred * mask
     return y_true, y_pred
