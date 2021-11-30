@@ -35,7 +35,6 @@ class BERTopic_model(base_model):
         self.bert_topic = BERTopic(embedding_model='all-MiniLM-L6-v2', language="english",
                                    calculate_probabilities=calculate_probabilities)
         self.topic_model = None
-        self.topics, self.probabilities = None, None
         self.similarity_matrix = None
         self.words_unique = None
         self.pro_num = None
@@ -56,9 +55,9 @@ class BERTopic_model(base_model):
         self.topic_model = self.bert_topic.fit(self.texts_df['sentence'].values)
         print("topic model created")
         self.words_num = len(self.topic_model.get_topic_freq())
-        self.topics, self.probabilities = self.topic_model.transform(self.texts_df['sentence'].values[0])
-        self.vector_size = len(self.probabilities[0])
-        self.pro_num = len(self.texts_df['sentence'].values)
+        self.texts_df['topics'], self.texts_df['probabilities'] = self.topic_model.transform(self.texts_df['sentence'].values)
+        self.vector_size = len(self.texts_df['probabilities'][0])
+        self.pro_num = len(self.texts_df['probabilities'].values)
 
     def write_words_unique(self, data_folder):
         write_txt(os.path.join(data_folder, 'words_set.txt'), self.words_unique)
@@ -108,12 +107,6 @@ class BERTopic_model(base_model):
         else:
             return [0.0], [0.0]
         return item_scores, correct_ids
-
-    def get_encoding(self, problem_id):
-        row = self.texts_df.loc[self.texts_df['problem_id'] == problem_id]
-        topics, encoding = self.topic_model.transform(row['sentence'].values[0])
-        encoding = np.array(encoding)
-        return encoding[0]
 
     def get_serializable_params(self):
         return {"min_df": self.min_df, "max_df": self.max_df, "binary": self.binary, "name": self.name,
