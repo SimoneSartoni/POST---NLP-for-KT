@@ -69,7 +69,7 @@ class BERTopic_model(base_model):
         print(self.probabilities)
         self.texts_df['topics'] = topic_predictions
         self.topic_model.visualize_topics()
-        self.vector_size = len(names)
+        self.vector_size = len(names) -1
         self.pro_num = len(self.probabilities.keys())
 
     def write_words_unique(self, data_folder):
