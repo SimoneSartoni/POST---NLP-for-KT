@@ -17,8 +17,8 @@ def get_saint_dataloaders(interactions_filepath="../input/assistmentds-2012/2012
     df = load_preprocessed_interactions(interactions_filepath=interactions_filepath, dictionary=dictionary)
     print(df)
     # grouping based on user_id to get the data supply
-    nb_questions = len(df['question_id'].unique())
-    nb_skills = len(df['skill'].unique())
+    nb_questions = df['question_id'].max()
+    nb_skills = df['skill'].max()
     print("Grouping users...")
 
     group = generate_sequences_of_same_length(df, seq_len=interaction_sequence_len, min_seq_len=min_seq_len, output_filepath=output_filepath)
