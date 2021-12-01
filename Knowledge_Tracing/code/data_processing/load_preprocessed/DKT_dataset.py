@@ -37,8 +37,8 @@ def encode_correctness_in_id(question_id, correctness, nb_questions):
 
 class DKT_Dataset:
     def __init__(self, grouped_df, text_encoding_model=None, max_seq=100, negative_correctness=False,
-                 encode_correct_in_encodings=True, encode_correct_in_skills=True, encode_correct_in_id=False, inputs_dict={}, outputs_dict={},
-                 nb_skills=300, nb_questions=10000):
+                 encode_correct_in_encodings=True, encode_correct_in_skills=True, encode_correct_in_id=False,
+                 inputs_dict={}, outputs_dict={}, nb_skills=300, nb_questions=10000):
         self.max_seq = max_seq
         self.data = grouped_df
         self.encode_correct_in_encodings = encode_correct_in_encodings
