@@ -72,7 +72,7 @@ class BERTopic_model(base_model):
         self.topic_model.visualize_barchart(topics=range(0, 10))
         self.topic_model.visualize_heatmap()
         self.topic_model.visualize_term_rank()
-        for probability in list(self.probabilities.keys())[2]:
+        for probability in list(self.probabilities.keys())[2:4]:
             self.topic_model.visualize_distribution(self.probabilities[probability], min_probability=1e-5)
         self.vector_size = len(names) - 1
         self.pro_num = len(self.probabilities.keys())
