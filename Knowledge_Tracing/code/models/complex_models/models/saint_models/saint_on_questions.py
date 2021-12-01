@@ -81,8 +81,8 @@ class DecoderBlock(nn.Module):
     def forward(self, input_r, encoder_output, first_block=True):
         if first_block:
             _response = self.response_embed(input_r)
-            position_encoded = pos_encode(self.seq_len)
-            _pos = self.position_embed(position_encoded.cuda())
+            position_encoded = pos_encode(self.seq_len).cuda()
+            _pos = self.position_embed(position_encoded)
             out = _response + _pos
         else:
             out = input_r

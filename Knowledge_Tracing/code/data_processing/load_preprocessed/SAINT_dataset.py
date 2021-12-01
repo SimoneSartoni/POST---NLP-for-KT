@@ -59,7 +59,7 @@ class SAINT_Dataset(Dataset):
         if self.negative_correctness:
             ans[-seq_len:] = [1.0 if x == 1.0 else -1.0 for x in answered_correctly]
         else:
-            ans[-seq_len:] = answered_correctly
+            ans[-seq_len:] = [1.0 if x == 1.0 else 0.0 for x in answered_correctly]
         r_elapsed_time[-seq_len:] = response_elapsed_time
         skill[-seq_len:] = exe_skill
 
