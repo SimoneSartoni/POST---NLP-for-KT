@@ -22,7 +22,7 @@ def identity_tokenizer(text):
 
 
 class BERTopic_model(base_model):
-    def __init__(self, n_neighbors=15, n_components=5, min_cluster_size=15, metric='euclidean',
+    def __init__(self, nr_topics=128,
                  calculate_probabilities=True, cluster_selection_method='eom'):
         super().__init__("sentence_transformers", "NLP")
         """self.sentence_transformer = SentenceTransformer('bert-large-nli-mean-tokens')
@@ -35,7 +35,7 @@ class BERTopic_model(base_model):
                                   metric=metric,
                                   cluster_selection_method=cluster_selection_method)"""
         self.bert_topic = BERTopic(embedding_model='all-MiniLM-L6-v2', language="english",
-                                   calculate_probabilities=calculate_probabilities)
+                                   calculate_probabilities=calculate_probabilities, nr_topics=nr_topics)
         self.topic_model = None
         self.probabilities = None
         self.similarity_matrix = None
@@ -68,12 +68,10 @@ class BERTopic_model(base_model):
         gc.collect()
         self.texts_df['topics'] = topic_predictions
         self.topic_model.visualize_topics()
-        self.topic_model.visualize_hierarchy()
+        self.topic_model.visualize_hierarchy(topics=range(0, 10))
         self.topic_model.visualize_barchart(topics=range(0, 10))
-        self.topic_model.visualize_heatmap()
+        self.topic_model.visualize_heatmap(topics=range(0, 10))
         self.topic_model.visualize_term_rank()
-        for probability in list(self.probabilities.keys())[2:4]:
-            self.topic_model.visualize_distribution(self.probabilities[probability], min_probability=1e-5)
         self.vector_size = len(names) - 1
         self.pro_num = len(self.probabilities.keys())
 
