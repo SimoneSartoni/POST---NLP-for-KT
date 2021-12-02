@@ -99,6 +99,12 @@ def load_dataset(batch_size=32, shuffle=True,
 
 def get_target(y_true, y_pred, nb_encodings=300):
     mask = 1 - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
+    print("here are the skills predictions:")
+    print(y_pred)
+    print(tf.shape(y_pred))
     y_true = y_true * mask
     y_pred = y_pred * mask
+    print("here is the predicted probability:")
+    print(y_pred)
+    print(tf.shape(y_pred))
     return y_true, y_pred
