@@ -99,10 +99,11 @@ def load_dataset(batch_size=32, shuffle=True,
 
 def get_target(y_true, y_pred, nb_encodings=300):
     mask = 1. - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
+    y_true = tf.boolean_mask(y_true, mask, axis=1)
     count = tf.reduce_sum(tf.where(y_pred >= 0.0, y_pred, 0.0)) / tf.reduce_sum(tf.where(y_pred >= 0.0, 1.0, 0.0))
     tf.print(count, output_stream=sys.stdout)
-    y_true = y_true * mask
-    y_pred = y_pred * mask
+    mask_pred = 1. - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
+    y_pred = tf.boolean_mask(y_pred, mask_pred, axis=1)
     count = tf.reduce_sum(tf.where(y_pred >= 0.0, y_pred, 0.0)) / tf.reduce_sum(tf.where(y_pred >= 0.0, 1.0, 0.0))
     tf.print(count, output_stream=sys.stdout)
 
