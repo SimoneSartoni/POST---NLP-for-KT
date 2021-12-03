@@ -91,11 +91,9 @@ def get_target(y_true, y_pred):
     skills, y_true = tf.split(y_true, num_or_size_splits=[-1, 1], axis=-1)
     skills = tf.clip_by_value(skills, clip_value_min=0.0, clip_value_max=1.0)
     # Get predictions for each skill
-    print("here are the skills predictions:")
-    tf.print("tensors:", y_pred,  output_stream=sys.stdout)
-    print(tf.shape(y_pred))
+    count = tf.reduce_sum(tf.where(y_pred >= 0.5, 1.0, 0.0)) / tf.reduce_sum(y_pred >= 0.0, 1.0, 0.0)
+    print(count)
     y_pred = tf.reduce_sum(y_pred * skills, axis=-1, keepdims=True)
-    print("here is the predicted probability:")
-    tf.print("tensors:", y_pred,  output_stream=sys.stdout)
-    print(tf.shape(y_pred))
+    count = tf.reduce_sum(tf.where(y_pred >= 0.5, 1.0, 0.0)) / tf.reduce_sum(y_pred >= 0.0, 1.0, 0.0)
+    print(count)
     return y_true, y_pred
