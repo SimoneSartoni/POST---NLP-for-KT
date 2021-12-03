@@ -86,13 +86,13 @@ def load_dataset(batch_size=32, shuffle=True,
 
 def get_target(y_true, y_pred):
     # Get skills and labels from y_true
-    y_true = np.asarray(y_true)
-    y_pred = np.asarray(y_pred)
+    y_true = y_true.numpy()
+    y_pred = y_pred.numpy()
     mask = np.where(y_true == MASK_VALUE, 1, 0)
     mask_pred = np.where(y_pred == MASK_VALUE, 1, 0)
 
-    y_true_nomask = np.delete(y_true, mask, axis=0)
-    y_pred_nomask = np.delete(y_pred, mask_pred, axis=0)
+    y_true = np.delete(y_true, mask, axis=0)
+    y_pred = np.delete(y_pred, mask_pred, axis=0)
     print("3")
     skills, y_true = tf.split(y_true, num_or_size_splits=[-1, 1], axis=-1)
     print(y_true)
