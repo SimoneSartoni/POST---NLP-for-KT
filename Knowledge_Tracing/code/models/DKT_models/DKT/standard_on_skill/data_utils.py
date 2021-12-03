@@ -6,7 +6,7 @@ from Knowledge_Tracing.code.data_processing.load_preprocessed.get_DKT_dataloader
 MASK_VALUE = -1.  # The masking value cannot be zero.
 from Knowledge_Tracing.code.data_processing.load_preprocessed.load_preprocessed_data import load_preprocessed_texts, \
     load_preprocessed_interactions
-
+import sys
 
 def create_dataset(generator, features_depth, skill_depth, shuffle=True, batch_size=1024):
     input_types = {"feature": tf.float32}
