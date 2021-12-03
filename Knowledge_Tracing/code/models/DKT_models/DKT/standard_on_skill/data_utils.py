@@ -1,6 +1,6 @@
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
-import numpy as np
+
 from Knowledge_Tracing.code.data_processing.load_preprocessed.get_DKT_dataloaders import get_DKT_dataloaders
 
 MASK_VALUE = -1.  # The masking value cannot be zero.
@@ -86,13 +86,18 @@ def load_dataset(batch_size=32, shuffle=True,
 
 def get_target(y_true, y_pred):
     # Get skills and labels from y_true
-    y_true = y_true.numpy()
-    y_pred = y_pred.numpy()
-    mask = np.where(y_true == MASK_VALUE, 1, 0)
-    mask_pred = np.where(y_pred == MASK_VALUE, 1, 0)
+    mask = 1. - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
+    print("0")
 
-    y_true = np.delete(y_true, mask, axis=0)
-    y_pred = np.delete(y_pred, mask_pred, axis=0)
+    y_true = tf.ragged.boolean_mask(y_true, mask, axis=-1)
+    print("1")
+    print(y_true)
+    print(y_pred)
+    mask_pred = 1. - tf.cast(tf.equal(y_pred, MASK_VALUE), y_pred.dtype)
+    print("2")
+    print(y_true)
+    print(y_pred)
+    y_pred = tf.ragged.boolean_mask(y_pred, mask_pred)
     print("3")
     skills, y_true = tf.split(y_true, num_or_size_splits=[-1, 1], axis=-1)
     print(y_true)
