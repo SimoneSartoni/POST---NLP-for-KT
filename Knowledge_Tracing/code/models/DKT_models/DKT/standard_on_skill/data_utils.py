@@ -87,17 +87,22 @@ def load_dataset(batch_size=32, shuffle=True,
 def get_target(y_true, y_pred):
     # Get skills and labels from y_true
     mask = 1. - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
-    y_true = tf.boolean_mask(y_true, mask)
-    mask_pred = 1. - tf.cast(tf.equal(y_pred, MASK_VALUE), y_pred.dtype)
-    y_pred = tf.boolean_mask(y_pred, mask_pred)
+    print("0")
 
+    y_true = tf.boolean_mask(y_true, mask)
+    print("1")
+    mask_pred = 1. - tf.cast(tf.equal(y_pred, MASK_VALUE), y_pred.dtype)
+    print("2")
+    y_pred = tf.boolean_mask(y_pred, mask_pred)
+    print("3")
     skills, y_true = tf.split(y_true, num_or_size_splits=[-1, 1], axis=-1)
     # Get predictions for each skill
+    print("4")
     count = tf.reduce_sum(tf.where(y_pred >= 0.5, 1.0, 0.0)) / tf.reduce_sum(tf.where(y_pred >= 0.0, 1.0, 0.0))
     tf.print(count, output_stream=sys.stdout)
-
+    print("5")
     y_pred = tf.reduce_sum(y_pred * skills, axis=-1, keepdims=True)
-
+    print("6")
     count = tf.reduce_sum(tf.where(y_pred >= 0.5, 1.0, 0.0)) / tf.reduce_sum(tf.where(y_pred > 0.0, 1.0, 0.0))
     tf.print(count, output_stream=sys.stdout)
 
