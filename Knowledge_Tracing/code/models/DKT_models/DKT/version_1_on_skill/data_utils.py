@@ -10,7 +10,7 @@ from Knowledge_Tracing.code.data_processing.load_preprocessed.load_preprocessed_
 from Knowledge_Tracing.code.data_processing.load_preprocessed.get_DKT_dataloaders import get_DKT_dataloaders
 
 MASK_VALUE = -1.0  # The masking value cannot be zero.
-
+import sys
 
 """
     possible_input_types = {"question_id": tf.float32, "text_id": tf.float32, "skill": tf.float32,
@@ -100,11 +100,11 @@ def load_dataset(batch_size=32, shuffle=True,
 def get_target(y_true, y_pred, nb_encodings=300):
     mask = 1 - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
     print("here are the skills predictions:")
-    print(y_pred)
+    tf.print("tensors:", y_pred,  output_stream=sys.stdout)
     print(tf.shape(y_pred))
     y_true = y_true * mask
     y_pred = y_pred * mask
     print("here is the predicted probability:")
-    print(y_pred)
+    tf.print("tensors:", y_pred,  output_stream=sys.stdout)
     print(tf.shape(y_pred))
     return y_true, y_pred
