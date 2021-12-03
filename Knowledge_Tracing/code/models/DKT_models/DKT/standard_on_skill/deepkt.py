@@ -55,7 +55,9 @@ class DKTModel(tf.keras.Model):
             loss=custom_loss,
             optimizer=optimizer,
             metrics=metrics,
-            experimental_run_tf_function=False)
+            experimental_run_tf_function=False,
+            run_eagerly=True
+        )
 
     def fit(self,
             dataset,

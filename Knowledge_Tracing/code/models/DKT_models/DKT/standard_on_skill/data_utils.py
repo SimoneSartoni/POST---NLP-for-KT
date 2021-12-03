@@ -89,17 +89,5 @@ def get_target(y_true, y_pred):
     skills, y_true = tf.split(y_true, num_or_size_splits=[-1, 1], axis=-1)
     print(y_true)
     print(y_pred)
-    # Get predictions for each skill
-    print("4")
-    count = tf.reduce_sum(tf.where(y_pred >= 0.5, 1.0, 0.0)) / tf.reduce_sum(tf.where(y_pred >= 0.0, 1.0, 0.0))
-    tf.print(count, output_stream=sys.stdout)
-    print("5")
-    print(y_true)
-    print(y_pred)
     y_pred = tf.reduce_sum(y_pred * skills, axis=-1, keepdims=True)
-    print("6")
-    count = tf.reduce_sum(tf.where(y_pred >= 0.5, 1.0, 0.0)) / tf.reduce_sum(tf.where(y_pred > 0.0, 1.0, 0.0))
-    tf.print(count, output_stream=sys.stdout)
-    print(y_true)
-    print(y_pred)
     return y_true, y_pred
