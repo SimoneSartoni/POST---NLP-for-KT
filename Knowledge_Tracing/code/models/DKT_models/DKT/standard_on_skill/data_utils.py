@@ -86,19 +86,8 @@ def load_dataset(batch_size=32, shuffle=True,
 
 def get_target(y_true, y_pred):
     # Get skills and labels from y_true
-    mask = tf.not_equal(y_true, MASK_VALUE)
-    print("0")
-
-    y_true = tf.ragged.boolean_mask(y_true, mask)
-    print("1")
-    print(y_true)
-    print(y_pred)
-    mask_pred = tf.not_equal(y_pred, MASK_VALUE)
-    print("2")
-    print(y_true)
-    print(y_pred)
-    y_pred = tf.ragged.boolean_mask(y_pred, mask_pred)
-    print("3")
+    for el in y_true.numpy():
+        print(el)
     skills, y_true = tf.split(y_true, num_or_size_splits=[-1, 1], axis=-1)
     print(y_true)
     print(y_pred)
