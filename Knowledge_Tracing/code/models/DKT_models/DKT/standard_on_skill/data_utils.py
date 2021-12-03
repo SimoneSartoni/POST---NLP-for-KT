@@ -86,7 +86,7 @@ def load_dataset(batch_size=32, shuffle=True,
 
 def get_target(y_true, y_pred):
     # Get skills and labels from y_true
-    for el in y_true.numpy():
+    for el in y_true.eval().numpy():
         print(el)
     skills, y_true = tf.split(y_true, num_or_size_splits=[-1, 1], axis=-1)
     print(y_true)
