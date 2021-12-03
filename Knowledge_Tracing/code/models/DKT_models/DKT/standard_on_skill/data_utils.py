@@ -92,8 +92,8 @@ def get_target(y_true, y_pred):
     skills = tf.clip_by_value(skills, clip_value_min=0.0, clip_value_max=1.0)
     # Get predictions for each skill
     count = tf.reduce_sum(tf.where(y_pred >= 0.5, 1.0, 0.0)) / tf.reduce_sum(tf.where(y_pred >= 0.0, 1.0, 0.0))
-    print(count)
+    tf.print(count, output_stream=sys.stdout)
     y_pred = tf.reduce_sum(y_pred * skills, axis=-1, keepdims=True)
     count = tf.reduce_sum(tf.where(y_pred >= 0.5, 1.0, 0.0)) / tf.reduce_sum(tf.where(y_pred >= 0.0, 1.0, 0.0))
-    print(count)
+    tf.print(count, output_stream=sys.stdout)
     return y_true, y_pred

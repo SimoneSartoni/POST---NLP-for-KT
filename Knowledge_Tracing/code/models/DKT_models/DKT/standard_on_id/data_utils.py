@@ -6,7 +6,7 @@ from Knowledge_Tracing.code.data_processing.load_preprocessed.get_DKT_dataloader
 MASK_VALUE = -1.  # The masking value cannot be zero.
 from Knowledge_Tracing.code.data_processing.load_preprocessed.load_preprocessed_data import load_preprocessed_texts, \
     load_preprocessed_interactions
-
+import sys
 
 def create_dataset(generator, ids_depth, nb_questions, shuffle=True, batch_size=1024):
     input_types = {"feature_id": tf.float32}
@@ -93,9 +93,9 @@ def get_target(y_true, y_pred):
     skills, y_true = tf.split(y_true, num_or_size_splits=[-1, 1], axis=-1)
     # Get predictions for each skill
     count = tf.reduce_sum(tf.where(y_pred >= 0.5, 1.0, 0.0)) / tf.reduce_sum(tf.where(y_pred >= 0.0, 1.0, 0.0))
-    print(count)
+    tf.print(count, output_stream=sys.stdout)
     y_pred = tf.reduce_sum(y_pred * skills, axis=-1, keepdims=True)
     count = tf.reduce_sum(tf.where(y_pred >= 0.5, 1.0, 0.0)) / tf.reduce_sum(tf.where(y_pred >= 0.0, 1.0, 0.0))
-    print(count)
+    tf.print(count, output_stream=sys.stdout)
 
     return y_true, y_pred
