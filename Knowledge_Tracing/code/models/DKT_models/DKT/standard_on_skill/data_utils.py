@@ -105,5 +105,6 @@ def get_target(y_true, y_pred):
     print("6")
     count = tf.reduce_sum(tf.where(y_pred >= 0.5, 1.0, 0.0)) / tf.reduce_sum(tf.where(y_pred > 0.0, 1.0, 0.0))
     tf.print(count, output_stream=sys.stdout)
-
+    print(y_true)
+    print(y_pred)
     return y_true, y_pred
