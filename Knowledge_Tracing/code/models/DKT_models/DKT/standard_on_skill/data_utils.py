@@ -88,7 +88,7 @@ def get_target(y_true, y_pred):
     # Get skills and labels from y_true
     mask = 1. - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
     y_true = tf.boolean_mask(y_true, mask, axis=1)
-    mask_pred = 1. - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
+    mask_pred = 1. - tf.cast(tf.equal(y_pred, MASK_VALUE), y_pred.dtype)
     y_pred = tf.boolean_mask(y_pred, mask_pred, axis=1)
     skills, y_true = tf.split(y_true, num_or_size_splits=[-1, 1], axis=-1)
     # Get predictions for each skill
