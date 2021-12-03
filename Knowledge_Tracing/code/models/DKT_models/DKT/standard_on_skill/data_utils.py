@@ -89,7 +89,7 @@ def get_target(y_true, y_pred):
     mask = 1. - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
     print("0")
 
-    y_true = tf.ragged.boolean_mask(y_true, mask, axis=-1)
+    y_true = tf.ragged.boolean_mask(y_true, mask)
     print("1")
     print(y_true)
     print(y_pred)
