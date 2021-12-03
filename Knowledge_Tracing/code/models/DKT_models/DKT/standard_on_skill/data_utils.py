@@ -91,7 +91,7 @@ def get_target(y_true, y_pred):
     print(mask)
     y_true = tf.boolean_mask(y_true, mask, axis=1)
     mask_pred = 1. - tf.cast(tf.equal(y_pred, MASK_VALUE), y_pred.dtype)
-    y_pred = tf.boolean_mask(y_pred, mask_pred, axis=1)
+    y_pred = tf.boolean_mask(y_pred, mask_pred)
     skills, y_true = tf.split(y_true, num_or_size_splits=[-1, 1], axis=-1)
     # Get predictions for each skill
     count = tf.reduce_sum(tf.where(y_pred >= 0.5, 1.0, 0.0)) / tf.reduce_sum(tf.where(y_pred >= 0.0, 1.0, 0.0))
