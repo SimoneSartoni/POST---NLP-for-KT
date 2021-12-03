@@ -86,14 +86,14 @@ def load_dataset(batch_size=32, shuffle=True,
 
 def get_target(y_true, y_pred):
     # Get skills and labels from y_true
-    mask = 1. - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
+    mask = tf.not_equal(y_true, MASK_VALUE)
     print("0")
 
     y_true = tf.ragged.boolean_mask(y_true, mask)
     print("1")
     print(y_true)
     print(y_pred)
-    mask_pred = 1. - tf.cast(tf.equal(y_pred, MASK_VALUE), y_pred.dtype)
+    mask_pred = tf.not_equal(y_pred, MASK_VALUE)
     print("2")
     print(y_true)
     print(y_pred)
