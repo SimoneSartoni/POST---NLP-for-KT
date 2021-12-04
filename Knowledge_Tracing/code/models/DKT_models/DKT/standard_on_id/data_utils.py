@@ -46,7 +46,7 @@ def create_dataset(generator, ids_depth, nb_questions, shuffle=True, batch_size=
     dataset = dataset.padded_batch(
         batch_size=batch_size,
         padded_shapes=({"input_feature_id": [None, None]}, [None, None]),
-        padding_values=(MASK_VALUE, MASK_VALUE),
+        padding_values=({"input_feature_id": MASK_VALUE}, MASK_VALUE),
         drop_remainder=True
     )
     return dataset
