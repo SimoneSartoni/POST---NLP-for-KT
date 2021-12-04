@@ -98,4 +98,6 @@ def load_dataset(batch_size=32, shuffle=True,
 
 
 def get_target(y_true, y_pred, nb_encodings=300):
+    print(y_true)
+    print(y_pred)
     return y_true, y_pred
