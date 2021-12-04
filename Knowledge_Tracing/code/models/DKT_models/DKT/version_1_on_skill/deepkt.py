@@ -33,7 +33,7 @@ class DKTModel(tf.keras.Model):
 
         dense_class = tf.keras.layers.Dense(1, activation='sigmoid')
 
-        output_class = tf.keras.layers.TimeDistributed(dense_class, name='output_class')(feature_pred)
+        output_class = tf.keras.layers.TimeDistributed(dense_class, name='output_class')(inputs=input_feature, mask=mask_feature)
 
         super(DKTModel, self).__init__(inputs={"input_feature": input_feature, "target_feature": target_feature},
                                        outputs=output_class,
