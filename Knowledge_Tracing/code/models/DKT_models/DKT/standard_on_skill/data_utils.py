@@ -42,10 +42,10 @@ def create_dataset(generator, features_depth, skill_depth, shuffle=True, batch_s
 
     print(dataset)
 
-    # Step 7 - Pad sequences per batch
     dataset = dataset.padded_batch(
         batch_size=batch_size,
-        padding_values=-1.0,
+        padded_shapes=({"input_feature": [None, None]}, [None, None]),
+        padding_values=({"input_feature": MASK_VALUE}, MASK_VALUE),
         drop_remainder=True
     )
     return dataset
