@@ -24,12 +24,12 @@ class DKTModel(tf.keras.Model):
 
         lstm = tf.keras.layers.LSTM(hidden_units,
                                     return_sequences=True,
-                                    dropout=dropout_rate)(mask_feature)
+                                    dropout=dropout_rate)(inputs=input_feature, mask=mask_feature)
 
         dense_feature = tf.keras.layers.Dense(nb_features, activation='sigmoid')
         outputs_feature = tf.keras.layers.TimeDistributed(dense_feature, name='outputs_feature')(lstm)
 
-        feature_pred = tensorflow.multiply(outputs_feature, mask_target_feature)
+        feature_pred = tf.keras.layers.Multiply()([outputs_feature, mask_target_feature])
 
         dense_class = tf.keras.layers.Dense(1, activation='sigmoid')
 
