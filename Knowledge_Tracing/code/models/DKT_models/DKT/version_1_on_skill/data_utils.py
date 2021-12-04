@@ -57,7 +57,7 @@ def create_dataset(generator, features_depth, shuffle=True, batch_size=1024):
     dataset = dataset.padded_batch(
         batch_size=batch_size,
         padding_values=-1.0,
-        padding_shapes=({"input_feature": [features_depth], "target_feature": [features_depth]}, [1]),
+        padded_shapes=({"input_feature": [features_depth], "target_feature": [features_depth]}, [1]),
         drop_remainder=True
     )
     return dataset
