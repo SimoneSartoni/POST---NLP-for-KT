@@ -45,8 +45,8 @@ def create_dataset(generator, ids_depth, nb_questions, shuffle=True, batch_size=
     # Step 7 - Pad sequences per batch
     dataset = dataset.padded_batch(
         batch_size=batch_size,
-        padding_shapes=(),
-        padding_values=-1.0,
+        padded_shapes=([None, None], [None, None]),
+        padding_values=(MASK_VALUE, MASK_VALUE),
         drop_remainder=True
     )
     return dataset
