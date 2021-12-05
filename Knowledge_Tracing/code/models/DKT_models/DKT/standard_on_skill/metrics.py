@@ -1,6 +1,7 @@
 from Knowledge_Tracing.code.models.DKT_models.DKT.standard_on_skill.data_utils import *
 
 
+
 class BinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
     def update_state(self, y_true, y_pred, sample_weight=None):
         true, pred = get_target(y_true, y_pred)
@@ -74,6 +75,6 @@ class TrueNegatives(tf.keras.metrics.TrueNegatives):
 class TruePositives(tf.keras.metrics.TruePositives):
     def update_state(self, y_true, y_pred, sample_weight=None):
         true, pred = get_target(y_true, y_pred)
-        super(TrueNegatives, self).update_state(y_true=true,
+        super(TruePositives, self).update_state(y_true=true,
                                                 y_pred=pred,
                                                 sample_weight=sample_weight)
