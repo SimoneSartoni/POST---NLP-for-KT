@@ -19,17 +19,14 @@ class CustomDKTLayer(tf.keras.layers.Layer):
     def call(self, input_feature, target_feature):
         mask_feature = self.mask_feature_layer.compute_mask(input_feature)
         print(mask_feature)
-        mask_target_feature = self.mask_feature_layer(target_feature)
-        print(mask_target_feature)
         lstm = self.lstm_layer(inputs=input_feature, mask=mask_feature)
         print(lstm)
         output_feature = self.output_feature_layer(lstm)
         output = self.feature_pred_layer([output_feature, target_feature])
         return output
 
-    def compute_mask(self, inputs, mas=None):
-        mask_feature = self.mask_feature_layer(input_feature)
-        mask_target_feature = self.mask_feature_layer(target_feature)
+    def compute_mask(self, input_feature):
+        mask_feature = self.mask_feature_layer.compute_mask(input_feature)
         lstm = self.lstm_layer(inputs=input_feature, mask=mask_feature)
         lstm_mask = self.lstm_layer.compute_mask(inputs=input_feature, mask=mask_feature)
         output_mask = self.output_feature_layer.compute_mask(lstm, lstm_mask)
@@ -54,10 +51,10 @@ class DKTModel(tf.keras.Model):
 
         customDKTLayer = CustomDKTLayer(nb_features, hidden_units, dropout_rate)
         feature_pred = customDKTLayer(input_feature, target_feature)
-
+        mask_pred = customDKTLayer.compute_mask(input_feature)
         dense_class = tf.keras.layers.Dense(1, activation='sigmoid')
 
-        output_class = tf.keras.layers.TimeDistributed(dense_class, name='output_class')(inputs=feature_pred)
+        output_class = tf.keras.layers.TimeDistributed(dense_class, name='output_class')(inputs=feature_pred, mask=mask_pred)
 
         super(DKTModel, self).__init__(inputs={"input_feature": input_feature, "target_feature": target_feature},
                                        outputs=output_class,
