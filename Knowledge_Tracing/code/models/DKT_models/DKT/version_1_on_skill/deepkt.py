@@ -13,7 +13,7 @@ class CustomDKTLayer(tf.keras.layers.Layer):
         self.lstm_layer = tf.keras.layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)
 
         self.dense_feature_layer = tf.keras.layers.Dense(nb_features, activation='sigmoid')
-        self.output_feature_layer = tf.keras.layers.TimeDistributed(dense_feature, name='outputs_feature')
+        self.output_feature_layer = tf.keras.layers.TimeDistributed(self.dense_feature_layer, name='outputs_feature')
         self.feature_pred_layer = tf.keras.layers.Multiply()
 
     def call(self, input_feature, target_feature):
