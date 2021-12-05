@@ -17,7 +17,7 @@ class CustomDKTLayer(tf.keras.layers.Layer):
         self.feature_pred_layer = tf.keras.layers.Multiply()
 
     def call(self, input_feature, target_feature):
-        mask_feature = self.mask_feature_layer(input_feature).compute_mask()
+        mask_feature = self.mask_feature_layer.compute_mask(input_feature)
         print(mask_feature)
         mask_target_feature = self.mask_feature_layer(target_feature)
         print(mask_target_feature)
