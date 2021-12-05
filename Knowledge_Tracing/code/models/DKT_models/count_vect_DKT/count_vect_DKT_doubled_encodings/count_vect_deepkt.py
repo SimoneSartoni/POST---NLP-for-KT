@@ -47,17 +47,17 @@ class clean_count_vect_DKTModel(tf.keras.Model):
     """
 
     def __init__(self, nb_encodings, hidden_units=100, dropout_rate=0.2):
-        input_feature = tf.keras.Input(shape=(None, nb_encodings), name='input_feature')
-        target_feature = tf.keras.Input(shape=(None, nb_encodings), name='target_feature')
+        input_encoding = tf.keras.Input(shape=(None, nb_encodings), name='input_encoding')
+        target_encoding = tf.keras.Input(shape=(None, nb_encodings), name='target_encoding')
 
         customDKTLayer = CustomDKTLayer(nb_encodings, hidden_units, dropout_rate)
-        feature_pred = customDKTLayer(input_feature, target_feature)
-        mask_pred = customDKTLayer.compute_mask(input_feature)
+        encoding_pred = customDKTLayer(input_encoding, target_encoding)
+        mask_pred = customDKTLayer.compute_mask(input_encoding)
         dense_class = tf.keras.layers.Dense(1, activation='sigmoid')
 
-        output_class = tf.keras.layers.TimeDistributed(dense_class, name='output_class')(inputs=feature_pred, mask=mask_pred)
+        output_class = tf.keras.layers.TimeDistributed(dense_class, name='output_class')(inputs=encoding_pred, mask=mask_pred)
 
-        super(clean_count_vect_DKTModel, self).__init__(inputs={"input_feature": input_feature, "target_feature": target_feature},
+        super(clean_count_vect_DKTModel, self).__init__(inputs={"input_encoding": input_encoding, "target_encoding": target_encoding},
                                        outputs=output_class,
                                        name="clean_count_vect_DKTModel")
 
