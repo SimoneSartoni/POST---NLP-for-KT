@@ -57,7 +57,7 @@ class clean_count_vect_DKTModel(tf.keras.Model):
 
         output_class = tf.keras.layers.TimeDistributed(dense_class, name='output_class')(inputs=encoding_pred, mask=mask_pred)
 
-        super(clean_count_vect_DKTModel, self).__init__(in7puts={"input_encoding": input_encoding, "target_encoding": target_encoding},
+        super(clean_count_vect_DKTModel, self).__init__(inputs={"input_encoding": input_encoding, "target_encoding": target_encoding},
                                        outputs=output_class,
                                        name="clean_count_vect_DKTModel")
 
