@@ -46,11 +46,11 @@ class clean_count_vect_DKTModel(tf.keras.Model):
             and what the model expects.
     """
 
-    def __init__(self, nb_features, hidden_units=100, dropout_rate=0.2):
-        input_feature = tf.keras.Input(shape=(None, nb_features), name='input_feature')
-        target_feature = tf.keras.Input(shape=(None, nb_features), name='target_feature')
+    def __init__(self, nb_encodings, hidden_units=100, dropout_rate=0.2):
+        input_feature = tf.keras.Input(shape=(None, nb_encodings), name='input_feature')
+        target_feature = tf.keras.Input(shape=(None, nb_encodings), name='target_feature')
 
-        customDKTLayer = CustomDKTLayer(nb_features, hidden_units, dropout_rate)
+        customDKTLayer = CustomDKTLayer(nb_encodings, hidden_units, dropout_rate)
         feature_pred = customDKTLayer(input_feature, target_feature)
         mask_pred = customDKTLayer.compute_mask(input_feature)
         dense_class = tf.keras.layers.Dense(1, activation='sigmoid')
