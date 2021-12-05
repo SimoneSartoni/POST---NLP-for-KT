@@ -1,4 +1,4 @@
-import tensorflow
+import tensorflow as tf
 from tensorflow.keras import Model, Input, layers, losses
 
 from Knowledge_Tracing.code.models.DKT_models.count_vect_DKT.count_vect_DKT_doubled_encodings.data_utils import get_target as NLP_get_target
