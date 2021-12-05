@@ -38,7 +38,7 @@ class CustomDKTLayer(tf.keras.layers.Layer):
         lstm_mask = self.lstm_layer.compute_mask(inputs=input_feature, mask=mask_feature)
         intermediate = self.output_feature_layer(lstm, lstm_mask)
         intermediate_mask = self.output_feature_layer.compute_mask(lstm, lstm_mask)
-        output_mask = self.output_feature_layer_2(intermediate, intermediate_mask)
+        output_mask = self.output_feature_layer_2.compute_mask(intermediate, intermediate_mask)
         return output_mask
 
 
