@@ -57,9 +57,9 @@ class clean_count_vect_DKTModel(tf.keras.Model):
 
         output_class = tf.keras.layers.TimeDistributed(dense_class, name='output_class')(inputs=feature_pred, mask=mask_pred)
 
-        super(DKTModel, self).__init__(inputs={"input_feature": input_feature, "target_feature": target_feature},
+        super(clean_count_vect_DKTModel, self).__init__(inputs={"input_feature": input_feature, "target_feature": target_feature},
                                        outputs=output_class,
-                                       name="DKTModel")
+                                       name="clean_count_vect_DKTModel")
 
     def compile(self, optimizer, metrics=None):
         """Configures the model for training.
