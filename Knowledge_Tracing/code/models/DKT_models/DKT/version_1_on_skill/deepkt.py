@@ -18,8 +18,11 @@ class CustomDKTLayer(tf.keras.layers.Layer):
 
     def call(self, input_feature, target_feature):
         mask_feature = self.mask_feature_layer(input_feature)
+        print(mask_feature)
         mask_target_feature = self.mask_feature_layer(target_feature)
+        print(mask_target_feature)
         lstm = self.lstm_layer(inputs=input_feature, mask=mask_feature)
+        print(lstm)
         output_feature = self.output_feature_layer(lstm)
         output = self.feature_pred_layer([output_feature, target_feature])
         return output
