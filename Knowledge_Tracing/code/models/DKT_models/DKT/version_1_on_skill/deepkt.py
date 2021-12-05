@@ -3,6 +3,36 @@ import tensorflow
 from Knowledge_Tracing.code.models.DKT_models.DKT.version_1_on_skill.data_utils import *
 
 
+class CustomDKTLayer(tf.keras.layers.Layer):
+    def __init__(self, nb_features, hidden_units=100, dropout_rate=0.2, **kwargs):
+        super(CustomDKTLayer, self).__init__(**kwargs)
+        self.nb_features = nb_features
+        self.hidden_units = hidden_units
+        self.mask_feature_layer = tf.keras.layers.Masking(mask_value=MASK_VALUE)
+
+        self.lstm_layer = tf.keras.layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)
+
+        self.dense_feature_layer = tf.keras.layers.Dense(nb_features, activation='sigmoid')
+        self.output_feature_layer = tf.keras.layers.TimeDistributed(dense_feature, name='outputs_feature')
+        self.feature_pred_layer = tf.keras.layers.Multiply()
+
+    def call(self, input_feature, target_feature):
+        mask_feature = self.mask_feature_layer(input_feature)
+        mask_target_feature = self.mask_feature_layer(target_feature)
+        lstm = self.lstm_layer(inputs=input_feature, mask=mask_feature)
+        output_feature = self.output_feature_layer(lstm)
+        output = self.feature_pred_layer([output_feature, target_feature])
+        return output
+
+    def compute_mask(self, inputs, mas=None):
+        mask_feature = self.mask_feature_layer(input_feature)
+        mask_target_feature = self.mask_feature_layer(target_feature)
+        lstm = self.lstm_layer(inputs=input_feature, mask=mask_feature)
+        lstm_mask = self.lstm_layer.compute_mask(inputs=input_feature, mask=mask_feature)
+        output_mask = self.output_feature_layer.compute_mask(lstm, lstm_mask)
+        return output_mask
+
+
 class DKTModel(tf.keras.Model):
     """ The Deep Knowledge Tracing model.
     Arguments in __init__:
@@ -19,17 +49,8 @@ class DKTModel(tf.keras.Model):
         input_feature = tf.keras.Input(shape=(None, nb_features), name='input_feature')
         target_feature = tf.keras.Input(shape=(None, nb_features), name='target_feature')
 
-        mask_feature = tf.keras.layers.Masking(mask_value=MASK_VALUE)(input_feature)
-        mask_target_feature = tf.keras.layers.Masking(mask_value=MASK_VALUE)(target_feature)
-
-        lstm = tf.keras.layers.LSTM(hidden_units,
-                                    return_sequences=True,
-                                    dropout=dropout_rate)(inputs=input_feature)
-
-        dense_feature = tf.keras.layers.Dense(nb_features, activation='sigmoid')
-        outputs_feature = tf.keras.layers.TimeDistributed(dense_feature, name='outputs_feature')(lstm)
-
-        feature_pred = tf.keras.layers.Multiply()([outputs_feature, mask_target_feature])
+        customDKTLayer = CustomDKTLayer(nb_features, hidden_units, dropout_rate)
+        feature_pred = customDKTLayer(input_feature, target_feature)
 
         dense_class = tf.keras.layers.Dense(1, activation='sigmoid')
 
@@ -58,7 +79,6 @@ class DKTModel(tf.keras.Model):
         """
 
         def custom_loss(y_true, y_pred):
-            y_true, y_pred = get_target(y_true, y_pred)
             return tf.keras.losses.binary_crossentropy(y_true, y_pred)
 
         super(DKTModel, self).compile(
