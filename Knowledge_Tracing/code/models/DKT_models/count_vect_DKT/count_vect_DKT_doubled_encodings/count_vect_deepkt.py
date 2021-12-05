@@ -2,11 +2,42 @@ import tensorflow
 from tensorflow.keras import Model, Input, layers, losses
 
 from Knowledge_Tracing.code.models.DKT_models.count_vect_DKT.count_vect_DKT_doubled_encodings.data_utils import get_target as NLP_get_target
+MASK_VALUE=-1.0
+
+class CustomDKTLayer(tf.keras.layers.Layer):
+    def __init__(self, encoding_depth, hidden_units=100, dropout_rate=0.2, **kwargs):
+        super(CustomDKTLayer, self).__init__(**kwargs)
+        self.nb_features = encoding_depth
+        self.hidden_units = hidden_units
+        self.mask_feature_layer = tf.keras.layers.Masking(mask_value=MASK_VALUE)
+
+        self.lstm_layer = tf.keras.layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)
+
+        self.dense_feature_layer = tf.keras.layers.Dense(encoding_depth, activation='sigmoid')
+        self.output_feature_layer = tf.keras.layers.TimeDistributed(self.dense_feature_layer, name='outputs_feature')
+        self.feature_pred_layer = tf.keras.layers.Multiply()
+
+    def call(self, input_feature, target_feature):
+        mask_feature = self.mask_feature_layer.compute_mask(input_feature)
+        print(mask_feature)
+        lstm = self.lstm_layer(inputs=input_feature, mask=mask_feature)
+        print(lstm)
+        output_feature = self.output_feature_layer(lstm)
+        output = self.feature_pred_layer([output_feature, target_feature])
+        return output
+
+    def compute_mask(self, input_feature):
+        mask_feature = self.mask_feature_layer.compute_mask(input_feature)
+        lstm = self.lstm_layer(inputs=input_feature, mask=mask_feature)
+        lstm_mask = self.lstm_layer.compute_mask(inputs=input_feature, mask=mask_feature)
+        output_mask = self.output_feature_layer.compute_mask(lstm, lstm_mask)
+        return output_mask
 
 
-class clean_count_vect_DKTModel(Model):
+class clean_count_vect_DKTModel(tf.keras.Model):
     """ The Deep Knowledge Tracing model.
     Arguments in __init__:
+        nb_features: The number of features in the input.
         nb_skills: The number of skills in the dataset.
         hidden_units: Positive integer. The number of units of the LSTM layer.
         dropout_rate: Float between 0 and 1. Fraction of the units to drop.
@@ -15,30 +46,20 @@ class clean_count_vect_DKTModel(Model):
             and what the model expects.
     """
 
-    def __init__(self, nb_encodings, hidden_units=100, dropout_rate=0.2):
-        input_encoding = Input(shape=[None, nb_encodings], name='input_encoding')
-        target_encoding = Input(shape=[None, nb_encodings], name='target_encoding')
-        mask_encoding = layers.Masking(mask_value=-1.0)(input_encoding)
-        mask_target_encoding = layers.Masking(mask_value=-1.0)(target_encoding)
+    def __init__(self, nb_features, hidden_units=100, dropout_rate=0.2):
+        input_feature = tf.keras.Input(shape=(None, nb_features), name='input_feature')
+        target_feature = tf.keras.Input(shape=(None, nb_features), name='target_feature')
 
-        mask = mask_encoding
-        lstm = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask)
+        customDKTLayer = CustomDKTLayer(nb_features, hidden_units, dropout_rate)
+        feature_pred = customDKTLayer(input_feature, target_feature)
+        mask_pred = customDKTLayer.compute_mask(input_feature)
+        dense_class = tf.keras.layers.Dense(1, activation='sigmoid')
 
-        dense_encoding = layers.Dense(nb_encodings, activation='sigmoid')
+        output_class = tf.keras.layers.TimeDistributed(dense_class, name='output_class')(inputs=feature_pred, mask=mask_pred)
 
-        output_encoding = layers.TimeDistributed(dense_encoding, name='output_encoding')(lstm)
-
-        encoding_pred = tensorflow.multiply(output_encoding, mask_target_encoding)
-
-        dense_class = layers.Dense(1, activation='sigmoid')
-
-        output_class = layers.TimeDistributed(dense_class, name='output_class')(encoding_pred)
-
-        super(clean_count_vect_DKTModel, self).__init__(inputs={"input_encoding": input_encoding,
-                                                                "target_encoding": target_encoding},
-                                                        outputs=output_class,
-                                                        name="DKT_count_vect_Model")
-        self.nb_encodings = nb_encodings
+        super(DKTModel, self).__init__(inputs={"input_feature": input_feature, "target_feature": target_feature},
+                                       outputs=output_class,
+                                       name="DKTModel")
 
     def compile(self, optimizer, metrics=None):
         """Configures the model for training.
