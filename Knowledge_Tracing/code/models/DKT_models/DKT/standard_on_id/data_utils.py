@@ -92,9 +92,5 @@ def get_target(y_true, y_pred):
     mask = 1. - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
     y_true = y_true * mask
     skills, y_true = tf.split(y_true, num_or_size_splits=[-1, 1], axis=-1)
-    print(y_true)
-    print(len(y_pred.numpy()[0]))
-    print(len(y_pred.numpy()[1]))
-    print(len(y_pred.numpy()[2]))
     y_pred = tf.reduce_sum(y_pred * skills, axis=-1, keepdims=True)
     return y_true, y_pred

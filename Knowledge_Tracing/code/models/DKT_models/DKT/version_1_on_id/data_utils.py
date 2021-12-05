@@ -100,8 +100,4 @@ def get_target(y_true, y_pred, nb_encodings=300):
     mask = 1. - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
     y_true = y_true * mask
     y_pred = y_pred * mask
-    count = tf.reduce_sum(tf.where(y_pred >= 0.5, 1.0, 0.0)) / tf.reduce_sum(tf.where(y_pred >= 0.0, 1.0, 0.0))
-    tf.print(count, output_stream=sys.stdout)
-    count = tf.reduce_sum(tf.where(y_pred >= 0.5, 1.0, 0.0)) / tf.reduce_sum(tf.where(y_pred >= 0.0, 1.0, 0.0))
-    tf.print(count, output_stream=sys.stdout)
     return y_true, y_pred
