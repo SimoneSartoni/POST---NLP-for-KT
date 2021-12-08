@@ -20,7 +20,7 @@ class count_vect_plus_skill_DKTModel(Model):
         input_label = Input(shape=[None, 1], name='input_labels')
         input_skill = Input(shape=[None, nb_skills], name='input_skills')
         target_encoding = Input(shape=[None, nb_encodings], name='target_encoding')
-        target_skill = Input(shape=[None, nb_encodings], name='target_encoding')
+        target_skill = Input(shape=[None, nb_encodings], name='target_skill')
 
         mask_encoding = layers.Masking(mask_value=-1.0)(input_encoding)
         mask_label = layers.Masking(mask_value=-1.0)(input_label)
