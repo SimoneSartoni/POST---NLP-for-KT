@@ -96,9 +96,9 @@ def load_dataset(batch_size=32, shuffle=True,
                                                                                 dictionary=dictionary)
     encoding_depth = train_gen.encoding_depth
 
-    train_loader = create_dataset(train_gen, encoding_depth, shuffle=shuffle, batch_size=batch_size)
-    val_loader = create_dataset(val_gen, encoding_depth, shuffle=shuffle, batch_size=batch_size)
-    test_loader = create_dataset(test_gen, encoding_depth, shuffle=shuffle, batch_size=batch_size)
+    train_loader = create_dataset(train_gen, encoding_depth, nb_skills, shuffle=shuffle, batch_size=batch_size)
+    val_loader = create_dataset(val_gen, encoding_depth, nb_skills, shuffle=shuffle, batch_size=batch_size)
+    test_loader = create_dataset(test_gen, encoding_depth, nb_skills, shuffle=shuffle, batch_size=batch_size)
 
     return train_loader, val_loader, test_loader, encoding_depth
 
