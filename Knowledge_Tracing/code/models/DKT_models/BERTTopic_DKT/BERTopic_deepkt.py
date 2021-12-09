@@ -4,9 +4,40 @@ from tensorflow.keras import Model, Input, layers, losses
 from Knowledge_Tracing.code.models.DKT_models.BERTTopic_DKT.data_utils import get_target as NLP_get_target
 
 
-class BERTopic_DKTModel(Model):
-    """ The sentence transformer Deep Knowledge Tracing model.
+class CustomDKTLayer(tf.keras.layers.Layer):
+    def __init__(self, encoding_depth, hidden_units=100, dropout_rate=0.2, **kwargs):
+        super(CustomDKTLayer, self).__init__(**kwargs)
+        self.nb_features = encoding_depth
+        self.hidden_units = hidden_units
+        self.mask_feature_layer = tf.keras.layers.Masking(mask_value=MASK_VALUE)
+
+        self.lstm_layer = tf.keras.layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)
+
+        self.dense_feature_layer = tf.keras.layers.Dense(encoding_depth, activation='sigmoid')
+        self.output_feature_layer = tf.keras.layers.TimeDistributed(self.dense_feature_layer, name='outputs_feature')
+        self.feature_pred_layer = tf.keras.layers.Multiply()
+
+    def call(self, input_feature, target_feature):
+        mask_feature = self.mask_feature_layer.compute_mask(input_feature)
+        print(mask_feature)
+        lstm = self.lstm_layer(inputs=input_feature, mask=mask_feature)
+        print(lstm)
+        output_feature = self.output_feature_layer(lstm)
+        output = self.feature_pred_layer([output_feature, target_feature])
+        return output
+
+    def compute_mask(self, input_feature):
+        mask_feature = self.mask_feature_layer.compute_mask(input_feature)
+        lstm = self.lstm_layer(inputs=input_feature, mask=mask_feature)
+        lstm_mask = self.lstm_layer.compute_mask(inputs=input_feature, mask=mask_feature)
+        output_mask = self.output_feature_layer.compute_mask(lstm, lstm_mask)
+        return output_mask
+
+
+class BERTopic_DKTModel(tf.keras.Model):
+    """ The Deep Knowledge Tracing model.
     Arguments in __init__:
+        nb_features: The number of features in the input.
         nb_skills: The number of skills in the dataset.
         hidden_units: Positive integer. The number of units of the LSTM layer.
         dropout_rate: Float between 0 and 1. Fraction of the units to drop.
@@ -16,29 +47,19 @@ class BERTopic_DKTModel(Model):
     """
 
     def __init__(self, nb_encodings, hidden_units=100, dropout_rate=0.2):
-        input_encoding = Input(shape=[None, nb_encodings], name='input_encoding')
-        target_encoding = Input(shape=[None, nb_encodings], name='target_encoding')
-        mask_encoding = layers.Masking(mask_value=-1.0)(input_encoding)
-        mask_target_encoding = layers.Masking(mask_value=-1.0)(target_encoding)
-
-        mask = mask_encoding
-        lstm = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask)
-
-        dense_encoding = layers.Dense(nb_encodings, activation='sigmoid')
-
-        output_encoding = layers.TimeDistributed(dense_encoding, name='output_encoding')(lstm)
-
-        encoding_pred = tensorflow.multiply(output_encoding, mask_target_encoding)
-
-        dense_class = layers.Dense(1, activation='sigmoid')
-
-        output_class = layers.TimeDistributed(dense_class, name='output_class')(encoding_pred)
-
-        super(BERTopic_DKTModel, self).__init__(inputs={"input_encoding": input_encoding,
-                                                                "target_encoding": target_encoding},
-                                                        outputs=output_class,
-                                                        name="DKT_BERTopics_Model")
+        input_encoding = tf.keras.Input(shape=(None, nb_encodings), name='input_encoding')
+        target_encoding = tf.keras.Input(shape=(None, nb_encodings), name='target_encoding')
         self.nb_encodings = nb_encodings
+        customDKTLayer = CustomDKTLayer(nb_encodings, hidden_units, dropout_rate)
+        encoding_pred = customDKTLayer(input_encoding, target_encoding)
+        mask_pred = customDKTLayer.compute_mask(input_encoding)
+        dense_class = tf.keras.layers.Dense(1, activation='sigmoid')
+
+        output_class = tf.keras.layers.TimeDistributed(dense_class, name='output_class')(inputs=encoding_pred, mask=mask_pred)
+
+        super(BERTopic_DKTModel, self).__init__(inputs={"input_encoding": input_encoding, "target_encoding": target_encoding},
+                                                outputs=output_class,
+                                                name="BERTopic_DKTModel")
 
     def compile(self, optimizer, metrics=None):
         """Configures the model for training.
@@ -138,15 +159,15 @@ class BERTopic_DKTModel(Model):
                 and what the model expects.
         """
         return super(BERTopic_DKTModel, self).fit(x=dataset,
-                                                          epochs=epochs,
-                                                          verbose=verbose,
-                                                          callbacks=callbacks,
-                                                          validation_data=validation_data,
-                                                          shuffle=shuffle,
-                                                          initial_epoch=initial_epoch,
-                                                          steps_per_epoch=steps_per_epoch,
-                                                          validation_steps=validation_steps,
-                                                          validation_freq=validation_freq)
+                                                  epochs=epochs,
+                                                  verbose=verbose,
+                                                  callbacks=callbacks,
+                                                  validation_data=validation_data,
+                                                  shuffle=shuffle,
+                                                  initial_epoch=initial_epoch,
+                                                  steps_per_epoch=steps_per_epoch,
+                                                  validation_steps=validation_steps,
+                                                  validation_freq=validation_freq)
 
     def custom_evaluate(self,
                         dataset,
@@ -179,9 +200,9 @@ class BERTopic_DKTModel(Model):
             ValueError: in case of invalid arguments.
         """
         return super(BERTopic_DKTModel, self).evaluate(dataset,
-                                                               verbose=verbose,
-                                                               steps=steps,
-                                                               callbacks=callbacks)
+                                                       verbose=verbose,
+                                                       steps=steps,
+                                                       callbacks=callbacks)
 
     def evaluate_generator(self, *args, **kwargs):
         raise SyntaxError("Not supported")
