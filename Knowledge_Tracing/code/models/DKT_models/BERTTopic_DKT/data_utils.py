@@ -10,7 +10,6 @@ from Knowledge_Tracing.code.data_processing.load_preprocessed.get_DKT_dataloader
 
 MASK_VALUE = -1.0  # The masking value cannot be zero.
 
-
 """
     possible_input_types = {"question_id": tf.float32, "text_id": tf.float32, "skill": tf.float32,
                             "label": tf.float32, "r_elapsed_time": tf.float32, "target_id": tf.float32,
@@ -55,6 +54,8 @@ def create_dataset(generator, encoding_depth, shuffle=True, batch_size=1024):
     dataset = dataset.padded_batch(
         batch_size=batch_size,
         padding_values=-1.0,
+        padded_shapes=(
+            {"input_encoding": [None, encoding_depth], "target_encoding": [None, encoding_depth]}, [None, 1]),
         drop_remainder=True
     )
     return dataset
@@ -77,13 +78,15 @@ def load_dataset(batch_size=32, shuffle=True,
     encode_model = BERTopic_model()
     encode_model.fit(text_df, save_filepath)
 
-    train_gen, val_gen, test_gen, nb_questions, nb_skills = get_DKT_dataloaders(batch_size, shuffle, interactions_filepath,
+    train_gen, val_gen, test_gen, nb_questions, nb_skills = get_DKT_dataloaders(batch_size, shuffle,
+                                                                                interactions_filepath,
                                                                                 output_filepath=save_filepath,
                                                                                 interaction_sequence_len=interaction_sequence_len
                                                                                 , min_seq_len=min_seq_len,
                                                                                 text_encoding_model=encode_model,
                                                                                 negative_correctness=False,
-                                                                                inputs_dict=inputs, outputs_dict=outputs,
+                                                                                inputs_dict=inputs,
+                                                                                outputs_dict=outputs,
                                                                                 encode_correct_in_encodings=True,
                                                                                 encode_correct_in_skills=False,
                                                                                 dictionary=dictionary)
