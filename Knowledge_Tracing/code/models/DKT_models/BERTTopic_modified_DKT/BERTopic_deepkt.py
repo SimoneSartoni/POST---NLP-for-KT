@@ -1,14 +1,13 @@
 import tensorflow as tf
 from tensorflow.keras import Model, Input, layers, losses
 
-from Knowledge_Tracing.code.models.DKT_models.BERTTopic_DKT.data_utils import get_target as NLP_get_target
+from Knowledge_Tracing.code.models.DKT_models.BERTTopic_modified_DKT.data_utils import get_target as NLP_get_target
 MASK_VALUE = -1.0
 
 
 class CustomDKTLayer(tf.keras.layers.Layer):
     def __init__(self, encoding_depth, hidden_units=100, dropout_rate=0.2, **kwargs):
         super(CustomDKTLayer, self).__init__(**kwargs)
-
 
     def call(self, input_feature, target_feature):
         mask_feature = self.mask_feature_layer.compute_mask(input_feature)
