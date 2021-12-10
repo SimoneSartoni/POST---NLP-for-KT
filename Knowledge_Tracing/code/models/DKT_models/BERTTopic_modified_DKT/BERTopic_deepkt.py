@@ -40,7 +40,7 @@ class BERTopic_DKTModel(tf.keras.Model):
         print(final_memory_state)
         encoding_pred = output_feature_layer(lstm_output)
         multiply_output = multiply_target_layer([encoding_pred, masked_target])
-        output_class = output_class_layer(inputs=multiply_output)
+        output_class = output_class_layer(multiply_output)
 
         super(BERTopic_DKTModel, self).__init__(inputs={"input_encoding": input_encoding, "target_encoding": target_encoding},
                                                 outputs=output_class,
