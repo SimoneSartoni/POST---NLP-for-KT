@@ -66,12 +66,8 @@ class BERTopic_DKTModel(tf.keras.Model):
                 `optimizer` or `metrics`.
         """
 
-        def custom_loss(y_true, y_pred):
-            y_true, y_pred = NLP_get_target(y_true, y_pred, nb_encodings=self.nb_encodings)
-            return losses.binary_crossentropy(y_true, y_pred)
-
         super(BERTopic_DKTModel, self).compile(
-              loss=custom_loss,
+              loss=losses.binary_crossentropy,
               optimizer=optimizer,
               metrics=metrics,
               experimental_run_tf_function=False)
