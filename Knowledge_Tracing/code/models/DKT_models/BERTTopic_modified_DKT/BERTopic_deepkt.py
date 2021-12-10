@@ -5,30 +5,6 @@ from Knowledge_Tracing.code.models.DKT_models.BERTTopic_modified_DKT.data_utils 
 MASK_VALUE = -1.0
 
 
-class CustomDKTLayer(tf.keras.layers.Layer):
-    def __init__(self, encoding_depth, hidden_units=100, dropout_rate=0.2, **kwargs):
-        super(CustomDKTLayer, self).__init__(**kwargs)
-
-    def call(self, input_feature, target_feature):
-        mask_feature = self.mask_feature_layer.compute_mask(input_feature)
-        print("mask:")
-        print(mask_feature)
-        print("masking layer output:")
-        print(self.mask_feature_layer(input_feature))
-        lstm = self.lstm_layer(inputs=input_feature, mask=mask_feature)
-        print(lstm)
-        output_feature = self.output_feature_layer(lstm)
-        output = self.feature_pred_layer([output_feature, target_feature])
-        return output
-
-    def compute_mask(self, input_feature):
-        mask_feature = self.mask_feature_layer.compute_mask(input_feature)
-        lstm = self.lstm_layer(inputs=input_feature, mask=mask_feature)
-        lstm_mask = self.lstm_layer.compute_mask(inputs=input_feature, mask=mask_feature)
-        output_mask = self.output_feature_layer.compute_mask(lstm, lstm_mask)
-        return output_mask
-
-
 class BERTopic_DKTModel(tf.keras.Model):
     """ The Deep Knowledge Tracing model.
     Arguments in __init__:
@@ -44,34 +20,35 @@ class BERTopic_DKTModel(tf.keras.Model):
     def __init__(self, nb_encodings, hidden_units=100, dropout_rate=0.2):
         input_encoding = tf.keras.Input(shape=(None, nb_encodings), name='input_encoding')
         target_encoding = tf.keras.Input(shape=(None, nb_encodings), name='target_encoding')
-        self.nb_encodings = nb_encodings
-        self.hidden_units = hidden_units
-        self.mask_feature_layer = tf.keras.layers.Masking(mask_value=MASK_VALUE, input_shape=(None, nb_encodings))
-        self.lstm_layer = tf.keras.layers.LSTM(hidden_units, return_sequences=True, return_state=True, dropout=dropout_rate)
-        self.dense_feature_layer = tf.keras.layers.Dense(nb_encodings, activation='sigmoid')
-        self.output_feature_layer = tf.keras.layers.TimeDistributed(self.dense_feature_layer, name='outputs_feature')
-        self.multiply_target_layer = tf.keras.layers.Multiply()
-        self.dense_feature_layer = tf.keras.layers.Dense(nb_encodings, activation='sigmoid')
-        self.dense_class_layer = tf.keras.layers.Dense(1, activation='sigmoid')
-        self.output_class_layer = tf.keras.layers.TimeDistributed(self.dense_class_layer, name='output_class')
+
+        mask_feature_layer = tf.keras.layers.Masking(mask_value=MASK_VALUE, input_shape=(None, nb_encodings))
+        lstm_layer = tf.keras.layers.LSTM(hidden_units, return_sequences=True, return_state=True, dropout=dropout_rate)
+        dense_feature_layer = tf.keras.layers.Dense(nb_encodings, activation='sigmoid')
+        output_feature_layer = tf.keras.layers.TimeDistributed(dense_feature_layer, name='outputs_feature')
+        multiply_target_layer = tf.keras.layers.Multiply()
+        dense_feature_layer = tf.keras.layers.Dense(nb_encodings, activation='sigmoid')
+        dense_class_layer = tf.keras.layers.Dense(1, activation='sigmoid')
+        output_class_layer = tf.keras.layers.TimeDistributed(dense_class_layer, name='output_class')
         print("input:")
         print(input_encoding)
-        masked_target = self.mask_feature_layer(target_encoding)
-        masked_input = self.mask_feature_layer(input_encoding)
+        masked_target = mask_feature_layer(target_encoding)
+        masked_input =  mask_feature_layer(input_encoding)
         print("mask output:")
         print(masked_input)
-        lstm_output, final_memory_state, final_carry_state = self.lstm_layer(masked_input)
+        lstm_output, final_memory_state, final_carry_state = lstm_layer(masked_input)
         print("lstm output")
         print(lstm_output)
         print(final_memory_state)
-        encoding_pred = self.dense_feature_layer(lstm_output)
-        multiply_output = self.multiply_target_layer([encoding_pred, masked_target])
-
-        output_class = self.output_class_layer(inputs=encoding_pred)
+        encoding_pred = output_feature_layer(lstm_output)
+        mask_function = lambda inputs, previous_mask: previous_mask
+        multiply_output = multiply_target_layer([encoding_pred, masked_target], mask=mask_function)
+        output_class = output_class_layer(inputs=multiply_output)
 
         super(BERTopic_DKTModel, self).__init__(inputs={"input_encoding": input_encoding, "target_encoding": target_encoding},
                                                 outputs=output_class,
                                                 name="BERTopic_DKTModel")
+        self.nb_encodings = nb_encodings
+        self.hidden_units = hidden_units
 
     def compile(self, optimizer, metrics=None):
         """Configures the model for training.
