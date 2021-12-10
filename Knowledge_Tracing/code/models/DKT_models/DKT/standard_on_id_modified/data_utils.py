@@ -88,7 +88,9 @@ def load_dataset(batch_size=32, shuffle=True,
 
 def get_target(y_true, y_pred):
     # Get skills and labels from y_true
+
+    mask = 1. - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
+    y_true = y_true * mask
     skills, y_true = tf.split(y_true, num_or_size_splits=[-1, 1], axis=-1)
-    print(y_pred)
     y_pred = tf.reduce_sum(y_pred * skills, axis=-1, keepdims=True)
     return y_true, y_pred
