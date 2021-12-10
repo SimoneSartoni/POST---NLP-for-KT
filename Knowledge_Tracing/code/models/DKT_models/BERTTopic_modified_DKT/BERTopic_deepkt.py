@@ -26,7 +26,6 @@ class BERTopic_DKTModel(tf.keras.Model):
         dense_feature_layer = tf.keras.layers.Dense(nb_encodings, activation='sigmoid')
         output_feature_layer = tf.keras.layers.TimeDistributed(dense_feature_layer, name='outputs_feature')
         multiply_target_layer = tf.keras.layers.Multiply()
-        dense_feature_layer = tf.keras.layers.Dense(nb_encodings, activation='sigmoid')
         dense_class_layer = tf.keras.layers.Dense(1, activation='sigmoid')
         output_class_layer = tf.keras.layers.TimeDistributed(dense_class_layer, name='output_class')
         print("input:")
