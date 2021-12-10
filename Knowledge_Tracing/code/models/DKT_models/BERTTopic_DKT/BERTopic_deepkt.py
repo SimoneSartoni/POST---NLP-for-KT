@@ -10,7 +10,7 @@ class CustomDKTLayer(tf.keras.layers.Layer):
         super(CustomDKTLayer, self).__init__(**kwargs)
         self.nb_features = encoding_depth
         self.hidden_units = hidden_units
-        self.mask_feature_layer = tf.keras.layers.Masking(mask_value=MASK_VALUE)
+        self.mask_feature_layer = tf.keras.layers.Masking(mask_value=MASK_VALUE, input_shape=(None, encoding_depth))
 
         self.lstm_layer = tf.keras.layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)
 
@@ -20,7 +20,10 @@ class CustomDKTLayer(tf.keras.layers.Layer):
 
     def call(self, input_feature, target_feature):
         mask_feature = self.mask_feature_layer.compute_mask(input_feature)
+        print("mask:")
         print(mask_feature)
+        print("masking layer output:")
+        print(self.mask_feature_layer(input_feature))
         lstm = self.lstm_layer(inputs=input_feature, mask=mask_feature)
         print(lstm)
         output_feature = self.output_feature_layer(lstm)
