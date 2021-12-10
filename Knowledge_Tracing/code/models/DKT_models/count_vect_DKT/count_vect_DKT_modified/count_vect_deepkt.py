@@ -1,11 +1,10 @@
 import tensorflow as tf
 from tensorflow.keras import Model, Input, layers, losses
 
-from Knowledge_Tracing.code.models.DKT_models.BERTTopic_modified_DKT.data_utils import get_target as NLP_get_target
-MASK_VALUE = -1.0
+from Knowledge_Tracing.code.models.DKT_models.count_vect_DKT.count_vect_DKT_doubled_encodings.data_utils import get_target as NLP_get_target
+MASK_VALUE=-1.0
 
-
-class BERTopic_DKTModel(tf.keras.Model):
+class clean_count_vect_DKTModel(tf.keras.Model):
     """ The Deep Knowledge Tracing model.
     Arguments in __init__:
         nb_features: The number of features in the input.
@@ -42,9 +41,9 @@ class BERTopic_DKTModel(tf.keras.Model):
         multiply_output = multiply_target_layer([encoding_pred, masked_target])
         output_class = output_class_layer(multiply_output)
 
-        super(BERTopic_DKTModel, self).__init__(inputs={"input_encoding": input_encoding, "target_encoding": target_encoding},
+        super(clean_count_vect_DKTModel, self).__init__(inputs={"input_encoding": input_encoding, "target_encoding": target_encoding},
                                                 outputs=output_class,
-                                                name="BERTopic_DKTModel")
+                                                name="clean_count_vect_DKTModel")
         self.nb_encodings = nb_encodings
         self.hidden_units = hidden_units
 
@@ -70,7 +69,7 @@ class BERTopic_DKTModel(tf.keras.Model):
             y_true, y_pred = NLP_get_target(y_true, y_pred, nb_encodings=self.nb_encodings)
             return losses.binary_crossentropy(y_true, y_pred)
 
-        super(BERTopic_DKTModel, self).compile(
+        super(clean_count_vect_DKTModel, self).compile(
               loss=custom_loss,
               optimizer=optimizer,
               metrics=metrics,
@@ -145,16 +144,16 @@ class BERTopic_DKTModel(tf.keras.Model):
             ValueError: In case of mismatch between the provided input data
                 and what the model expects.
         """
-        return super(BERTopic_DKTModel, self).fit(x=dataset,
-                                                  epochs=epochs,
-                                                  verbose=verbose,
-                                                  callbacks=callbacks,
-                                                  validation_data=validation_data,
-                                                  shuffle=shuffle,
-                                                  initial_epoch=initial_epoch,
-                                                  steps_per_epoch=steps_per_epoch,
-                                                  validation_steps=validation_steps,
-                                                  validation_freq=validation_freq)
+        return super(clean_count_vect_DKTModel, self).fit(x=dataset,
+                                                          epochs=epochs,
+                                                          verbose=verbose,
+                                                          callbacks=callbacks,
+                                                          validation_data=validation_data,
+                                                          shuffle=shuffle,
+                                                          initial_epoch=initial_epoch,
+                                                          steps_per_epoch=steps_per_epoch,
+                                                          validation_steps=validation_steps,
+                                                          validation_freq=validation_freq)
 
     def custom_evaluate(self,
                         dataset,
@@ -186,10 +185,10 @@ class BERTopic_DKTModel(tf.keras.Model):
         Raises:
             ValueError: in case of invalid arguments.
         """
-        return super(BERTopic_DKTModel, self).evaluate(dataset,
-                                                       verbose=verbose,
-                                                       steps=steps,
-                                                       callbacks=callbacks)
+        return super(clean_count_vect_DKTModel, self).evaluate(dataset,
+                                                               verbose=verbose,
+                                                               steps=steps,
+                                                               callbacks=callbacks)
 
     def evaluate_generator(self, *args, **kwargs):
         raise SyntaxError("Not supported")
