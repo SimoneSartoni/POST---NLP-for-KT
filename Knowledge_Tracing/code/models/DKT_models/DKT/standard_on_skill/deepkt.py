@@ -30,7 +30,7 @@ class DKTModel(tf.keras.Model):
         outputs = tf.keras.layers.Multiply()([skill_pred, mask_target_skill])
         outputs = CumSumLayer()(outputs)
 
-        super(DKTModel, self).__init__(inputs={"input_feature": input_feature},
+        super(DKTModel, self).__init__(inputs={"input_feature": input_feature, "target_skill": target_skill},
                                        outputs=outputs,
                                        name="DKTModel")
 

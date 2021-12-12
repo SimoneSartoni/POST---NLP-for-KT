@@ -16,7 +16,7 @@ class DKTModel(tf.keras.Model):
 
     def __init__(self, id_depth, nb_questions, hidden_units=100, dropout_rate=0.2):
         input_feature_id = tf.keras.Input(shape=(None, id_depth), name='input_feature')
-        target_feature_id = tf.keras.Input(shape=(None, nb_questions), name='target_encoding')
+        target_feature_id = tf.keras.Input(shape=(None, nb_questions), name='target_id')
 
         mask_feature = tf.keras.layers.Masking(mask_value=MASK_VALUE)(input_feature_id)
         mask_target_feature = tf.keras.layers.Masking(mask_value=MASK_VALUE)(target_feature_id)
@@ -26,8 +26,8 @@ class DKTModel(tf.keras.Model):
                                     dropout=dropout_rate)(mask_feature)
 
         dense_ids = tf.keras.layers.Dense(nb_questions, activation='relu')
-        feature_id_pred_1 = tf.keras.layers.TimeDistributed(dense_ids, name='outputs')(lstm)
-        feature_id_pred_2 = tf.keras.layers.TimeDistributed(dense_ids, name='outputs')(feature_id_pred_1)
+        feature_id_pred_1 = tf.keras.layers.TimeDistributed(dense_ids, name='outputs_1')(lstm)
+        feature_id_pred_2 = tf.keras.layers.TimeDistributed(dense_ids, name='outputs_2')(feature_id_pred_1)
         outputs = tf.keras.layers.Multiply()([feature_id_pred_2, mask_target_feature])
         outputs = CumSumLayer()(outputs)
         super(DKTModel, self).__init__(inputs={"input_feature_id": input_feature_id, "target_id": target_feature_id},
