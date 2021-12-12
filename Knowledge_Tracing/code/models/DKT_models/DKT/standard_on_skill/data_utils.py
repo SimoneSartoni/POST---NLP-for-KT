@@ -27,7 +27,7 @@ def create_dataset(generator, features_depth, skill_depth, shuffle=True, batch_s
     print(dataset)
     dataset = dataset.map(
         lambda inputs, outputs: (
-            {"input_feature": inputs['feature'], "target_skill": tf.one_hot(outputs['target_skill'], depth=skill_depth)},
+            {"input_feature": inputs['feature'], "target_skill": tf.one_hot(inputs['target_skill'], depth=skill_depth)},
             tf.expand_dims(outputs['target_label'], -1)
         )
     )
