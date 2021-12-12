@@ -8,6 +8,7 @@ from Knowledge_Tracing.code.data_processing.load_preprocessed.load_preprocessed_
     load_preprocessed_interactions
 import sys
 
+
 def create_dataset(generator, ids_depth, nb_questions, shuffle=True, batch_size=1024):
     input_types = {"feature_id": tf.float32}
     output_types = {"target_label": tf.float32, "target_id": tf.int32}
@@ -66,17 +67,17 @@ def load_dataset(batch_size=32, shuffle=True,
                "target_feature": False, "target_feature_id": False, "target_feature_id": False}
 
     train_gen, val_gen, test_gen, \
-        nb_questions, nb_skills = get_DKT_dataloaders(batch_size, shuffle, interactions_filepath,
-                                                      output_filepath=save_filepath,
-                                                      interaction_sequence_len=interaction_sequence_len
-                                                      , min_seq_len=min_seq_len,
-                                                      text_encoding_model=None,
-                                                      negative_correctness=False,
-                                                      inputs_dict=inputs, outputs_dict=outputs,
-                                                      encode_correct_in_encodings=False,
-                                                      encode_correct_in_skills=False,
-                                                      encode_correct_in_id=True,
-                                                      dictionary=dictionary)
+    nb_questions, nb_skills = get_DKT_dataloaders(batch_size, shuffle, interactions_filepath,
+                                                  output_filepath=save_filepath,
+                                                  interaction_sequence_len=interaction_sequence_len
+                                                  , min_seq_len=min_seq_len,
+                                                  text_encoding_model=None,
+                                                  negative_correctness=False,
+                                                  inputs_dict=inputs, outputs_dict=outputs,
+                                                  encode_correct_in_encodings=False,
+                                                  encode_correct_in_skills=False,
+                                                  encode_correct_in_id=True,
+                                                  dictionary=dictionary)
 
     ids_depth = 2 * nb_questions
     train_loader = create_dataset(train_gen, ids_depth, nb_questions, shuffle=shuffle, batch_size=batch_size)
@@ -89,8 +90,8 @@ def load_dataset(batch_size=32, shuffle=True,
 def get_target(y_true, y_pred):
     # Get skills and labels from y_true
 
-    #mask = 1. - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
-    #y_true = y_true * mask
+    # mask = 1. - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
+    # y_true = y_true * mask
     skills, y_true = tf.split(y_true, num_or_size_splits=[-1, 1], axis=-1)
     y_pred = tf.reduce_sum(y_pred * skills, axis=-1, keepdims=True)
     return y_true, y_pred
