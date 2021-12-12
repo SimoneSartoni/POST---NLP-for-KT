@@ -26,7 +26,7 @@ class DKTModel(tf.keras.Model):
                                     dropout=dropout_rate)(mask_feature)
 
         dense_ids_1 = tf.keras.layers.Dense(nb_questions, activation='relu')
-        dense_ids_2 = tf.keras.layers.Dense(nb_questions, activation='relu')
+        dense_ids_2 = tf.keras.layers.Dense(nb_questions, activation='sigmoid')
         feature_id_pred_1 = tf.keras.layers.TimeDistributed(dense_ids_1, name='outputs_1')(lstm)
         feature_id_pred_2 = tf.keras.layers.TimeDistributed(dense_ids_2, name='outputs_2')(feature_id_pred_1)
         outputs = tf.keras.layers.Multiply()([feature_id_pred_2, mask_target_feature])
