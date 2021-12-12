@@ -15,7 +15,7 @@ class DKTModel(tf.keras.Model):
 
     def __init__(self, id_depth, nb_questions, hidden_units=100, dropout_rate=0.2):
         input_feature_id = tf.keras.Input(shape=(None, id_depth), name='input_feature')
-        target_feature_id = tf.keras.Input(shape=(None, id_depth), name='target_encoding')
+        target_feature_id = tf.keras.Input(shape=(None, nb_questions), name='target_encoding')
 
         mask_feature = tf.keras.layers.Masking(mask_value=MASK_VALUE)(input_feature_id)
         mask_target_feature = tf.keras.layers.Masking(mask_value=MASK_VALUE)(target_feature_id)
