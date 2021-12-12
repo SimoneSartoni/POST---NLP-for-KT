@@ -4,16 +4,14 @@ from sklearn.model_selection import train_test_split
 from Knowledge_Tracing.code.data_processing.load_preprocessed.get_DKT_dataloaders import get_DKT_dataloaders
 
 MASK_VALUE = -1.  # The masking value cannot be zero.
-from Knowledge_Tracing.code.data_processing.load_preprocessed.load_preprocessed_data import load_preprocessed_texts, \
-    load_preprocessed_interactions
-import sys
+
 
 def create_dataset(generator, features_depth, skill_depth, shuffle=True, batch_size=1024):
-    input_types = {"feature": tf.float32}
-    output_types = {"target_label": tf.float32, "target_skill": tf.int32}
+    input_types = {"feature": tf.float32, "target_skill": tf.int32}
+    output_types = {"target_label": tf.float32}
 
-    input_shapes = {"feature": [None, features_depth], }
-    output_shapes = {"target_label": [None], "target_skill": [None]}
+    input_shapes = {"feature": [None, features_depth],  "target_skill": [None]}
+    output_shapes = {"target_label": [None]}
     types = (input_types, output_types)
     shapes = (input_shapes, output_shapes)
     dataset = tf.data.Dataset.from_generator(
@@ -29,14 +27,8 @@ def create_dataset(generator, features_depth, skill_depth, shuffle=True, batch_s
     print(dataset)
     dataset = dataset.map(
         lambda inputs, outputs: (
-            {"input_feature": inputs['feature']},
-            tf.concat(
-                values=[
-                    tf.one_hot(outputs['target_skill'], depth=skill_depth),
-                    tf.expand_dims(outputs['target_label'], -1)
-                ],
-                axis=-1
-            )
+            {"input_feature": inputs['feature'], "target_skill": tf.one_hot(outputs['target_skill'], depth=skill_depth)},
+            tf.expand_dims(outputs['target_label'], -1)
         )
     )
 
@@ -44,8 +36,8 @@ def create_dataset(generator, features_depth, skill_depth, shuffle=True, batch_s
 
     dataset = dataset.padded_batch(
         batch_size=batch_size,
-        padded_shapes=({"input_feature": [None, None]}, [None, None]),
-        padding_values=({"input_feature": MASK_VALUE}, MASK_VALUE),
+        padded_shapes=({"input_feature": [None, features_depth], "target_skill": [None, skill_depth]}, [None, 1]),
+        padding_values=({"input_feature": MASK_VALUE, "target_skill": MASK_VALUE}, MASK_VALUE),
         drop_remainder=True
     )
     return dataset
