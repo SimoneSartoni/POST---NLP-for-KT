@@ -26,7 +26,7 @@ class DKTModel(tf.keras.Model):
 
         dense_ids = tf.keras.layers.Dense(nb_questions, activation='sigmoid')
         feature_id_pred = tf.keras.layers.TimeDistributed(dense_ids, name='outputs')(lstm)
-        outputs = tf.keras.layers.Multiply()[feature_id_pred, mask_target_feature]
+        outputs = tf.keras.layers.Multiply()([feature_id_pred, mask_target_feature])
         super(DKTModel, self).__init__(inputs={"input_feature_id": input_feature_id, "target_id": target_feature_id},
                                        outputs=outputs,
                                        name="DKTModel")
