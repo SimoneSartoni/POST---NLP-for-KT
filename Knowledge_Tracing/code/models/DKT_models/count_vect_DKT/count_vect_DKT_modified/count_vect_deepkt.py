@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras import Model, Input, layers, losses
 
-from Knowledge_Tracing.code.models.DKT_models.count_vect_DKT.count_vect_DKT_doubled_encodings.data_utils import get_target as NLP_get_target
+from Knowledge_Tracing.code.models.DKT_models.count_vect_DKT.count_vect_DKT_modified.data_utils import get_target as NLP_get_target
 MASK_VALUE=-1.0
 
 
@@ -41,6 +41,8 @@ class clean_count_vect_DKTModel(tf.keras.Model):
         # intermediate_feature_layer = tf.keras.layers.TimeDistributed(intermediate_feature_layer, name='intermediate_feature_layer')
         dense_feature_layer = tf.keras.layers.Dense(nb_encodings, activation='relu')
         output_feature_layer = tf.keras.layers.TimeDistributed(dense_feature_layer, name='outputs_feature')
+        dense_feature_layer_2 = tf.keras.layers.Dense(nb_encodings//2, activation='relu')
+        output_feature_layer_2 = tf.keras.layers.TimeDistributed(dense_feature_layer_2, name='outputs_feature')
         multiply_target_layer = tf.keras.layers.Multiply()
         dense_class_layer = tf.keras.layers.Dense(1, activation='sigmoid')
         output_class_layer = tf.keras.layers.TimeDistributed(dense_class_layer, name='output_class')
@@ -58,7 +60,7 @@ class clean_count_vect_DKTModel(tf.keras.Model):
         # intermediate_pred = intermediate_feature_layer(lstm_output)
         encoding_pred = output_feature_layer(lstm_output)
         multiply_output = multiply_target_layer([encoding_pred, masked_target])
-        output = CumSumLayer()(multiply_output)
+        output = output_feature_layer_2(multiply_output)
         output_class = output_class_layer(output)
 
         super(clean_count_vect_DKTModel, self).__init__(inputs={"input_encoding": input_encoding, "target_encoding": target_encoding},
@@ -86,7 +88,6 @@ class clean_count_vect_DKTModel(tf.keras.Model):
         """
 
         def custom_loss(y_true, y_pred):
-            y_true, y_pred = NLP_get_target(y_true, y_pred, nb_encodings=self.nb_encodings)
             return losses.binary_crossentropy(y_true, y_pred)
 
         super(clean_count_vect_DKTModel, self).compile(
