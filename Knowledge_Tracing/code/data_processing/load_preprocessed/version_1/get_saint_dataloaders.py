@@ -9,7 +9,8 @@ from Knowledge_Tracing.code.data_processing.preprocess.group_interactions_by_use
 from Knowledge_Tracing.code.data_processing.load_preprocessed.SAINT_dataset import *
 
 
-def get_saint_dataloaders(interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
+def get_saint_dataloaders(batch_size=128,
+                          interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
                                        ".csv", texts_filepath='../input/', output_filepath='/kaggle/working/',
                           interaction_sequence_len=25, min_seq_len=5, text_encoding_model=None,
                           negative_correctness=False, encode_correct_in_encodings=True, dictionary=None):
@@ -51,19 +52,19 @@ def get_saint_dataloaders(interactions_filepath="../input/assistmentds-2012/2012
                                  decoder_inputs_dict=decoder_inputs_dict, outputs_dict=outputs_dict)
     encoding_depth = train_dataset.encoding_depth
     train_loader = DataLoader(train_dataset,
-                              batch_size=config.BATCH_SIZE,
+                              batch_size=batch_size,
                               num_workers=2,
                               shuffle=True)
     del train_dataset
     gc.collect()
     val_loader = DataLoader(val_dataset,
-                            batch_size=config.BATCH_SIZE,
+                            batch_size=batch_size,
                             num_workers=2,
                             shuffle=False)
     del val_dataset
     gc.collect()
     test_loader = DataLoader(test_dataset,
-                             batch_size=config.BATCH_SIZE,
+                             batch_size=batch_size,
                              num_workers=2,
                              shuffle=False)
     del test_dataset
