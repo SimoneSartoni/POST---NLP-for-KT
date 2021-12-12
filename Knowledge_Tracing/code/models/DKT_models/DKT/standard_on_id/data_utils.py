@@ -9,11 +9,11 @@ from Knowledge_Tracing.code.data_processing.load_preprocessed.load_preprocessed_
 import sys
 
 def create_dataset(generator, ids_depth, nb_questions, shuffle=True, batch_size=1024):
-    input_types = {"feature_id": tf.float32}
-    output_types = {"target_label": tf.float32, "target_id": tf.int32}
+    input_types = {"feature_id": tf.float32, "target_id": tf.int32}
+    output_types = {"target_label": tf.float32}
 
-    input_shapes = {"feature_id": [None, ids_depth]}
-    output_shapes = {"target_label": [None], "target_id": [None]}
+    input_shapes = {"feature_id": [None, ids_depth], "target_id": [None]}
+    output_shapes = {"target_label": [None]}
     types = (input_types, output_types)
     shapes = (input_shapes, output_shapes)
     dataset = tf.data.Dataset.from_generator(
@@ -29,14 +29,9 @@ def create_dataset(generator, ids_depth, nb_questions, shuffle=True, batch_size=
     print(dataset)
     dataset = dataset.map(
         lambda inputs, outputs: (
-            {"input_feature_id": inputs['feature_id']},
-            tf.concat(
-                values=[
-                    tf.one_hot(outputs['target_id'], depth=nb_questions),
-                    tf.expand_dims(outputs['target_label'], -1)
-                ],
-                axis=-1
-            )
+            {"input_feature_id": inputs['feature_id'], "target_id": tf.one_hot(inputs['target_id'], depth=nb_questions)
+             },
+            tf.expand_dims(outputs['target_label'], -1)
         )
     )
 
@@ -45,8 +40,8 @@ def create_dataset(generator, ids_depth, nb_questions, shuffle=True, batch_size=
     # Step 7 - Pad sequences per batch
     dataset = dataset.padded_batch(
         batch_size=batch_size,
-        padded_shapes=({"input_feature_id": [None, ids_depth]}, [None, nb_questions+1]),
-        padding_values=({"input_feature_id": MASK_VALUE}, MASK_VALUE),
+        padded_shapes=({"input_feature_id": [None, ids_depth], "target_id": [None, nb_questions]}, [None, 1]),
+        padding_values=({"input_feature_id": MASK_VALUE, "target_id":MASK_VALUE}, MASK_VALUE),
         drop_remainder=True
     )
     return dataset
@@ -57,11 +52,11 @@ def load_dataset(batch_size=32, shuffle=True,
                  save_filepath='/kaggle/working/', texts_filepath='../input/',
                  interaction_sequence_len=30, min_seq_len=5, dictionary=None):
     inputs = {"question_id": False, "text_id": False, "skill": False, "feature_id": True,
-              "label": False, "r_elapsed_time": False, 'text_encoding': False, "target_id": False, "feature": False,
+              "label": False, "r_elapsed_time": False, 'text_encoding': False, "target_id": True, "feature": False,
               "target_text_id": False, "target_skill": False, 'target_label': False, 'target_text_encoding': False,
               "target_feature": False, "target_feature_id": False}
     outputs = {"question_id": False, "text_id": False, "skill": False, "feature_id": False,
-               "label": False, "r_elapsed_time": False, 'text_encoding': False, "target_id": True, "feature": False,
+               "label": False, "r_elapsed_time": False, 'text_encoding': False, "target_id": False, "feature": False,
                "target_text_id": False, "target_skill": False, 'target_label': True, 'target_text_encoding': False,
                "target_feature": False, "target_feature_id": False, "target_feature_id": False}
 
@@ -84,11 +79,3 @@ def load_dataset(batch_size=32, shuffle=True,
     test_loader = create_dataset(test_gen, ids_depth, nb_questions, shuffle=shuffle, batch_size=batch_size)
 
     return train_loader, val_loader, test_loader, ids_depth, nb_questions
-
-
-def get_target(y_true, y_pred):
-    # Get skills and labels from y_true
-    skills, y_true = tf.split(y_true, num_or_size_splits=[-1, 1], axis=-1)
-    print(y_pred)
-    y_pred = tf.reduce_sum(y_pred * skills, axis=-1, keepdims=True)
-    return y_true, y_pred

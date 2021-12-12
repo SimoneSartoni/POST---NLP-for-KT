@@ -23,6 +23,8 @@ class DKTModel(tf.keras.Model):
                                     dropout=dropout_rate)(mask_feature)
 
         dense_skill = tf.keras.layers.Dense(nb_questions, activation='sigmoid')
+
+        outputs = tf.keras.layers.Multiply()([dense_skill, ])
         outputs = tf.keras.layers.TimeDistributed(dense_skill, name='outputs')(lstm)
 
         super(DKTModel, self).__init__(inputs={"input_feature_id": input_feature_id},
