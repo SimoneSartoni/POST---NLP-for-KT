@@ -4,6 +4,21 @@ from tensorflow.keras import Model, Input, layers, losses
 from Knowledge_Tracing.code.models.DKT_models.count_vect_DKT.count_vect_DKT_doubled_encodings.data_utils import get_target as NLP_get_target
 MASK_VALUE=-1.0
 
+
+class CumSumLayer(tf.keras.layers.Layer):
+    def __init__(self, **kwargs):
+        super(CumSumLayer, self).__init__(**kwargs)
+
+    def call(self, input_feature):
+        output = tf.reduce_sum(input_feature, axis=-1, keepdims=True)
+        return output
+
+    def compute_mask(self, input_feature, mask=None):
+        if mask is None:
+            return None
+        return mask
+
+
 class clean_count_vect_DKTModel(tf.keras.Model):
     """ The Deep Knowledge Tracing model.
     Arguments in __init__:
@@ -22,13 +37,13 @@ class clean_count_vect_DKTModel(tf.keras.Model):
 
         mask_feature_layer = tf.keras.layers.Masking(mask_value=MASK_VALUE, input_shape=(None, nb_encodings))
         lstm_layer = tf.keras.layers.LSTM(hidden_units, return_sequences=True, return_state=True, dropout=dropout_rate)
-        intermediate_feature_layer = tf.keras.layers.Dense(nb_encodings, activation='sigmoid')
-        intermediate_feature_layer = tf.keras.layers.TimeDistributed(intermediate_feature_layer, name='intermediate_feature_layer')
+        # intermediate_feature_layer = tf.keras.layers.Dense(nb_encodings, activation='relu')
+        # intermediate_feature_layer = tf.keras.layers.TimeDistributed(intermediate_feature_layer, name='intermediate_feature_layer')
         dense_feature_layer = tf.keras.layers.Dense(nb_encodings, activation='sigmoid')
         output_feature_layer = tf.keras.layers.TimeDistributed(dense_feature_layer, name='outputs_feature')
         multiply_target_layer = tf.keras.layers.Multiply()
-        dense_class_layer = tf.keras.layers.Dense(1, activation='sigmoid')
-        output_class_layer = tf.keras.layers.TimeDistributed(dense_class_layer, name='output_class')
+        # dense_class_layer = tf.keras.layers.Dense(1, activation='sigmoid')
+        # output_class_layer = tf.keras.layers.TimeDistributed(dense_class_layer, name='output_class')
 
         print("input:")
         print(input_encoding)
@@ -40,10 +55,10 @@ class clean_count_vect_DKTModel(tf.keras.Model):
         print("lstm output")
         print(lstm_output)
         print(final_memory_state)
-        intermediate_pred = intermediate_feature_layer(lstm_output)
-        encoding_pred = output_feature_layer(intermediate_pred)
+        # intermediate_pred = intermediate_feature_layer(lstm_output)
+        encoding_pred = output_feature_layer(lstm_output)
         multiply_output = multiply_target_layer([encoding_pred, masked_target])
-        output_class = output_class_layer(multiply_output)
+        output_class = CumSumLayer()(multiply_output)
 
         super(clean_count_vect_DKTModel, self).__init__(inputs={"input_encoding": input_encoding, "target_encoding": target_encoding},
                                                         outputs=output_class,
