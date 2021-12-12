@@ -42,7 +42,7 @@ class clean_count_vect_DKTModel(tf.keras.Model):
         dense_feature_layer = tf.keras.layers.Dense(nb_encodings, activation='relu')
         output_feature_layer = tf.keras.layers.TimeDistributed(dense_feature_layer, name='outputs_feature')
         dense_feature_layer_2 = tf.keras.layers.Dense(nb_encodings//2, activation='relu')
-        output_feature_layer_2 = tf.keras.layers.TimeDistributed(dense_feature_layer_2, name='outputs_feature')
+        output_feature_layer_2 = tf.keras.layers.TimeDistributed(dense_feature_layer_2, name='outputs_feature_2')
         multiply_target_layer = tf.keras.layers.Multiply()
         dense_class_layer = tf.keras.layers.Dense(1, activation='sigmoid')
         output_class_layer = tf.keras.layers.TimeDistributed(dense_class_layer, name='output_class')
