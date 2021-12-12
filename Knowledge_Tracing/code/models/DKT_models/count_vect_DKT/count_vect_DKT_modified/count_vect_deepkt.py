@@ -31,7 +31,7 @@ class clean_count_vect_DKTModel(tf.keras.Model):
             and what the model expects.
     """
 
-    def __init__(self, nb_encodings, hidden_units=100, dropout_rate=0.2):
+    def __init__(self, nb_encodings, hidden_units=100, dropout_rate=0.4):
         input_encoding = tf.keras.Input(shape=(None, nb_encodings), name='input_encoding')
         target_encoding = tf.keras.Input(shape=(None, nb_encodings), name='target_encoding')
 
@@ -59,9 +59,9 @@ class clean_count_vect_DKTModel(tf.keras.Model):
         print(final_memory_state)
         # intermediate_pred = intermediate_feature_layer(lstm_output)
         encoding_pred = output_feature_layer(lstm_output)
-        multiply_output = multiply_target_layer([encoding_pred, masked_target])
-        output = output_feature_layer_2(multiply_output)
-        output_class = output_class_layer(output)
+        encoding_pred2 = output_feature_layer_2(encoding_pred)
+        multiply_output = multiply_target_layer([encoding_pred2, masked_target])
+        output_class = output_class_layer(multiply_output)
 
         super(clean_count_vect_DKTModel, self).__init__(inputs={"input_encoding": input_encoding, "target_encoding": target_encoding},
                                                         outputs=output_class,
