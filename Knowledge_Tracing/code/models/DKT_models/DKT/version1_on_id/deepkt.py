@@ -1,6 +1,5 @@
-import tensorflow
-
-from Knowledge_Tracing.code.models.DKT_models.DKT.version_1_on_skill.data_utils import *
+from Knowledge_Tracing.code.models.DKT_models.DKT.standard_on_id.data_utils import *
+from Knowledge_Tracing.code.models.tensorflow_utills.layers import *
 
 
 class DKTModel(tf.keras.Model):
@@ -15,28 +14,24 @@ class DKTModel(tf.keras.Model):
             and what the model expects.
     """
 
-    def __init__(self, id_depth, hidden_units=100, dropout_rate=0.2):
-        input_feature = tf.keras.Input(shape=(None, id_depth), name='input_feature_id')
-        target_feature = tf.keras.Input(shape=(None, id_depth), name='target_feature_id')
+    def __init__(self, id_depth, nb_questions, hidden_units=100, dropout_rate=0.2):
+        input_feature_id = tf.keras.Input(shape=(None, id_depth), name='input_feature')
+        target_feature_id = tf.keras.Input(shape=(None, nb_questions), name='target_encoding')
 
-        mask_feature = tf.keras.layers.Masking(mask_value=MASK_VALUE)(input_feature)
-        mask_target_feature = tf.keras.layers.Masking(mask_value=MASK_VALUE)(target_feature)
+        mask_feature = tf.keras.layers.Masking(mask_value=MASK_VALUE)(input_feature_id)
+        mask_target_feature = tf.keras.layers.Masking(mask_value=MASK_VALUE)(target_feature_id)
 
         lstm = tf.keras.layers.LSTM(hidden_units,
                                     return_sequences=True,
                                     dropout=dropout_rate)(mask_feature)
 
-        dense_feature = tf.keras.layers.Dense(id_depth, activation='sigmoid')
-        outputs_feature = tf.keras.layers.TimeDistributed(dense_feature, name='outputs_feature_id')(lstm)
-
-        feature_pred = tensorflow.multiply(outputs_feature, mask_target_feature)
-
-        dense_class = tf.keras.layers.Dense(1, activation='sigmoid')
-
-        output_class = tf.keras.layers.TimeDistributed(dense_class, name='output_class')(feature_pred)
-
-        super(DKTModel, self).__init__(inputs={"input_feature_id": input_feature, "target_feature_id": target_feature},
-                                       outputs=output_class,
+        dense_ids = tf.keras.layers.Dense(nb_questions, activation='relu')
+        feature_id_pred_1 = tf.keras.layers.TimeDistributed(dense_ids, name='outputs')(lstm)
+        feature_id_pred_2 = tf.keras.layers.TimeDistributed(dense_ids, name='outputs')(feature_id_pred_1)
+        outputs = tf.keras.layers.Multiply()([feature_id_pred_2, mask_target_feature])
+        outputs = CumSumLayer()(outputs)
+        super(DKTModel, self).__init__(inputs={"input_feature_id": input_feature_id, "target_id": target_feature_id},
+                                       outputs=outputs,
                                        name="DKTModel")
 
     def compile(self, optimizer, metrics=None):
@@ -58,14 +53,15 @@ class DKTModel(tf.keras.Model):
         """
 
         def custom_loss(y_true, y_pred):
-            y_true, y_pred = get_target(y_true, y_pred)
             return tf.keras.losses.binary_crossentropy(y_true, y_pred)
 
         super(DKTModel, self).compile(
             loss=custom_loss,
             optimizer=optimizer,
             metrics=metrics,
-            experimental_run_tf_function=False)
+            experimental_run_tf_function=False,
+            run_eagerly=True
+        )
 
     def fit(self,
             dataset,
