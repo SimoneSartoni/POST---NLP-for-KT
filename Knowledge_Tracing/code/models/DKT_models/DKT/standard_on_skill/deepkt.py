@@ -1,4 +1,5 @@
 from Knowledge_Tracing.code.models.DKT_models.DKT.standard_on_skill.data_utils import *
+from Knowledge_Tracing.code.models.tensorflow_utills.layers import *
 
 
 class DKTModel(tf.keras.Model):
@@ -15,15 +16,19 @@ class DKTModel(tf.keras.Model):
 
     def __init__(self, nb_features, nb_skills, hidden_units=100, dropout_rate=0.2):
         input_feature = tf.keras.Input(shape=(None, nb_features), name='input_feature')
+        target_skill = tf.keras.Input(shape=(None, nb_skills), name='target_skill')
 
         mask_feature = tf.keras.layers.Masking(mask_value=MASK_VALUE)(input_feature)
+        mask_target_skill = tf.keras.layers.Masking(mask_value=MASK_VALUE)(target_skill)
 
         lstm = tf.keras.layers.LSTM(hidden_units,
                                     return_sequences=True,
                                     dropout=dropout_rate)(mask_feature)
 
         dense_skill = tf.keras.layers.Dense(nb_skills, activation='sigmoid')
-        outputs = tf.keras.layers.TimeDistributed(dense_skill, name='outputs')(lstm)
+        skill_pred = tf.keras.layers.TimeDistributed(dense_skill, name='outputs')(lstm)
+        outputs = tf.keras.layers.Multiply()([skill_pred, mask_target_skill])
+        outputs = CumSumLayer()(outputs)
 
         super(DKTModel, self).__init__(inputs={"input_feature": input_feature},
                                        outputs=outputs,
