@@ -99,6 +99,7 @@ def load_dataset(batch_size=32, shuffle=True,
 
 
 def get_target(y_true, y_pred, nb_encodings=300):
+    print(y_pred)
     """    mask = 1 - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
     y_true = y_true * mask
     y_pred = y_pred * mask"""

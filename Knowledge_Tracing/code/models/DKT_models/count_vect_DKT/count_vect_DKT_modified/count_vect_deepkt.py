@@ -70,8 +70,6 @@ class clean_count_vect_DKTModel(tf.keras.Model):
         """
 
         def custom_loss(y_true, y_pred):
-            print(y_true[0])
-            print(y_pred[0])
             y_true, y_pred = NLP_get_target(y_true, y_pred, nb_encodings=self.nb_encodings)
             return losses.binary_crossentropy(y_true, y_pred)
 
