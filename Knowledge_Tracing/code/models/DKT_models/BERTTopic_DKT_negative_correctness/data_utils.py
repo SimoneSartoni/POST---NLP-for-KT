@@ -23,10 +23,11 @@ MASK_VALUE = -1.0  # The masking value cannot be zero.
 
 
 def create_dataset(generator, encoding_depth, shuffle=True, batch_size=1024):
-    input_types = {"text_encoding": tf.float32, "target_text_encoding": tf.float32}
+    input_types = {"text_encoding": tf.float32, "label": tf.float32, "target_text_encoding": tf.float32}
     output_types = {"target_label": tf.float32}
 
-    input_shapes = {"text_encoding": [None, encoding_depth], "target_text_encoding": [None, encoding_depth]}
+    input_shapes = {"text_encoding": [None, encoding_depth], "label": [None], "target_text_encoding": [None,
+                                                                                                       encoding_depth]}
     output_shapes = {"target_label": [None]}
     types = (input_types, output_types)
     shapes = (input_shapes, output_shapes)
@@ -43,7 +44,8 @@ def create_dataset(generator, encoding_depth, shuffle=True, batch_size=1024):
     print(dataset)
     dataset = dataset.map(
         lambda inputs, outputs: (
-            {"input_encoding": inputs['text_encoding'], "target_encoding": inputs['target_text_encoding']},
+            {"input_encoding": inputs['text_encoding'], "input_label": tf.expand_dims(outputs['target_label'], axis=-1),
+             "target_encoding": inputs['target_text_encoding']},
             tf.expand_dims(outputs['target_label'], axis=-1)
         )
     )
@@ -55,7 +57,10 @@ def create_dataset(generator, encoding_depth, shuffle=True, batch_size=1024):
         batch_size=batch_size,
         padding_values=-1.0,
         padded_shapes=(
-            {"input_encoding": [None, encoding_depth], "target_encoding": [None, encoding_depth]}, [None, 1]),
+            {"input_encoding": [None, encoding_depth], "input_label": [None, 1],
+             "target_encoding": [None, encoding_depth]},
+            [None, 1]
+        ),
         drop_remainder=True
     )
     return dataset
@@ -67,7 +72,7 @@ def load_dataset(batch_size=32, shuffle=True,
                  interaction_sequence_len=30, min_seq_len=5, encode_correct_in_encodings=False,
                  dictionary=None):
     inputs = {"question_id": False, "text_id": False, "skill": False,
-              "label": False, "r_elapsed_time": False, 'text_encoding': True, "target_id": False,
+              "label": True, "r_elapsed_time": False, 'text_encoding': True, "target_id": False,
               "target_text_id": False, "target_skill": False, 'target_label': False, 'target_text_encoding': True}
     outputs = {"question_id": False, "text_id": False, "skill": False,
                "label": False, "r_elapsed_time": False, 'text_encoding': False, "target_id": False,
@@ -87,7 +92,7 @@ def load_dataset(batch_size=32, shuffle=True,
                                                                                 negative_correctness=False,
                                                                                 inputs_dict=inputs,
                                                                                 outputs_dict=outputs,
-                                                                                encode_correct_in_encodings=True,
+                                                                                encode_correct_in_encodings=False,
                                                                                 encode_correct_in_skills=False,
                                                                                 dictionary=dictionary)
 
@@ -98,9 +103,3 @@ def load_dataset(batch_size=32, shuffle=True,
 
     return train_loader, val_loader, test_loader, encoding_depth
 
-
-def get_target(y_true, y_pred, nb_encodings=300):
-    """mask = 1 - tf.cast(tf.equal(y_true, MASK_VALUE), y_true.dtype)
-    y_true = y_true * mask
-    y_pred = y_pred * mask"""
-    return y_true, y_pred

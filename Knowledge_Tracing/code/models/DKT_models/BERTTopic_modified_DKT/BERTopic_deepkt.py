@@ -27,7 +27,7 @@ class BERTopic_DKTModel(tf.keras.Model):
         # intermediate_feature_layer = tf.keras.layers.TimeDistributed(intermediate_feature_layer, name='intermediate_feature_layer')
         dense_feature_layer = tf.keras.layers.Dense(nb_encodings, activation='relu')
         output_feature_layer = tf.keras.layers.TimeDistributed(dense_feature_layer, name='outputs_feature')
-        dense_feature_layer_2 = tf.keras.layers.Dense(nb_encodings // 2, activation='relu')
+        dense_feature_layer_2 = tf.keras.layers.Dense(nb_encodings, activation='relu')
         output_feature_layer_2 = tf.keras.layers.TimeDistributed(dense_feature_layer_2, name='outputs_feature_2')
         multiply_target_layer = tf.keras.layers.Multiply()
         dense_class_layer = tf.keras.layers.Dense(1, activation='sigmoid')
@@ -45,7 +45,8 @@ class BERTopic_DKTModel(tf.keras.Model):
         print(final_memory_state)
         # intermediate_pred = intermediate_feature_layer(lstm_output)
         encoding_pred = output_feature_layer(lstm_output)
-        multiply_output = multiply_target_layer([encoding_pred, masked_target])
+        encoding_pred2 = output_feature_layer_2(encoding_pred)
+        multiply_output = multiply_target_layer([encoding_pred2, masked_target])
         output_class = output_class_layer(multiply_output)
 
         super(BERTopic_DKTModel, self).__init__(inputs={"input_encoding": input_encoding, "target_encoding": target_encoding},
