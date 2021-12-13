@@ -57,7 +57,7 @@ class SAINT_Dataset(Dataset):
         input_id[1:] = question_id[:-1]
         input_text_id[1:] = text_id[:-1]
         input_r_elapsed_time[1:] = r_elapsed_time[:-1].copy().astype(np.int)
-        input_skill[1:] = skill
+        input_skill[1:] = skill[:-1]
         input_label[1:] = label[:-1]
 
         target_id = np.full(self.max_seq, fill_value=self.mask_value, dtype=int)
@@ -66,10 +66,10 @@ class SAINT_Dataset(Dataset):
         target_text_id = np.full(self.max_seq, fill_value=self.mask_value, dtype=int)
         target_skill = np.full(self.max_seq, fill_value=self.mask_value, dtype=int)
 
-        target_id[1:] = input_id[1:]
-        target_text_id[1:] = input_text_id[1:]
+        target_id[1:] = question_id[1:]
+        target_text_id[1:] = text_id[1:]
         target_r_elapsed_time[1:] = r_elapsed_time[1:].copy().astype(np.int)
-        target_skill[1:] = input_skill[1:]
+        target_skill[1:] = skill[1:]
         target_label[1:] = label[1:]
 
         if self.text_encoding_model:
