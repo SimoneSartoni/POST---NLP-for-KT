@@ -32,7 +32,7 @@ class SAINT_Dataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        user_id, unique_question_id, text_id, answered_correctly, response_elapsed_time, exe_skill = self.data[idx]
+        user_id, unique_question_id, unique_text_id, answered_correctly, response_elapsed_time, exe_skill = self.data[idx]
         seq_len = len(unique_question_id)
 
         question_id = np.full(self.max_seq, fill_value=self.mask_value, dtype=int)
@@ -42,7 +42,7 @@ class SAINT_Dataset(Dataset):
         skill = np.full(self.max_seq, fill_value=self.mask_value, dtype=int)
 
         question_id[-seq_len:] = unique_question_id
-        text_id[-seq_len:] = text_id
+        text_id[-seq_len:] = unique_text_id
         label[-seq_len:] = [1.0 if x == 1.0 else self.negative_value for x in answered_correctly]
 
         r_elapsed_time[-seq_len:] = response_elapsed_time
