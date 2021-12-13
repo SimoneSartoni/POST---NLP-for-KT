@@ -48,6 +48,7 @@ def get_saint_dataloaders(batch_size=128,
     test_dataset = SAINT_Dataset(test.values, text_encoding_model=text_encoding_model,
                                  max_seq=interaction_sequence_len, negative_value=negative_value, mask_value=mask_value,
                                  inputs_output_dict=inputs_output_dict)
+    encoding_depth = train_dataset.encoding_depth
     train_loader = DataLoader(train_dataset,
                               batch_size=batch_size,
                               num_workers=2,
