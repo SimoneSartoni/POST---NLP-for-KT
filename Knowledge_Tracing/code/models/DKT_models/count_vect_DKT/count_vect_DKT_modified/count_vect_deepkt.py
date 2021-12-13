@@ -37,12 +37,8 @@ class clean_count_vect_DKTModel(tf.keras.Model):
 
         mask_feature_layer = tf.keras.layers.Masking(mask_value=MASK_VALUE, input_shape=(None, nb_encodings))
         lstm_layer = tf.keras.layers.LSTM(hidden_units, return_sequences=True, return_state=True, dropout=dropout_rate)
-        # intermediate_feature_layer = tf.keras.layers.Dense(nb_encodings, activation='relu')
-        # intermediate_feature_layer = tf.keras.layers.TimeDistributed(intermediate_feature_layer, name='intermediate_feature_layer')
         dense_feature_layer = tf.keras.layers.Dense(nb_encodings, activation='relu')
         output_feature_layer = tf.keras.layers.TimeDistributed(dense_feature_layer, name='outputs_feature')
-        dense_feature_layer_2 = tf.keras.layers.Dense(nb_encodings//2, activation='relu')
-        output_feature_layer_2 = tf.keras.layers.TimeDistributed(dense_feature_layer_2, name='outputs_feature_2')
         multiply_target_layer = tf.keras.layers.Multiply()
         dense_class_layer = tf.keras.layers.Dense(1, activation='sigmoid')
         output_class_layer = tf.keras.layers.TimeDistributed(dense_class_layer, name='output_class')
@@ -59,8 +55,7 @@ class clean_count_vect_DKTModel(tf.keras.Model):
         print(final_memory_state)
         # intermediate_pred = intermediate_feature_layer(lstm_output)
         encoding_pred = output_feature_layer(lstm_output)
-        encoding_pred2 = output_feature_layer_2(encoding_pred)
-        multiply_output = multiply_target_layer([encoding_pred2, masked_target])
+        multiply_output = multiply_target_layer([encoding_pred, masked_target])
         output_class = output_class_layer(multiply_output)
 
         super(clean_count_vect_DKTModel, self).__init__(inputs={"input_encoding": input_encoding, "target_encoding": target_encoding},
