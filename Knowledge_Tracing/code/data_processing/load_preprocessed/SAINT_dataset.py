@@ -6,7 +6,10 @@ def encode_correctness_in_encodings(text_encoding_model, text_ids, max_seq):
     i = 0
     text_encoding = np.zeros((max_seq, text_encoding_model.vector_size), dtype=int)
     for text_id in text_ids:
+        print(text_id)
+        print(text_encoding[i])
         text_encoding[i] = text_encoding_model.get_encoding(text_id)
+        i += 1
     input_text_encoding = text_encoding[-1]
     target_text_encoding = text_encoding[1:]
     return text_encoding, input_text_encoding, target_text_encoding
