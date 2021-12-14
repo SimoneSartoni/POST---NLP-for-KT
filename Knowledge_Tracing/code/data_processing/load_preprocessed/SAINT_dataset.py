@@ -58,7 +58,7 @@ class SAINT_Dataset(Dataset):
 
         input_id[1:] = question_id[:-1]
         input_text_id[1:] = text_id[:-1]
-        input_r_elapsed_time[1:] = r_elapsed_time[:-1].copy().astype(np.np.double)
+        input_r_elapsed_time[1:] = r_elapsed_time[:-1].copy().astype(np.double)
         input_skill[1:] = skill[:-1]
         input_label[1:] = label[:-1]
 
