@@ -75,17 +75,17 @@ class SAINT_Dataset(Dataset):
         if self.text_encoding_model:
             text_encoding, input_text_encoding, target_text_encoding = encode_correctness_in_encodings(
                 self.text_encoding_model, text_id, self.max_seq)
+        else:
+            text_encoding, input_text_encoding, target_text_encoding = None, None, None
 
-        possible_inputs = {"question_id": question_id, "text_id": text_id, "skill": skill,
-                           "label": label, "r_elapsed_time": r_elapsed_time,
-                           "input_question_id": input_id, "input_text_id": input_text_id, "input_skill": input_skill,
-                           "input_label": input_label, "input_r_elapsed_time": input_r_elapsed_time,
-                           "target_id": target_id,  "target_text_id": target_text_id, "target_skill": target_skill,
-                           "target_r_elapsed_time": target_r_elapsed_time, 'target_label': target_label}
-        if self.text_encoding_model:
-            possible_inputs["text_encoding"] = text_encoding
-            possible_inputs["input_text_encoding"] = input_text_encoding
-            possible_inputs["target_text_encoding"] = target_text_encoding
+        possible_inputs = {"question_id": question_id, "text_id": text_id, "skill": skill, "label": label,
+                           "r_elapsed_time": r_elapsed_time, "input_question_id": input_id,
+                           "input_text_id": input_text_id, "input_skill": input_skill, "input_label": input_label,
+                           "input_r_elapsed_time": input_r_elapsed_time, "target_id": target_id,
+                           "target_text_id": target_text_id, "target_skill": target_skill,
+                           "target_r_elapsed_time": target_r_elapsed_time, 'target_label': target_label,
+                           "text_encoding": text_encoding, "input_text_encoding": input_text_encoding,
+                           "target_text_encoding": target_text_encoding}
         possible_outputs = possible_inputs
         encoder_inputs = {}
         for key in possible_inputs.keys():

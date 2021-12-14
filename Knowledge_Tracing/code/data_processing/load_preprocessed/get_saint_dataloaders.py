@@ -32,14 +32,14 @@ def get_saint_dataloaders(batch_size=128,
     train, val = train_test_split(train, test_size=0.2)
     print("train size: ", train.shape, "validation size: ", val.shape)
     encoder_inputs_dict = {"question_id": True, "text_id": True, "skill": True,
-                           "label": False, "r_elapsed_time": False,
+                           "label": False, "r_elapsed_time": False, "text_encoding": True,
                            "input_question_id": True, "input_text_id": True, "input_skill": True,
-                           "input_label": True, "input_r_elapsed_time": False,
+                           "input_label": True, "input_r_elapsed_time": False, "input_text_encoding":True,
                            "target_id": True,  "target_text_id": True, "target_skill": True,
-                           "target_r_elapsed_time": True, 'target_label': True}
+                           "target_r_elapsed_time": True, 'target_label': True, "target_text_encoding":True}
     decoder_inputs_dict = encoder_inputs_dict
     outputs_dict = decoder_inputs_dict
-    inputs_output_dict = {"encoder": encoder_inputs_dict, "decoder":decoder_inputs_dict, "output":outputs_dict}
+    inputs_output_dict = {"encoder": encoder_inputs_dict, "decoder": decoder_inputs_dict, "output": outputs_dict}
     train_dataset = SAINT_Dataset(train.values, text_encoding_model=text_encoding_model,
                                   max_seq=interaction_sequence_len, negative_value=negative_value, mask_value=mask_value,
                                   inputs_output_dict=inputs_output_dict)
