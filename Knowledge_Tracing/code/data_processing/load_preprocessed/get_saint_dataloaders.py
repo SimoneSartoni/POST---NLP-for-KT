@@ -1,11 +1,10 @@
-import Knowledge_Tracing.code.models.complex_models.config as config
-
 import gc
 from sklearn.model_selection import train_test_split
 
 from Knowledge_Tracing.code.data_processing.load_preprocessed.load_preprocessed_data import \
     load_preprocessed_interactions
-from Knowledge_Tracing.code.data_processing.preprocess.group_interactions_by_user_id import generate_sequences_of_same_length
+from Knowledge_Tracing.code.data_processing.preprocess.group_interactions_by_user_id import \
+    generate_sequences_of_same_length
 from Knowledge_Tracing.code.data_processing.load_preprocessed.SAINT_dataset import *
 
 
@@ -13,7 +12,7 @@ def get_saint_dataloaders(batch_size=128,
                           interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
                                        ".csv", texts_filepath='../input/', output_filepath='/kaggle/working/',
                           interaction_sequence_len=25, min_seq_len=5, text_encoding_model=None,
-                          negative_correctness=False, encode_correct_in_encodings=True, dictionary=None):
+                          negative_value=False, mask_value=0.0, encode_correct_in_encodings=True, dictionary=None):
 
     df = load_preprocessed_interactions(interactions_filepath=interactions_filepath, dictionary=dictionary)
     print(df)
@@ -33,23 +32,23 @@ def get_saint_dataloaders(batch_size=128,
     train, val = train_test_split(train, test_size=0.2)
     print("train size: ", train.shape, "validation size: ", val.shape)
     encoder_inputs_dict = {"question_id": True, "text_id": True, "skill": True,
-                           "label": True, "r_elapsed_time": True, 'text_encoding': True, "target_id": True,
-                           "target_text_id": True, "target_skill": True, 'target_label': True, 'target_text_encoding': True}
+                           "label": False, "r_elapsed_time": False,
+                           "input_question_id": True, "input_text_id": True, "input_skill": True,
+                           "input_label": True, "input_r_elapsed_time": False,
+                           "target_id": True,  "target_text_id": True, "target_skill": True,
+                           "target_r_elapsed_time": True, 'target_label': True}
     decoder_inputs_dict = encoder_inputs_dict
     outputs_dict = decoder_inputs_dict
+    inputs_output_dict = {"encoder": encoder_inputs_dict, "decoder":decoder_inputs_dict, "output":outputs_dict}
     train_dataset = SAINT_Dataset(train.values, text_encoding_model=text_encoding_model,
-                                  max_seq=interaction_sequence_len, negative_correctness=negative_correctness,
-                                  encode_correct_in_encodings=encode_correct_in_encodings,
-                                  encoder_inputs_dict=encoder_inputs_dict, decoder_inputs_dict=decoder_inputs_dict,
-                                  outputs_dict=outputs_dict)
-    val_dataset = SAINT_Dataset(val.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len,
-                                negative_correctness=negative_correctness, encoder_inputs_dict=encoder_inputs_dict,
-                                decoder_inputs_dict=decoder_inputs_dict, outputs_dict=outputs_dict,
-                                encode_correct_in_encodings=encode_correct_in_encodings)
-    test_dataset = SAINT_Dataset(test.values, text_encoding_model=text_encoding_model, max_seq=interaction_sequence_len,
-                                 negative_correctness=negative_correctness, encode_correct_in_encodings=
-                                 encode_correct_in_encodings, encoder_inputs_dict=encoder_inputs_dict,
-                                 decoder_inputs_dict=decoder_inputs_dict, outputs_dict=outputs_dict)
+                                  max_seq=interaction_sequence_len, negative_value=negative_value, mask_value=mask_value,
+                                  inputs_output_dict=inputs_output_dict)
+    val_dataset = SAINT_Dataset(val.values, text_encoding_model=text_encoding_model,
+                                max_seq=interaction_sequence_len, negative_value=negative_value, mask_value=mask_value,
+                                inputs_output_dict=inputs_output_dict)
+    test_dataset = SAINT_Dataset(test.values, text_encoding_model=text_encoding_model,
+                                 max_seq=interaction_sequence_len, negative_value=negative_value, mask_value=mask_value,
+                                 inputs_output_dict=inputs_output_dict)
     encoding_depth = train_dataset.encoding_depth
     train_loader = DataLoader(train_dataset,
                               batch_size=batch_size,
