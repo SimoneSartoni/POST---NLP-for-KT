@@ -21,7 +21,7 @@ class saint_on_encodings(nn.Module):
         first_block = True
         encoder_inputs, decoder_inputs = inputs['encoder'], inputs['decoder']
         in_exercise, in_skill, in_response, text_encoding = encoder_inputs['question_id'], encoder_inputs['skill'], \
-                                                            decoder_inputs['label'], encoder_inputs['text_encoding']
+                                                            decoder_inputs['input_label'], encoder_inputs['text_encoding']
         for n in range(self.n_encoder):
             if n >= 1:
                 first_block = False
