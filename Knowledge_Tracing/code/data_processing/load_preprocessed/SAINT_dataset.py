@@ -15,7 +15,7 @@ def encode_correctness_in_encodings(text_encoding_model, text_ids, max_seq, mask
 
 
 class SAINT_Dataset(Dataset):
-    def __init__(self, grouped_df, text_encoding_model=None, max_seq=100, negative_value=0.0,
+    def __init__(self, grouped_df, text_encoding_model=None, max_seq=100, negative_value=0,
                  inputs_output_dict={}, mask_value=0.0):
         self.encoder_inputs_dict = inputs_output_dict['encoder']
         self.decoder_inputs_dict = inputs_output_dict['decoder']
@@ -37,24 +37,24 @@ class SAINT_Dataset(Dataset):
         user_id, unique_question_id, unique_text_id, answered_correctly, response_elapsed_time, exe_skill = self.data[idx]
         seq_len = len(unique_question_id)
 
-        question_id = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.double)
-        text_id = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.double)
-        label = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.double)
-        r_elapsed_time = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.double)
-        skill = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.double)
+        question_id = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.int)
+        text_id = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.int)
+        label = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.int)
+        r_elapsed_time = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.int)
+        skill = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.int)
 
         question_id[-seq_len:] = unique_question_id
         text_id[-seq_len:] = unique_text_id
-        label[-seq_len:] = [1.0 if x == 1.0 else self.negative_value for x in answered_correctly]
+        label[-seq_len:] = [1 if x == 1 else self.negative_value for x in answered_correctly]
 
         r_elapsed_time[-seq_len:] = response_elapsed_time
         skill[-seq_len:] = exe_skill
 
-        input_id = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.double)
-        input_r_elapsed_time = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.double)
-        input_label = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.double)
-        input_text_id = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.double)
-        input_skill = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.double)
+        input_id = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.int)
+        input_r_elapsed_time = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.int)
+        input_label = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.int)
+        input_text_id = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.int)
+        input_skill = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.int)
 
         input_id[1:] = question_id[:-1]
         input_text_id[1:] = text_id[:-1]
@@ -62,11 +62,11 @@ class SAINT_Dataset(Dataset):
         input_skill[1:] = skill[:-1]
         input_label[1:] = label[:-1]
 
-        target_id = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.double)
-        target_r_elapsed_time = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.double)
-        target_label = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.double)
-        target_text_id = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.double)
-        target_skill = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.double)
+        target_id = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.int)
+        target_r_elapsed_time = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.int)
+        target_label = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.int)
+        target_text_id = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.int)
+        target_skill = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.int)
 
         target_id[1:] = question_id[1:]
         target_text_id[1:] = text_id[1:]
