@@ -4,7 +4,7 @@ from torch.utils.data import Dataset, DataLoader
 
 def encode_correctness_in_encodings(text_encoding_model, text_ids, max_seq, mask_value):
     i = 0
-    text_encoding = np.full((max_seq, text_encoding_model.vector_size), fill_value=mask_value, dtype=float)
+    text_encoding = np.full((max_seq, text_encoding_model.vector_size), fill_value=mask_value, dtype=double)
     for text_id in text_ids:
         if text_id != mask_value:
             text_encoding[i] = text_encoding_model.get_encoding(text_id)
@@ -37,11 +37,11 @@ class SAINT_Dataset(Dataset):
         user_id, unique_question_id, unique_text_id, answered_correctly, response_elapsed_time, exe_skill = self.data[idx]
         seq_len = len(unique_question_id)
 
-        question_id = np.full(self.max_seq, fill_value=self.mask_value, dtype=float)
-        text_id = np.full(self.max_seq, fill_value=self.mask_value, dtype=float)
-        label = np.full(self.max_seq, fill_value=self.mask_value, dtype=float)
-        r_elapsed_time = np.full(self.max_seq, fill_value=self.mask_value, dtype=float)
-        skill = np.full(self.max_seq, fill_value=self.mask_value, dtype=float)
+        question_id = np.full(self.max_seq, fill_value=self.mask_value, dtype=double)
+        text_id = np.full(self.max_seq, fill_value=self.mask_value, dtype=double)
+        label = np.full(self.max_seq, fill_value=self.mask_value, dtype=double)
+        r_elapsed_time = np.full(self.max_seq, fill_value=self.mask_value, dtype=double)
+        skill = np.full(self.max_seq, fill_value=self.mask_value, dtype=double)
 
         question_id[-seq_len:] = unique_question_id
         text_id[-seq_len:] = unique_text_id
@@ -50,23 +50,23 @@ class SAINT_Dataset(Dataset):
         r_elapsed_time[-seq_len:] = response_elapsed_time
         skill[-seq_len:] = exe_skill
 
-        input_id = np.full(self.max_seq, fill_value=self.mask_value, dtype=float)
-        input_r_elapsed_time = np.full(self.max_seq, fill_value=self.mask_value, dtype=float)
-        input_label = np.full(self.max_seq, fill_value=self.mask_value, dtype=float)
-        input_text_id = np.full(self.max_seq, fill_value=self.mask_value, dtype=float)
-        input_skill = np.full(self.max_seq, fill_value=self.mask_value, dtype=float)
+        input_id = np.full(self.max_seq, fill_value=self.mask_value, dtype=double)
+        input_r_elapsed_time = np.full(self.max_seq, fill_value=self.mask_value, dtype=double)
+        input_label = np.full(self.max_seq, fill_value=self.mask_value, dtype=double)
+        input_text_id = np.full(self.max_seq, fill_value=self.mask_value, dtype=double)
+        input_skill = np.full(self.max_seq, fill_value=self.mask_value, dtype=double)
 
         input_id[1:] = question_id[:-1]
         input_text_id[1:] = text_id[:-1]
-        input_r_elapsed_time[1:] = r_elapsed_time[:-1].copy().astype(np.float)
+        input_r_elapsed_time[1:] = r_elapsed_time[:-1].copy().astype(np.double)
         input_skill[1:] = skill[:-1]
         input_label[1:] = label[:-1]
 
-        target_id = np.full(self.max_seq, fill_value=self.mask_value, dtype=float)
-        target_r_elapsed_time = np.full(self.max_seq, fill_value=self.mask_value, dtype=float)
-        target_label = np.full(self.max_seq, fill_value=self.mask_value, dtype=float)
-        target_text_id = np.full(self.max_seq, fill_value=self.mask_value, dtype=float)
-        target_skill = np.full(self.max_seq, fill_value=self.mask_value, dtype=float)
+        target_id = np.full(self.max_seq, fill_value=self.mask_value, dtype=double)
+        target_r_elapsed_time = np.full(self.max_seq, fill_value=self.mask_value, dtype=double)
+        target_label = np.full(self.max_seq, fill_value=self.mask_value, dtype=double)
+        target_text_id = np.full(self.max_seq, fill_value=self.mask_value, dtype=double)
+        target_skill = np.full(self.max_seq, fill_value=self.mask_value, dtype=double)
 
         target_id[1:] = question_id[1:]
         target_text_id[1:] = text_id[1:]
