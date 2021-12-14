@@ -60,6 +60,7 @@ class EncoderBlock(nn.Module):
             _pos = self.position_embed(position_encoded)
             # out_skill = _skill + _pos
             # out_ex = _exe + _pos
+            input_encoding = input_encoding.type(torch.DoubleTensor)
             out = input_encoding + _pos
         else:
             out = input_exercise
