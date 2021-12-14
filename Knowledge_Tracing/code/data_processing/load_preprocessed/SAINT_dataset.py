@@ -6,9 +6,6 @@ def encode_correctness_in_encodings(text_encoding_model, text_ids, max_seq, mask
     i = 0
     text_encoding = np.full((max_seq, text_encoding_model.vector_size), fill_value=mask_value, dtype=float)
     for text_id in text_ids:
-        print(text_id)
-        print(text_encoding[i])
-        print(text_encoding_model.get_encoding(text_id))
         if text_id != mask_value:
             text_encoding[i] = text_encoding_model.get_encoding(text_id)
         i += 1
