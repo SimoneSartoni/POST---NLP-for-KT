@@ -60,7 +60,7 @@ class EncoderBlock(nn.Module):
             _pos = self.position_embed(position_encoded)
             # out_skill = _skill + _pos
             # out_ex = _exe + _pos
-            out = input_encoding + _pos
+            out = input_encoding.float() + _pos
         else:
             out = input_encoding
         output = self.multihead(q_input=out, kv_input=out)
