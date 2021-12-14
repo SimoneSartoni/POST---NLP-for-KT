@@ -74,7 +74,7 @@ class SAINT_Dataset(Dataset):
 
         if self.text_encoding_model:
             text_encoding, input_text_encoding, target_text_encoding = encode_correctness_in_encodings(
-                self.text_encoding_model, text_id, answered_correctly, self.max_seq, False)
+                self.text_encoding_model, text_id, self.max_seq)
 
         possible_inputs = {"question_id": question_id, "text_id": text_id, "skill": skill,
                            "label": label, "r_elapsed_time": r_elapsed_time,
