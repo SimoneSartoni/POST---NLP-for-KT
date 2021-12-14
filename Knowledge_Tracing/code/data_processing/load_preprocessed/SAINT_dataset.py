@@ -18,7 +18,7 @@ def encode_correctness_in_encodings(text_encoding_model, text_ids, max_seq):
 
 class SAINT_Dataset(Dataset):
     def __init__(self, grouped_df, text_encoding_model=None, max_seq=100, negative_value=0.0,
-                 inputs_output_dict={}, mask_value=0.0):
+                 inputs_output_dict={}, mask_value=0):
         self.encoder_inputs_dict = inputs_output_dict['encoder']
         self.decoder_inputs_dict = inputs_output_dict['decoder']
         self.outputs_dict = inputs_output_dict['output']
