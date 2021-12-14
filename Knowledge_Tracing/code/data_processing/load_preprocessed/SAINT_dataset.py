@@ -9,7 +9,8 @@ def encode_correctness_in_encodings(text_encoding_model, text_ids, max_seq, mask
         print(text_id)
         print(text_encoding[i])
         print(text_encoding_model.get_encoding(text_id))
-        text_encoding[i] = text_encoding_model.get_encoding(text_id)
+        if text_id != mask_value:
+            text_encoding[i] = text_encoding_model.get_encoding(text_id)
         i += 1
     input_text_encoding = text_encoding[-1]
     target_text_encoding = text_encoding[1:]
