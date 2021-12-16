@@ -5,7 +5,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 
 from Knowledge_Tracing.code.models.encoding_models.count_vectorizer import count_vectorizer
-from Knowledge_Tracing.code.models.encoding_models.BERTopic_model import BERTopic_model
+# from Knowledge_Tracing.code.models.encoding_models.BERTopic_model import BERTopic_model
 from Knowledge_Tracing.code.models.encoding_models.pretrained_distilBERT import PretrainedDistilBERT
 from Knowledge_Tracing.code.models.encoding_models.sentence_transformers import sentence_transformer
 from Knowledge_Tracing.code.models.encoding_models.gensim_model.gensim_pretrained_word2vec import pretrained_word2vec
