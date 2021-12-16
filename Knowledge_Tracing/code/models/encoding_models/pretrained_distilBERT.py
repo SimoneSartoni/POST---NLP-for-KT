@@ -78,7 +78,7 @@ class PretrainedDistilBERT(base_model):
             start = start + batch_size
         print(self.encodings)
         print("pretrainedBERT model created")
-        self.words_num = self.encodings.values()[0].shape[0]
+        self.words_num = list(self.encodings.values())[0].shape[0]
         print("vector_size: " + str(self.words_num))
         self.vector_size = self.words_num
         self.pro_num = len(self.texts_df.index)
