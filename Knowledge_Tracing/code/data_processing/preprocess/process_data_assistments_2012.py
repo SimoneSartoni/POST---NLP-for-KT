@@ -1,11 +1,10 @@
-import csv
 from datetime import datetime
 
 import numpy as np
 import pandas as pd
 
 from Knowledge_Tracing.code.utils.utils import try_parsing_date
-from Knowledge_Tracing.code.data_processing.get_assistments_texts import get_assistments_texts
+from Knowledge_Tracing.code.data_processing.preprocess.load_process_assistments_texts import load_process_assistments_texts
 
 
 def process_data_assistments_2012(min_questions=2, max_questions=50, interactions_filepath="../input/assistmentds"
@@ -73,7 +72,7 @@ def process_data_assistments_2012(min_questions=2, max_questions=50, interaction
     print("Get texts, intersection...")
 
     # Step 6 - Remove questions interactions we do not have text
-    texts_df = get_assistments_texts(personal_cleaning=personal_cleaning, texts_filepath=texts_filepath, n_texts=n_texts, make_sentences_flag=make_sentences_flag)
+    texts_df = load_process_assistments_texts(personal_cleaning=personal_cleaning, texts_filepath=texts_filepath, n_texts=n_texts, make_sentences_flag=make_sentences_flag)
     train_df = train_df.loc[train_df['problem_id'].isin(texts_df['problem_id'])]
     texts_df = texts_df.loc[texts_df['problem_id'].isin(train_df['problem_id'])]
 

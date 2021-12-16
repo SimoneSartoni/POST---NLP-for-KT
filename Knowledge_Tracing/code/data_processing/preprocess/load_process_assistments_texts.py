@@ -105,7 +105,7 @@ def make_sentences(data, name):
     data[name] = data[name].apply(lambda x: re.sub(r'\s+', ' ', x, flags=re.I))
 
 
-def get_assistments_texts(personal_cleaning=True, texts_filepath='../input/', n_texts=None, make_sentences_flag=True):
+def load_process_assistments_texts(personal_cleaning=True, texts_filepath='../input/', n_texts=None, make_sentences_flag=True):
     input_types = {'problem_id': 'int64', 'body': "string"}
     if n_texts:
         df = pd.read_csv(texts_filepath, low_memory=False, dtype=input_types, nrows=n_texts)

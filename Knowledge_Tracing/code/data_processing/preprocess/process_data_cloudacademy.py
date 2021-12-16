@@ -1,11 +1,7 @@
-import csv
-from datetime import datetime
-
-import numpy as np
 import pandas as pd
 
 from Knowledge_Tracing.code.utils.utils import try_parsing_date
-from Knowledge_Tracing.code.data_processing.get_cloudacademy_texts import get_cloudacademy_texts
+from Knowledge_Tracing.code.data_processing.preprocess.load_process_cloudacademy_texts import get_cloudacademy_texts
 
 
 def process_data_cloudacademy(min_questions=2, max_questions=50, interactions_filepath="../input/assistmentds"

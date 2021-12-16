@@ -91,6 +91,7 @@ class sentence_transformer(base_model):
                 # and p not in unique_problems_set:
                 # unique_problems_set.add(p)
                 input_ids.append(self.problem_id_to_index[p])
+                input_ids.append(self.problem_id_to_index[p])
                 correct_ids.append(c)
         item_scores = 0.0
         if len(input_problems) == 0:
