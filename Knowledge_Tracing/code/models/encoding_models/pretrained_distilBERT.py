@@ -71,7 +71,7 @@ class PretrainedDistilBERT(base_model):
                 end = start + batch_size
             else:
                 end = -1
-            inputs = self.tokenizer(texts_df['sentence'].values[start:end], return_tensors="tf", padding=True)
+            inputs = self.tokenizer(list(texts_df['sentence'].values)[start:end], return_tensors="tf", padding=True)
             encoding = self.model(inputs).to_tuple()[0].numpy()
             for problem_id, enc in list(zip(self.texts_df['problem_id'].values[start:end], encoding)):
                 self.encodings[problem_id] = enc
