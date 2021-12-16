@@ -1,4 +1,4 @@
-from Knowledge_Tracing.code.models.DKT_models.pretrained_distillBERT_DKT.data_utils import *
+from Knowledge_Tracing.code.models.DKT_models.pretrained_distilBERT_DKT.data_utils import *
 
 
 class BinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
