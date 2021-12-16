@@ -133,7 +133,7 @@ class PretrainedDistilBERT(base_model):
         return item_scores, correct_ids
 
     def get_encoding(self, problem_id):
-        encodings = np.array(self.probabilities[problem_id])
+        encodings = np.array(self.encodings[problem_id])
         return encodings
 
     def get_serializable_params(self):
