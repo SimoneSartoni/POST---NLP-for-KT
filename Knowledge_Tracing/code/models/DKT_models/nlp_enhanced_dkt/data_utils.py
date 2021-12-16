@@ -7,8 +7,6 @@ from sklearn.model_selection import train_test_split
 from Knowledge_Tracing.code.models.encoding_models.count_vectorizer import count_vectorizer
 # from Knowledge_Tracing.code.models.encoding_models.BERTopic_model import BERTopic_model
 from Knowledge_Tracing.code.models.encoding_models.pretrained_distilBERT import PretrainedDistilBERT
-from Knowledge_Tracing.code.models.encoding_models.sentence_transformers import sentence_transformer
-from Knowledge_Tracing.code.models.encoding_models.gensim_model.gensim_pretrained_word2vec import pretrained_word2vec
 
 from Knowledge_Tracing.code.data_processing.load_preprocessed.load_preprocessed_data import load_preprocessed_texts
 from Knowledge_Tracing.code.data_processing.load_preprocessed.get_DKT_dataloaders import get_DKT_dataloaders
@@ -85,19 +83,6 @@ def load_dataset(batch_size=32, shuffle=True,
                                        count_vectorizer_args['max_features']
         encode_model = count_vectorizer(min_df=min_df, max_df=max_df, binary=False, max_features=max_features)
         encode_model.fit(text_df, save_filepath)
-
-    if 'sentence_encoder' in nlp_kwargs:
-        encoding_model = nlp_kwargs['sentence_encoder']['sentence_encoder_model']
-        encode_model = sentence_transformer(encoding_model=encoding_model)
-        encode_model.fit(text_df, save_filepath)
-
-    if 'pretrained_word2vec' in nlp_kwargs:
-        pretrained_word2vec_args = nlp_kwargs['pretrained_word2vec']
-        load, keyed_vectors = pretrained_word2vec_args['pretrained_word2vec_load'], \
-                              pretrained_word2vec_args['pretrained_word2vec_keyed_vectors']
-        encode_model = pretrained_word2vec(load=load, keyedvectors=keyed_vectors)
-        encode_model.encode_problems(text_df)
-        encode_model.fit()
 
     if 'pretrained_distilBERT' in nlp_kwargs:
         pretrained_distilBERT_args = nlp_kwargs['pretrained_distilBERT']
