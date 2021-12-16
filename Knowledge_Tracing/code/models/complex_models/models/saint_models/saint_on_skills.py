@@ -52,7 +52,7 @@ class EncoderBlock(nn.Module):
         self.multihead = MultiHeadWithFFN(n_heads=n_heads,
                                           n_dims=n_dims)
 
-    def forward(self, input_encoding, input_skill, first_block=True):
+    def forward(self, in_exercise, input_skill, first_block=True):
         if first_block:
             # _exe = self.exercise_embed(input_e)
             _skill = self.skill_embed(input_skill)
@@ -60,7 +60,7 @@ class EncoderBlock(nn.Module):
             _pos = self.position_embed(position_encoded)
             out = _skill + _pos
         else:
-            out = input_encoding
+            out = in_exercise
         output = self.multihead(q_input=out, kv_input=out)
         return output
 

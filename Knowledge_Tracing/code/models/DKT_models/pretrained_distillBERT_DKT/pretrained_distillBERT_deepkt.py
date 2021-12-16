@@ -1,37 +1,22 @@
 import tensorflow as tf
 from tensorflow.keras import Model, Input, layers, losses
 
-from Knowledge_Tracing.code.models.DKT_models.count_vect_DKT.count_vect_DKT_doubled_encodings.data_utils import get_target as NLP_get_target
+from Knowledge_Tracing.code.models.DKT_models.pretrained_distillBERT_DKT.data_utils import get_target as NLP_get_target
 MASK_VALUE=-1.0
 
-class CustomDKTLayer(tf.keras.layers.Layer):
-    def __init__(self, encoding_depth, hidden_units=100, dropout_rate=0.2, **kwargs):
-        super(CustomDKTLayer, self).__init__(**kwargs)
-        self.nb_features = encoding_depth
-        self.hidden_units = hidden_units
-        self.mask_feature_layer = tf.keras.layers.Masking(mask_value=MASK_VALUE)
 
-        self.lstm_layer = tf.keras.layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)
+class CumSumLayer(tf.keras.layers.Layer):
+    def __init__(self, **kwargs):
+        super(CumSumLayer, self).__init__(**kwargs)
 
-        self.dense_feature_layer = tf.keras.layers.Dense(encoding_depth, activation='sigmoid')
-        self.output_feature_layer = tf.keras.layers.TimeDistributed(self.dense_feature_layer, name='outputs_feature')
-        self.feature_pred_layer = tf.keras.layers.Multiply()
-
-    def call(self, input_feature, target_feature):
-        mask_feature = self.mask_feature_layer.compute_mask(input_feature)
-        print(mask_feature)
-        lstm = self.lstm_layer(inputs=input_feature, mask=mask_feature)
-        print(lstm)
-        output_feature = self.output_feature_layer(lstm)
-        output = self.feature_pred_layer([output_feature, target_feature])
+    def call(self, input_feature):
+        output = tf.reduce_sum(input_feature, axis=-1, keepdims=True)
         return output
 
-    def compute_mask(self, input_feature):
-        mask_feature = self.mask_feature_layer.compute_mask(input_feature)
-        lstm = self.lstm_layer(inputs=input_feature, mask=mask_feature)
-        lstm_mask = self.lstm_layer.compute_mask(inputs=input_feature, mask=mask_feature)
-        output_mask = self.output_feature_layer.compute_mask(lstm, lstm_mask)
-        return output_mask
+    def compute_mask(self, input_feature, mask=None):
+        if mask is None:
+            return None
+        return mask
 
 
 class clean_count_vect_DKTModel(tf.keras.Model):
@@ -46,20 +31,38 @@ class clean_count_vect_DKTModel(tf.keras.Model):
             and what the model expects.
     """
 
-    def __init__(self, nb_encodings, hidden_units=100, dropout_rate=0.2):
+    def __init__(self, nb_encodings, hidden_units=100, dropout_rate=0.4):
         input_encoding = tf.keras.Input(shape=(None, nb_encodings), name='input_encoding')
         target_encoding = tf.keras.Input(shape=(None, nb_encodings), name='target_encoding')
-        self.nb_encodings = nb_encodings
-        customDKTLayer = CustomDKTLayer(nb_encodings, hidden_units, dropout_rate)
-        encoding_pred = customDKTLayer(input_encoding, target_encoding)
-        mask_pred = customDKTLayer.compute_mask(input_encoding)
-        dense_class = tf.keras.layers.Dense(1, activation='sigmoid')
 
-        output_class = tf.keras.layers.TimeDistributed(dense_class, name='output_class')(inputs=encoding_pred, mask=mask_pred)
+        mask_feature_layer = tf.keras.layers.Masking(mask_value=MASK_VALUE, input_shape=(None, nb_encodings))
+        lstm_layer = tf.keras.layers.LSTM(hidden_units, return_sequences=True, return_state=True, dropout=dropout_rate)
+        dense_feature_layer = tf.keras.layers.Dense(nb_encodings, activation='relu')
+        output_feature_layer = tf.keras.layers.TimeDistributed(dense_feature_layer, name='outputs_feature')
+        multiply_target_layer = tf.keras.layers.Multiply()
+        dense_class_layer = tf.keras.layers.Dense(1, activation='sigmoid')
+        output_class_layer = tf.keras.layers.TimeDistributed(dense_class_layer, name='output_class')
+
+        print("input:")
+        print(input_encoding)
+        masked_target = mask_feature_layer(target_encoding)
+        masked_input = mask_feature_layer(input_encoding)
+        print("mask output:")
+        print(masked_input)
+        lstm_output, final_memory_state, final_carry_state = lstm_layer(masked_input)
+        print("lstm output")
+        print(lstm_output)
+        print(final_memory_state)
+        # intermediate_pred = intermediate_feature_layer(lstm_output)
+        encoding_pred = output_feature_layer(lstm_output)
+        multiply_output = multiply_target_layer([encoding_pred, masked_target])
+        output_class = output_class_layer(multiply_output)
 
         super(clean_count_vect_DKTModel, self).__init__(inputs={"input_encoding": input_encoding, "target_encoding": target_encoding},
-                                       outputs=output_class,
-                                       name="clean_count_vect_DKTModel")
+                                                        outputs=output_class,
+                                                        name="clean_count_vect_DKTModel")
+        self.nb_encodings = nb_encodings
+        self.hidden_units = hidden_units
 
     def compile(self, optimizer, metrics=None):
         """Configures the model for training.
@@ -80,7 +83,6 @@ class clean_count_vect_DKTModel(tf.keras.Model):
         """
 
         def custom_loss(y_true, y_pred):
-            y_true, y_pred = NLP_get_target(y_true, y_pred, nb_encodings=self.nb_encodings)
             return losses.binary_crossentropy(y_true, y_pred)
 
         super(clean_count_vect_DKTModel, self).compile(
