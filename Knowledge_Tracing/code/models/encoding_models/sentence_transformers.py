@@ -47,10 +47,9 @@ class sentence_transformer(base_model):
         del vectors
         gc.collect()
         # Save sparse matrix in current directory
-        self.vector_size = len(self.vectors.values()[0])
-        np.save(save_filepath, self.vectors)
+        self.vector_size = len(list(self.vectors.values())[0])
 
-        self.pro_num = len(self.vectors.keys())
+        self.pro_num = len(self.texts_df.keys)
         self.words_num = self.vector_size
 
     def write_words_unique(self, data_folder):
