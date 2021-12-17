@@ -9,7 +9,6 @@ from sentence_transformers import SentenceTransformer
 
 from Knowledge_Tracing.code.Similarity.Compute_Similarity import Compute_Similarity
 
-from sklearn.feature_extraction.text import CountVectorizer
 from Knowledge_Tracing.code.models.base_model import base_model
 
 

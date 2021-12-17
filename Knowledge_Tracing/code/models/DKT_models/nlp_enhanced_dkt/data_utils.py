@@ -91,6 +91,8 @@ def load_dataset(batch_size=32, shuffle=True,
         encode_model = PretrainedDistilBERT(config_path, model_filepath)
         encode_model.fit(text_df)
 
+
+
     train_gen, val_gen, test_gen, nb_questions, nb_skills = get_DKT_dataloaders(batch_size, shuffle,
                                                                                 interactions_filepath,
                                                                                 output_filepath=save_filepath,

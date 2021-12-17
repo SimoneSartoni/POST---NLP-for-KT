@@ -1,11 +1,16 @@
 from tensorflow.keras import Model, Input, layers, losses
 
-from Knowledge_Tracing.code.models.sentence_transformers.data_utils import get_target as NLP_get_target
+import tensorflow as tf
+from tensorflow.keras import Model, Input, layers, losses
+
+from Knowledge_Tracing.code.models.DKT_models.nlp_enhanced_dkt.data_utils import get_target as NLP_get_target
+MASK_VALUE = -1.0
 
 
-class sentence_transformer_deepkt(Model):
-    """ The sentence transformer Deep Knowledge Tracing model.
+class sentence_transformers_DKTModel(tf.keras.Model):
+    """ The Deep Knowledge Tracing model.
     Arguments in __init__:
+        nb_features: The number of features in the input.
         nb_skills: The number of skills in the dataset.
         hidden_units: Positive integer. The number of units of the LSTM layer.
         dropout_rate: Float between 0 and 1. Fraction of the units to drop.
@@ -14,30 +19,38 @@ class sentence_transformer_deepkt(Model):
             and what the model expects.
     """
 
-    def __init__(self, nb_encodings, hidden_units=100, dropout_rate=0.2):
-        input_encodings = Input(shape=[None, nb_encodings], name='input_encodings')
-        input_labels = Input(shape=[None, 1], name='input_labels')
+    def __init__(self, nb_encodings, hidden_units=100, dropout_rate=0.4):
+        input_encoding = tf.keras.Input(shape=(None, nb_encodings), name='input_encoding')
+        target_encoding = tf.keras.Input(shape=(None, nb_encodings), name='target_encoding')
 
-        mask_encodings = layers.Masking(mask_value=-1.0)(input_encodings)
-        mask_labels = layers.Masking(mask_value=-1.0)(input_labels)
+        mask_feature_layer = tf.keras.layers.Masking(mask_value=MASK_VALUE, input_shape=(None, nb_encodings))
+        lstm_layer = tf.keras.layers.LSTM(hidden_units, return_sequences=True, return_state=True, dropout=dropout_rate)
+        dense_feature_layer = tf.keras.layers.Dense(nb_encodings, activation='relu')
+        output_feature_layer = tf.keras.layers.TimeDistributed(dense_feature_layer, name='outputs_feature')
+        multiply_target_layer = tf.keras.layers.Multiply()
+        dense_class_layer = tf.keras.layers.Dense(1, activation='sigmoid')
+        output_class_layer = tf.keras.layers.TimeDistributed(dense_class_layer, name='output_class')
 
-        mask = layers.concatenate([mask_encodings, mask_labels], axis=-1)
-        lstm = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask)
+        print("input:")
+        print(input_encoding)
+        masked_target = mask_feature_layer(target_encoding)
+        masked_input = mask_feature_layer(input_encoding)
+        print("mask output:")
+        print(masked_input)
+        lstm_output, final_memory_state, final_carry_state = lstm_layer(masked_input)
+        print("lstm output")
+        print(lstm_output)
+        print(final_memory_state)
+        # intermediate_pred = intermediate_feature_layer(lstm_output)
+        encoding_pred = output_feature_layer(lstm_output)
+        multiply_output = multiply_target_layer([encoding_pred, masked_target])
+        output_class = output_class_layer(multiply_output)
 
-        dense_encodings = layers.Dense(nb_encodings, activation='sigmoid')
-
-        output_encodings = layers.TimeDistributed(dense_encodings, name='output_encodings')(lstm)
-
-        dense_class = layers.Dense(1, activation='sigmoid')
-
-        output_class = layers.TimeDistributed(dense_class, name='output_class')(output_encodings)
-
-        outputs = layers.concatenate([output_encodings, output_class])
-
-        super(sentence_transformer_deepkt, self).__init__(inputs=[input_encodings, input_labels],
-                                                        outputs=outputs,
-                                                        name="DKT_count_vect_Model")
+        super(sentence_transformers_DKTModel, self).__init__(inputs={"input_encoding": input_encoding, "target_encoding": target_encoding},
+                                                             outputs=output_class,
+                                                             name="sentence_transformers_DKTModel")
         self.nb_encodings = nb_encodings
+        self.hidden_units = hidden_units
 
     def compile(self, optimizer, metrics=None):
         """Configures the model for training.
@@ -58,10 +71,9 @@ class sentence_transformer_deepkt(Model):
         """
 
         def custom_loss(y_true, y_pred):
-            y_true, y_pred = NLP_get_target(y_true, y_pred, nb_encodings=self.nb_encodings)
             return losses.binary_crossentropy(y_true, y_pred)
 
-        super(sentence_transformer_deepkt, self).compile(
+        super(sentence_transformers_DKTModel, self).compile(
               loss=custom_loss,
               optimizer=optimizer,
               metrics=metrics,
@@ -136,16 +148,16 @@ class sentence_transformer_deepkt(Model):
             ValueError: In case of mismatch between the provided input data
                 and what the model expects.
         """
-        return super(sentence_transformer_deepkt, self).fit(x=dataset,
-                                                          epochs=epochs,
-                                                          verbose=verbose,
-                                                          callbacks=callbacks,
-                                                          validation_data=validation_data,
-                                                          shuffle=shuffle,
-                                                          initial_epoch=initial_epoch,
-                                                          steps_per_epoch=steps_per_epoch,
-                                                          validation_steps=validation_steps,
-                                                          validation_freq=validation_freq)
+        return super(sentence_transformers_DKTModel, self).fit(x=dataset,
+                                                               epochs=epochs,
+                                                               verbose=verbose,
+                                                               callbacks=callbacks,
+                                                               validation_data=validation_data,
+                                                               shuffle=shuffle,
+                                                               initial_epoch=initial_epoch,
+                                                               steps_per_epoch=steps_per_epoch,
+                                                               validation_steps=validation_steps,
+                                                               validation_freq=validation_freq)
 
     def custom_evaluate(self,
                         dataset,
@@ -177,10 +189,10 @@ class sentence_transformer_deepkt(Model):
         Raises:
             ValueError: in case of invalid arguments.
         """
-        return super(sentence_transformer_deepkt, self).evaluate(dataset,
-                                                               verbose=verbose,
-                                                               steps=steps,
-                                                               callbacks=callbacks)
+        return super(sentence_transformers_DKTModel, self).evaluate(dataset,
+                                                                    verbose=verbose,
+                                                                    steps=steps,
+                                                                    callbacks=callbacks)
 
     def evaluate_generator(self, *args, **kwargs):
         raise SyntaxError("Not supported")
