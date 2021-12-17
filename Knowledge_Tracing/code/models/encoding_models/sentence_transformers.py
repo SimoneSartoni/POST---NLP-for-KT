@@ -49,7 +49,7 @@ class sentence_transformer(base_model):
         # Save sparse matrix in current directory
         self.vector_size = len(list(self.vectors.values())[0])
 
-        self.pro_num = len(self.texts_df.keys)
+        self.pro_num = len(list(self.vectors.values()))
         self.words_num = self.vector_size
 
     def write_words_unique(self, data_folder):
