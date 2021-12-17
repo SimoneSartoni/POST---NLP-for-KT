@@ -1,7 +1,6 @@
 import tensorflow as tf
 from tensorflow.keras import Model, Input, layers, losses
 
-from Knowledge_Tracing.code.models.DKT_models.nlp_enhanced_dkt.data_utils import get_target as NLP_get_target
 MASK_VALUE = -1.0
 
 

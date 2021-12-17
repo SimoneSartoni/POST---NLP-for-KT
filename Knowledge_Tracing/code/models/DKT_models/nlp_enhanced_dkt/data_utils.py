@@ -117,6 +117,3 @@ def load_dataset(batch_size=32, shuffle=True,
 
     return train_loader, val_loader, test_loader, encoding_depth
 
-
-def get_target(y_true, y_pred, nb_encodings=300):
-    return y_true, y_pred
