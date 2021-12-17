@@ -39,8 +39,8 @@ def max_pooling(token_embeddings, attention_mask):
 # Min Pooling - Take attention mask into account for correct averaging
 def min_pooling(token_embeddings, attention_mask):
     input_mask_expanded = np.broadcast_to(np.expand_dims(attention_mask, -1), token_embeddings.shape)
-    max_embeddings = np.amin(token_embeddings * input_mask_expanded, 0)
-    return max_embeddings
+    min_embeddings = np.amin(token_embeddings * input_mask_expanded, 0)
+    return min_embeddings
 
 
 class PretrainedDistilBERT(base_model):
