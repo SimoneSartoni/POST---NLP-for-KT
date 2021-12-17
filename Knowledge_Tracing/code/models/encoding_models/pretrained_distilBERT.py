@@ -92,22 +92,22 @@ class PretrainedDistilBERT(base_model):
         self.texts_df = texts_df
         start = 0
         batch_size = 100
-        while start < len(texts_df['sentence'].values):
+        while start < len(texts_df.keys):
             if start + batch_size < len(texts_df.index):
                 end = start + batch_size
             else:
-                end = -1
+                end = len(texts_df.index)
             inputs = self.tokenizer(list(self.texts_df['sentence'].values)[start:end], truncation=True,
                                     return_tensors="tf",
                                     padding=True)
             attention_mask = inputs['attention_mask'].numpy()
             output = self.model(inputs)
             encoding = output.to_tuple()[0].numpy()
-            for problem_id, enc, attention in list(
-                    zip(self.texts_df['problem_id'].values[start:end], encoding, attention_mask)):
+            for problem_id, enc, attention in list(zip(self.texts_df['problem_id'].values[start:end],
+                                                       encoding, attention_mask)):
                 self.encodings[problem_id] = self.pooling_method(enc, attention)
             start = start + batch_size
-        print(self.encodings)
+        print(len(list(self.encodings.keys())))
         print("pretrainedBERT model created")
 
         self.words_num = list(self.encodings.values())[0].shape[0]
