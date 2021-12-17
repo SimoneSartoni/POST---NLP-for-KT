@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 from Knowledge_Tracing.code.models.encoding_models.count_vectorizer import count_vectorizer
 # from Knowledge_Tracing.code.models.encoding_models.BERTopic_model import BERTopic_model
 from Knowledge_Tracing.code.models.encoding_models.pretrained_distilBERT import PretrainedDistilBERT
+from Knowledge_Tracing.code.models.encoding_models.sentence_transformers import sentence_transformer
 
 from Knowledge_Tracing.code.data_processing.load_preprocessed.load_preprocessed_data import load_preprocessed_texts
 from Knowledge_Tracing.code.data_processing.load_preprocessed.get_DKT_dataloaders import get_DKT_dataloaders
@@ -91,7 +92,10 @@ def load_dataset(batch_size=32, shuffle=True,
         encode_model = PretrainedDistilBERT(config_path, model_filepath)
         encode_model.fit(text_df)
 
-
+    if 'sentence_transformers' in nlp_kwargs:
+        model_name = nlp_kwargs['sentence_transformers']['model_name']
+        encode_model = sentence_transformer(encoding_model=model_name)
+        encode_model.fit(text_df)
 
     train_gen, val_gen, test_gen, nb_questions, nb_skills = get_DKT_dataloaders(batch_size, shuffle,
                                                                                 interactions_filepath,
