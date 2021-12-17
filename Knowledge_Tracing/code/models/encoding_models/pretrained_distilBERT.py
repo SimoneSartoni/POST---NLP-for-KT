@@ -48,7 +48,7 @@ class PretrainedDistilBERT(base_model):
                                    "pretrained_distilbert_base_uncased_24_epochs/config.json",
                  model_filepath="/content/drive/MyDrive/simone sartoni - text enhanced deep knowledge tracing/"
                                 "pretrained_distilbert_base_uncased_24_epochs/tf_model.h5",
-                 pooling='average'
+                 pooling='mean'
                  ):
         super().__init__("sentence_transformers", "NLP")
 
