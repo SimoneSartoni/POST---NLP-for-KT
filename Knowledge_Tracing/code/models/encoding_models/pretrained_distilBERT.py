@@ -95,8 +95,6 @@ class PretrainedDistilBERT(base_model):
         while start < len(texts_df.keys):
             if start + batch_size < len(texts_df.index):
                 end = start + batch_size
-            else:
-                end = len(texts_df.index)
             inputs = self.tokenizer(list(self.texts_df['sentence'].values)[start:end], truncation=True,
                                     return_tensors="tf",
                                     padding=True)
