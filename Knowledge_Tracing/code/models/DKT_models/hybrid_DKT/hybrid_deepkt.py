@@ -1,9 +1,7 @@
 from tensorflow.keras import Model, Input, layers, losses
 
-from Knowledge_Tracing.code.models.DKT_models.complete_DKT.data_utils import get_target as NLP_get_target
 
-
-class complete_DKTModel(Model):
+class hybrid_DKTModel(Model):
     """ The Deep Knowledge Tracing model.
     Arguments in __init__:
         nb_skills: The number of skills in the dataset.
@@ -14,41 +12,28 @@ class complete_DKTModel(Model):
             and what the model expects.
     """
 
-    def __init__(self, encoding_sizes=[], nb_features=None, hidden_units=100, output_units_per_encoding=50, dropout_rate=0.2):
-
-        dense_units = 0
-        inputs = []
-        lstm_encodings = []
-        if len(encoding_sizes) > 0:
-            dense_units = len(encoding_sizes) * output_units_per_encoding
-            for index in range(0, len(encoding_sizes)):
-                input_encoding = Input(shape=[None, encoding_sizes[index]], name='input_encoding_'+str(index))
-                inputs.append(input_encoding)
-                mask_encoding = layers.Masking(mask_value=-1.0)(input_encoding)
-                lstm_encoding = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_encoding)
-                lstm_encodings.append(lstm_encoding)
-        if nb_features:
-            input_features = Input(shape=[None, nb_features], name='input_skills')
-            inputs.append(input_features)
-            mask_features = layers.Masking(mask_value=-1.0)(input_features)
-            lstm_features = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_features)
-            lstm_encodings.append(lstm_features)
-        lstm = layers.concatenate(lstm_encodings)
-
-        if nb_features:
-            dense_units += output_units_per_encoding
-
-        dense_layer = layers.Dense(dense_units, activation='sigmoid')
-
-        dense_outputs = layers.TimeDistributed(dense_layer, name='output_dense')(lstm)
+    def __init__(self, configs={}, dropout_rate=0.2):
+        inputs = {}
+        dense_outputs = []
+        if len(list(configs.keys())) > 0:
+            for config in configs.values():
+                name, embedding_size, hidden_units, dense_units = config['name'], config['embedding_size'], \
+                                                                 config['hidden_units'], config['dense_units']
+                input_embedding = Input(shape=[None, embedding_size], name="embedding_" + name)
+                inputs["input_" + name] = input_embedding
+                mask_embedding = layers.Masking(mask_value=-1.0)(input_embedding)
+                lstm_embedding = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_embedding)
+                dense_layer = layers.Dense(dense_units, activation='sigmoid')
+                dense_output = layers.TimeDistributed(dense_layer, name=name + '_output_dense')(lstm_embedding)
+                dense_outputs.append(dense_output)
+        concatenate_layer = layers.concatenate(dense_outputs)
 
         dense_label = layers.Dense(1, activation='sigmoid')
 
-        output_label = layers.TimeDistributed(dense_label, name='output_class')(dense_outputs)
+        output_label = layers.TimeDistributed(dense_label, name='output_class')(concatenate_layer)
 
-        super(complete_DKTModel, self).__init__(inputs=inputs, outputs=output_label, name="complete_DKTModel")
-        self.encoding_sizes = encoding_sizes
-        self.nb_features = nb_features
+        super(hybrid_DKTModel, self).__init__(inputs=inputs, outputs=output_label, name="hybrid_DKTModel")
+        self.configs = configs
 
     def compile(self, optimizer, metrics=None):
         """Configures the model for training.
@@ -69,10 +54,9 @@ class complete_DKTModel(Model):
         """
 
         def custom_loss(y_true, y_pred):
-            y_true, y_pred = NLP_get_target(y_true, y_pred)
             return losses.binary_crossentropy(y_true, y_pred)
 
-        super(complete_DKTModel, self).compile(
+        super(hybrid_DKTModel, self).compile(
             loss=custom_loss,
             optimizer=optimizer,
             metrics=metrics,
@@ -147,16 +131,16 @@ class complete_DKTModel(Model):
             ValueError: In case of mismatch between the provided input data
                 and what the model expects.
         """
-        return super(complete_DKTModel, self).fit(x=dataset,
-                                                  epochs=epochs,
-                                                  verbose=verbose,
-                                                  callbacks=callbacks,
-                                                  validation_data=validation_data,
-                                                  shuffle=shuffle,
-                                                  initial_epoch=initial_epoch,
-                                                  steps_per_epoch=steps_per_epoch,
-                                                  validation_steps=validation_steps,
-                                                  validation_freq=validation_freq)
+        return super(hybrid_DKTModel, self).fit(x=dataset,
+                                                epochs=epochs,
+                                                verbose=verbose,
+                                                callbacks=callbacks,
+                                                validation_data=validation_data,
+                                                shuffle=shuffle,
+                                                initial_epoch=initial_epoch,
+                                                steps_per_epoch=steps_per_epoch,
+                                                validation_steps=validation_steps,
+                                                validation_freq=validation_freq)
 
     def custom_evaluate(self,
                         dataset,
@@ -188,10 +172,10 @@ class complete_DKTModel(Model):
         Raises:
             ValueError: in case of invalid arguments.
         """
-        return super(complete_DKTModel, self).evaluate(dataset,
-                                                                    verbose=verbose,
-                                                                    steps=steps,
-                                                                    callbacks=callbacks)
+        return super(hybrid_DKTModel, self).evaluate(dataset,
+                                                     verbose=verbose,
+                                                     steps=steps,
+                                                     callbacks=callbacks)
 
     def evaluate_generator(self, *args, **kwargs):
         raise SyntaxError("Not supported")

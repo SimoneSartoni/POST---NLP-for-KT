@@ -1,4 +1,4 @@
-from Knowledge_Tracing.code.models.DKT_models.complete_DKT.data_utils import *
+from Knowledge_Tracing.code.models.DKT_models.hybrid_DKT.data_utils import *
 
 class BinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
     def update_state(self, y_true, y_pred, sample_weight=None):
