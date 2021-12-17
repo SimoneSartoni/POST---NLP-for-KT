@@ -21,11 +21,34 @@ def identity_tokenizer(text):
     return text
 
 
+# Mean Pooling - Take attention mask into account for correct averaging
+def mean_pooling(token_embeddings, attention_mask):
+    input_mask_expanded = np.broadcast_to(np.expand_dims(attention_mask, -1), token_embeddings.shape)
+    sum_embeddings = np.sum(token_embeddings * input_mask_expanded, 0)
+    sum_mask = np.clip(np.sum(input_mask_expanded, 0), 1e-9, 1000)
+    return sum_embeddings / sum_mask
+
+
+# Max Pooling - Take attention mask into account for correct max
+def max_pooling(token_embeddings, attention_mask):
+    input_mask_expanded = np.broadcast_to(np.expand_dims(attention_mask, -1), token_embeddings.shape)
+    max_embeddings = np.amax(token_embeddings * input_mask_expanded, 0)
+    return max_embeddings
+
+
+# Min Pooling - Take attention mask into account for correct averaging
+def min_pooling(token_embeddings, attention_mask):
+    input_mask_expanded = np.broadcast_to(np.expand_dims(attention_mask, -1), token_embeddings.shape)
+    max_embeddings = np.amin(token_embeddings * input_mask_expanded, 0)
+    return max_embeddings
+
+
 class PretrainedDistilBERT(base_model):
     def __init__(self, config_path="/content/drive/MyDrive/simone sartoni - text enhanced deep knowledge tracing/"
                                    "pretrained_distilbert_base_uncased_24_epochs/config.json",
                  model_filepath="/content/drive/MyDrive/simone sartoni - text enhanced deep knowledge tracing/"
-                                "pretrained_distilbert_base_uncased_24_epochs/tf_model.h5"
+                                "pretrained_distilbert_base_uncased_24_epochs/tf_model.h5",
+                 pooling='average'
                  ):
         super().__init__("sentence_transformers", "NLP")
 
@@ -40,13 +63,16 @@ class PretrainedDistilBERT(base_model):
                                   cluster_selection_method=cluster_selection_method)
         """
 
-
         self.config = DistilBertConfig.from_json_file(config_path)
         self.model = TFDistilBertModel.from_pretrained(model_filepath, config=self.config)
         self.tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
         self.encodings = {}
-
-
+        if pooling == 'mean':
+            self.pooling_method = mean_pooling
+        elif pooling == 'min':
+            self.pooling_method = min_pooling
+        elif pooling == 'max':
+            self.pooling_method = max_pooling
         self.similarity_matrix = None
         self.words_unique = None
         self.pro_num = None
@@ -71,10 +97,15 @@ class PretrainedDistilBERT(base_model):
                 end = start + batch_size
             else:
                 end = -1
-            inputs = self.tokenizer(list(texts_df['sentence'].values)[start:end], return_tensors="tf", padding=True)
-            encoding = self.model(inputs).to_tuple()[0].numpy()
-            for problem_id, enc in list(zip(self.texts_df['problem_id'].values[start:end], encoding)):
-                self.encodings[problem_id] = enc
+            inputs = self.tokenizer(list(self.texts_df['sentence'].values)[start:end], truncation=True,
+                                    return_tensors="tf",
+                                    padding=True)
+            attention_mask = inputs['attention_mask'].numpy()
+            output = self.model(inputs)
+            encoding = output.to_tuple()[0].numpy()
+            for problem_id, enc, attention in list(
+                    zip(self.texts_df['problem_id'].values[start:end], encoding, attention_mask)):
+                self.encodings[problem_id] = self.pooling_method(enc, attention)
             start = start + batch_size
         print(self.encodings)
         print("pretrainedBERT model created")

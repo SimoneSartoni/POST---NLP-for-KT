@@ -58,7 +58,7 @@ def create_dataset(generator, encoding_depth, shuffle=True, batch_size=1024):
         batch_size=batch_size,
         padding_values=-1.0,
         padded_shapes=(
-        {"input_encoding": [None, encoding_depth], "target_encoding": [None, encoding_depth]}, [None, 1]),
+            {"input_encoding": [None, encoding_depth], "target_encoding": [None, encoding_depth]}, [None, 1]),
         drop_remainder=True
     )
     return dataset
