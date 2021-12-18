@@ -140,8 +140,8 @@ class hybrid_dkt_dataset:
             if self.text_encoding_models:
                 for encoding_model, encoding, target_encoding in list(zip(self.text_encoding_models, text_encodings,
                                                                           target_text_encodings)):
-                    inputs[encoding_model.name] = encoding
-                    inputs["target_" + encoding_model.name] = target_encoding
+                    inputs[encoding_model.name] = text_encodings[encoding]
+                    inputs["target_" + encoding_model.name] = target_text_encodings[target_encoding]
             outputs = {}
             for key in possible_outputs.keys():
                 if self.outputs_dict[key]:
