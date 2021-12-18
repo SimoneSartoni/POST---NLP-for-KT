@@ -15,7 +15,6 @@ class hybrid_DKTModel(Model):
     def __init__(self, configs={}, dropout_rate=0.2):
         inputs = {}
         multiply_outputs = []
-        multiply_target_layer = layers.Multiply()
 
         if len(list(configs.keys())) > 0:
             for config in configs.values():
@@ -30,6 +29,7 @@ class hybrid_DKTModel(Model):
                 lstm_embedding = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_embedding)
                 dense_layer = layers.Dense(embedding_size, activation='sigmoid')
                 dense_output = layers.TimeDistributed(dense_layer, name=name + '_output_dense')(lstm_embedding)
+                multiply_target_layer = layers.Multiply()
                 multiply_output = multiply_target_layer([dense_output, mask_target_embedding])
                 multiply_outputs.append(multiply_output)
         concatenate_layer = layers.concatenate(multiply_outputs)
