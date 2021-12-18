@@ -56,11 +56,11 @@ class hybrid_dkt_dataset:
         if self.text_encoding_models:
             for encoding_model in self.text_encoding_models:
                 if self.encode_correct_in_encodings:
-                    self.encoding_depth[encoding_model.name] = 2 * encoding_model.vector_size
+                    self.encoding_depths[encoding_model.name] = 2 * encoding_model.vector_size
                 else:
-                    self.encoding_depth[encoding_model.name] = encoding_model.vector_size
+                    self.encoding_depths[encoding_model.name] = encoding_model.vector_size
         else:
-            self.encoding_depth = 0
+            self.encoding_depths = 0
 
     def __len__(self):
         return len(self.data)
