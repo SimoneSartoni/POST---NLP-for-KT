@@ -80,14 +80,16 @@ class hybrid_dkt_dataset:
             target_text_encodings = {}
             if self.text_encoding_models:
                 for encoding_model in self.text_encoding_models:
+                    encodings = []
+                    target_encodings = []
                     if self.encode_correct_in_encodings:
                         for text_id, correct in list(zip(text_ids, answered_correctly)):
-                            text_encoding, target_encoding = encode_correctness_in_encodings(encoding_model, text_id,
-                                                                                             correct)
-                            text_encodings.append(text_encoding)
-                            target_text_encodings.append(target_encoding)
-                        text_encodings[encoding_model.name] = text_encodings[:-1]
-                        target_text_encodings[encoding_model.name] = target_text_encodings[1:]
+                            encoding, target_encoding = encode_correctness_in_encodings(encoding_model, text_id,
+                                                                                        correct)
+                            encodings.append(encoding)
+                            target_encodings.append(target_encoding)
+                        text_encodings[encoding_model.name] = encodings[:-1]
+                        target_text_encodings[encoding_model.name] = target_encodings[1:]
                     else:
                         all_text_encodings = [encoding_model.get_encoding(text_id) for text_id in text_ids]
                         target_text_encodings[encoding_model.name] = all_text_encodings[1:]
