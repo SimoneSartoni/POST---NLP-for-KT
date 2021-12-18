@@ -24,7 +24,7 @@ def identity_tokenizer(text):
 class BERTopic_model(base_model):
     def __init__(self, nr_topics=128,
                  calculate_probabilities=True, cluster_selection_method='eom'):
-        super().__init__("sentence_transformers", "NLP")
+        super().__init__("BERTopic", "NLP")
         """self.sentence_transformer = SentenceTransformer('bert-large-nli-mean-tokens')
         self.embeddings = None
         self.umap_embeddings = None

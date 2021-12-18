@@ -14,19 +14,25 @@ class hybrid_DKTModel(Model):
 
     def __init__(self, configs={}, dropout_rate=0.2):
         inputs = {}
-        dense_outputs = []
+        multiply_outputs = []
+        multiply_target_layer = layers.Multiply()
+
         if len(list(configs.keys())) > 0:
             for config in configs.values():
                 name, embedding_size, hidden_units, dense_units = config['name'], config['embedding_size'], \
                                                                  config['hidden_units'], config['dense_units']
-                input_embedding = Input(shape=[None, embedding_size], name="embedding_" + name)
-                inputs["input_" + name] = input_embedding
+                input_embedding = Input(shape=[None, embedding_size], name=name)
+                target_embedding = Input(shape=[None, embedding_size], name="target_" + name)
+                inputs[name] = input_embedding
+                inputs['target_'+name] = target_embedding
                 mask_embedding = layers.Masking(mask_value=-1.0)(input_embedding)
+                mask_target_embedding = layers.Masking(mask_value=-1.0)(target_embedding)
                 lstm_embedding = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_embedding)
                 dense_layer = layers.Dense(dense_units, activation='sigmoid')
                 dense_output = layers.TimeDistributed(dense_layer, name=name + '_output_dense')(lstm_embedding)
-                dense_outputs.append(dense_output)
-        concatenate_layer = layers.concatenate(dense_outputs)
+                multiply_output = multiply_target_layer([dense_output, mask_target_embedding])
+                multiply_outputs.append(multiply_output)
+        concatenate_layer = layers.concatenate(multiply_outputs)
 
         dense_label = layers.Dense(1, activation='sigmoid')
 

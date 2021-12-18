@@ -10,7 +10,8 @@ from Knowledge_Tracing.code.models.encoding_models.pretrained_distilBERT import 
 from Knowledge_Tracing.code.models.encoding_models.sentence_transformers import sentence_transformer
 
 from Knowledge_Tracing.code.data_processing.load_preprocessed.load_preprocessed_data import load_preprocessed_texts
-from Knowledge_Tracing.code.data_processing.load_preprocessed.get_DKT_dataloaders import get_DKT_dataloaders
+from Knowledge_Tracing.code.data_processing.load_preprocessed.get_hybrid_DKT_dataloaders import \
+    get_hybrid_dkt_dataloaders
 
 MASK_VALUE = -1.0  # The masking value cannot be zero.
 
@@ -26,12 +27,17 @@ MASK_VALUE = -1.0  # The masking value cannot be zero.
 """
 
 
-def create_dataset(generator, encoding_depth, shuffle=True, batch_size=1024):
-    input_types = {"text_encoding": tf.float32, "target_text_encoding": tf.float32}
-    output_types = {"target_label": tf.float32}
+def create_dataset(generator, encode_models, encoding_depths, shuffle=True, batch_size=1024):
+    input_types, output_types, input_shapes, output_shapes = {}, {}, {}, {}
+    for encoding_depth, encode_model in list(zip(list(encoding_depths.values()), encode_models)):
+        input_types[encode_model.name] = tf.float32
+        input_types["target_" + encode_model.name] = tf.float32
+        input_shapes[encode_model.name] = [None, encoding_depth]
+        input_shapes["target_" + encode_model.name] = [None, encoding_depth]
 
-    input_shapes = {"text_encoding": [None, encoding_depth], "target_text_encoding": [None, encoding_depth]}
+    output_types = {"target_label": tf.float32}
     output_shapes = {"target_label": [None]}
+
     types = (input_types, output_types)
     shapes = (input_shapes, output_shapes)
     dataset = tf.data.Dataset.from_generator(
@@ -47,7 +53,7 @@ def create_dataset(generator, encoding_depth, shuffle=True, batch_size=1024):
     print(dataset)
     dataset = dataset.map(
         lambda inputs, outputs: (
-            {"input_encoding": inputs['text_encoding'], "target_encoding": inputs['target_text_encoding']},
+            inputs,
             tf.expand_dims(outputs['target_label'], axis=-1)
         )
     )
@@ -58,8 +64,7 @@ def create_dataset(generator, encoding_depth, shuffle=True, batch_size=1024):
     dataset = dataset.padded_batch(
         batch_size=batch_size,
         padding_values=-1.0,
-        padded_shapes=(
-            {"input_encoding": [None, encoding_depth], "target_encoding": [None, encoding_depth]}, [None, 1]),
+        padded_shapes=(input_shapes, [None, 1]),
         drop_remainder=True
     )
     return dataset
@@ -78,12 +83,14 @@ def load_dataset(batch_size=32, shuffle=True,
 
     text_df = load_preprocessed_texts(texts_filepath=texts_filepath)
     # Step 3.1 - Generate NLP extracted encoding for problems
+    encode_models = []
     if 'count_vectorizer' in nlp_kwargs:
         count_vectorizer_args = nlp_kwargs['count_vectorizer']
         min_df, max_df, max_features = count_vectorizer_args['min_df'], count_vectorizer_args['max_df'], \
                                        count_vectorizer_args['max_features']
         encode_model = count_vectorizer(min_df=min_df, max_df=max_df, binary=False, max_features=max_features)
         encode_model.fit(text_df, save_filepath)
+        encode_models.append(encode_model)
 
     if 'pretrained_distilBERT' in nlp_kwargs:
         pretrained_distilBERT_args = nlp_kwargs['pretrained_distilBERT']
@@ -91,29 +98,24 @@ def load_dataset(batch_size=32, shuffle=True,
                                       pretrained_distilBERT_args['model_filepath']
         encode_model = PretrainedDistilBERT(config_path, model_filepath)
         encode_model.fit(text_df)
+        encode_models.append(encode_model)
 
     if 'sentence_transformers' in nlp_kwargs:
         model_name = nlp_kwargs['sentence_transformers']['model_name']
         encode_model = sentence_transformer(encoding_model=model_name)
         encode_model.fit(text_df)
+        encode_models.append(encode_model)
 
-    train_gen, val_gen, test_gen, nb_questions, nb_skills = get_DKT_dataloaders(batch_size, shuffle,
-                                                                                interactions_filepath,
-                                                                                output_filepath=save_filepath,
-                                                                                interaction_sequence_len=interaction_sequence_len
-                                                                                , min_seq_len=min_seq_len,
-                                                                                text_encoding_model=encode_model,
-                                                                                negative_correctness=False,
-                                                                                inputs_dict=inputs,
-                                                                                outputs_dict=outputs,
-                                                                                encode_correct_in_encodings=True,
-                                                                                encode_correct_in_skills=False,
-                                                                                dictionary=dictionary)
+    train_gen, val_gen, test_gen, nb_questions, nb_skills = get_hybrid_dkt_dataloaders(
+        batch_size, shuffle, interactions_filepath, output_filepath=save_filepath,
+        interaction_sequence_len=interaction_sequence_len, min_seq_len=min_seq_len, text_encoding_models=encode_models,
+        negative_correctness=False, inputs_dict=inputs, outputs_dict=outputs, encode_correct_in_encodings=True,
+        encode_correct_in_skills=False, dictionary=dictionary)
 
-    encoding_depth = train_gen.encoding_depth
-    train_loader = create_dataset(train_gen, encoding_depth, shuffle=shuffle, batch_size=batch_size)
-    val_loader = create_dataset(val_gen, encoding_depth, shuffle=shuffle, batch_size=batch_size)
-    test_loader = create_dataset(test_gen, encoding_depth, shuffle=shuffle, batch_size=batch_size)
+    encoding_depths = train_gen.encoding_depth
+    train_loader = create_dataset(train_gen, encode_models, encoding_depths, shuffle=shuffle, batch_size=batch_size)
+    val_loader = create_dataset(val_gen, encode_models, encoding_depths, shuffle=shuffle, batch_size=batch_size)
+    test_loader = create_dataset(test_gen, encode_models, encoding_depths, shuffle=shuffle, batch_size=batch_size)
 
-    return train_loader, val_loader, test_loader, encoding_depth
-
+    encode_names = [encode_model.name for encode_model in encode_models]
+    return train_loader, val_loader, test_loader, encoding_depths, encode_names

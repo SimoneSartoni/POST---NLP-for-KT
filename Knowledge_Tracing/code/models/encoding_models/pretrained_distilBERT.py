@@ -50,7 +50,7 @@ class PretrainedDistilBERT(base_model):
                                 "pretrained_distilbert_base_uncased_24_epochs/tf_model.h5",
                  pooling='mean'
                  ):
-        super().__init__("sentence_transformers", "NLP")
+        super().__init__("PretrainedDistilBERT", "NLP")
 
         """
         self.embeddings = None
