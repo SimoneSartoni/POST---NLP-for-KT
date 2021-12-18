@@ -1,3 +1,5 @@
+import tensorflow as tf
+
 class BinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
     def update_state(self, y_true, y_pred, sample_weight=None):
         super(BinaryAccuracy, self).update_state(y_true=y_true,
