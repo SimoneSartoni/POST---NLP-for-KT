@@ -112,7 +112,7 @@ def load_dataset(batch_size=32, shuffle=True,
         negative_correctness=False, inputs_dict=inputs, outputs_dict=outputs, encode_correct_in_encodings=True,
         encode_correct_in_skills=False, dictionary=dictionary)
 
-    encoding_depths = train_gen.encoding_depth
+    encoding_depths = train_gen.encoding_depths
     train_loader = create_dataset(train_gen, encode_models, encoding_depths, shuffle=shuffle, batch_size=batch_size)
     val_loader = create_dataset(val_gen, encode_models, encoding_depths, shuffle=shuffle, batch_size=batch_size)
     test_loader = create_dataset(test_gen, encode_models, encoding_depths, shuffle=shuffle, batch_size=batch_size)

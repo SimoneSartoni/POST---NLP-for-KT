@@ -19,8 +19,8 @@ class hybrid_DKTModel(Model):
 
         if len(list(configs.keys())) > 0:
             for config in configs.values():
-                name, embedding_size, hidden_units, dense_units = config['name'], config['embedding_size'], \
-                                                                 config['hidden_units'], config['dense_units']
+                name, embedding_size, hidden_units = config['name'], config['embedding_size'], \
+                                                                 config['hidden_units']
                 input_embedding = Input(shape=[None, embedding_size], name=name)
                 target_embedding = Input(shape=[None, embedding_size], name="target_" + name)
                 inputs[name] = input_embedding
@@ -28,7 +28,7 @@ class hybrid_DKTModel(Model):
                 mask_embedding = layers.Masking(mask_value=-1.0)(input_embedding)
                 mask_target_embedding = layers.Masking(mask_value=-1.0)(target_embedding)
                 lstm_embedding = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_embedding)
-                dense_layer = layers.Dense(dense_units, activation='sigmoid')
+                dense_layer = layers.Dense(embedding_size, activation='sigmoid')
                 dense_output = layers.TimeDistributed(dense_layer, name=name + '_output_dense')(lstm_embedding)
                 multiply_output = multiply_target_layer([dense_output, mask_target_embedding])
                 multiply_outputs.append(multiply_output)
