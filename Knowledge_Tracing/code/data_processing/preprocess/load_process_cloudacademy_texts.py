@@ -44,6 +44,8 @@ def preprocess_data(data, name):
     data[name] = data[name].apply(lambda x: re.sub(r'[0-9]+', '', str(x)))
     # Remove the twitter handlers
     data[name] = data[name].apply(lambda x: re.sub(r'@[^\s]+', '', str(x)))
+    data[name] = data[name].apply(lambda x: str(x))
+
 
 
 # This function is to remove stopwords from a particular column and to tokenize it
