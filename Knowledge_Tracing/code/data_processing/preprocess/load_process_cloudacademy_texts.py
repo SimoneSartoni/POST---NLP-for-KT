@@ -4,7 +4,6 @@ import pandas as pd
 
 import nltk
 
-
 from bs4 import BeautifulSoup
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
@@ -48,12 +47,13 @@ def preprocess_data(data, name):
 
 
 # This function is to remove stopwords from a particular column and to tokenize it
-def rem_stopwords_tokenize(data, name, personal_cleaning):
+def rem_stopwords_tokenize(data, name, personal_cleaning,
+                           dictionary_gb_path='/content/drive/MyDrive/simone sartoni - text enhanced deep knowledge '
+                                              'tracing/Text-enhanced Knowledge Tracing/utils/'):
     stop_words = set(stopwords.words('english'))
-    dictionary_US = hunspell.HunSpell('/usr/share/hunspell/en_US.dic', '/usr/share/hunspell/en_US.aff')
-    dictionary_GB = hunspell.HunSpell('/content/drive/MyDrive/Thesis_ NLP for KT/utils/en_GB-large.dic',
-                                      '/content/drive/MyDrive/Thesis_ NLP for KT/utils/en_GB-large.aff')
-
+    dictionary_us = hunspell.HunSpell('/usr/share/hunspell/en_US.dic', '/usr/share/hunspell/en_US.aff')
+    dictionary_gb = hunspell.HunSpell(dictionary_gb_path + 'en_GB-large.dic',
+                                      dictionary_gb_path + 'en_GB-large.aff')
 
     def escape_values(text):
         text = text.replace(' ', '#').replace('/', '#slash#').replace('<', '#lessthan#').replace('>',
@@ -80,12 +80,12 @@ def rem_stopwords_tokenize(data, name, personal_cleaning):
         filtered_text = []
         print("filtering existing words has removed:")
         for word in text:
-            if dictionary_GB.spell(word) or dictionary_US.spell(word):
+            if dictionary_gb.spell(word) or dictionary_us.spell(word):
                 filtered_text.append(word)
             else:
                 print(word)
-                suggestions = dictionary_US.suggest(word)
-                if len(suggestions)>0:
+                suggestions = dictionary_us.suggest(word)
+                if len(suggestions) > 0:
                     filtered_text.append(suggestions[0])
                 else:
                     filtered_text.append(word)
@@ -130,7 +130,7 @@ def get_cloudacademy_texts(personal_cleaning=True, texts_filepath='../input/', n
     df = df.rename(columns=renaming_dict, errors="raise")
     df['unprocessed_text'] = df['body']
     print("df after hunspell")
-    dictionary_US = hunspell.HunSpell('/usr/share/hunspell/en_US.dic', '/usr/share/hunspell/en_US.aff',  format="html")
+    dictionary_US = hunspell.HunSpell('/usr/share/hunspell/en_US.dic', '/usr/share/hunspell/en_US.aff', format="html")
     df['rapid'] = df['body'].apply(lambda text: dictionary_US.spell(text))
     print(df)
     preprocess_data(df, 'body')
