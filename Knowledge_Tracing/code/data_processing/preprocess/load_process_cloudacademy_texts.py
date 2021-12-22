@@ -120,7 +120,7 @@ def make_sentences(data, name):
 
 
 def get_cloudacademy_texts(personal_cleaning=True, texts_filepath='../input/', n_texts=None, make_sentences_flag=True):
-    input_types = {'id': 'string', 'description': "string"}
+    input_types = {'id': 'int64', 'description': "string"}
     if n_texts:
         df = pd.read_csv(texts_filepath, low_memory=False, dtype=input_types, nrows=n_texts)
     else:
