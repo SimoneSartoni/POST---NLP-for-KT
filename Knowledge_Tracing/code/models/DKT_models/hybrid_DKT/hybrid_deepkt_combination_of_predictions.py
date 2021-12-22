@@ -1,16 +1,9 @@
 from tensorflow.keras import Model, Input, layers, losses
 
-import tensorflow as tf
-from tensorflow.keras import Model, Input, layers, losses
 
-from Knowledge_Tracing.code.models.DKT_models.nlp_enhanced_dkt.data_utils import get_target as NLP_get_target
-MASK_VALUE = -1.0
-
-
-class sentence_transformers_DKTModel(tf.keras.Model):
+class hybrid_DKT_combination_of_predictions_Model(Model):
     """ The Deep Knowledge Tracing model.
     Arguments in __init__:
-        nb_features: The number of features in the input.
         nb_skills: The number of skills in the dataset.
         hidden_units: Positive integer. The number of units of the LSTM layer.
         dropout_rate: Float between 0 and 1. Fraction of the units to drop.
@@ -19,38 +12,34 @@ class sentence_transformers_DKTModel(tf.keras.Model):
             and what the model expects.
     """
 
-    def __init__(self, nb_encodings, hidden_units=100, dropout_rate=0.4):
-        input_encoding = tf.keras.Input(shape=(None, nb_encodings), name='input_encoding')
-        target_encoding = tf.keras.Input(shape=(None, nb_encodings), name='target_encoding')
+    def __init__(self, configs={}, dropout_rate=0.2):
+        inputs = {}
+        output_labels = []
 
-        mask_feature_layer = tf.keras.layers.Masking(mask_value=MASK_VALUE, input_shape=(None, nb_encodings))
-        lstm_layer = tf.keras.layers.LSTM(hidden_units, return_sequences=True, return_state=True, dropout=dropout_rate)
-        dense_feature_layer = tf.keras.layers.Dense(nb_encodings, activation='relu')
-        output_feature_layer = tf.keras.layers.TimeDistributed(dense_feature_layer, name='outputs_feature')
-        multiply_target_layer = tf.keras.layers.Multiply()
-        dense_class_layer = tf.keras.layers.Dense(1, activation='sigmoid')
-        output_class_layer = tf.keras.layers.TimeDistributed(dense_class_layer, name='output_class')
+        if len(list(configs.keys())) > 0:
+            for config in configs.values():
+                name, embedding_size, hidden_units = config['name'], config['embedding_size'], \
+                                                                 config['hidden_units']
+                input_embedding = Input(shape=[None, embedding_size], name=name)
+                target_embedding = Input(shape=[None, embedding_size], name="target_" + name)
+                inputs[name] = input_embedding
+                inputs['target_'+name] = target_embedding
+                mask_embedding = layers.Masking(mask_value=-1.0)(input_embedding)
+                mask_target_embedding = layers.Masking(mask_value=-1.0)(target_embedding)
+                lstm_embedding = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_embedding)
+                dense_layer = layers.Dense(embedding_size, activation='relu')
+                dense_output = layers.TimeDistributed(dense_layer, name=name + '_output_dense')(lstm_embedding)
+                multiply_target_layer = layers.Multiply()
+                multiply_output = multiply_target_layer([dense_output, mask_target_embedding])
+                dense_label = layers.Dense(1, activation='sigmoid')
+                output_label = layers.TimeDistributed(dense_label, name=name + 'output_class')(multiply_output)
+                output_labels.append(output_label)
+        concatenate_layer = layers.concatenate(output_labels)
+        dense_prediction_layer = layers.Dense(1, activation='sigmoid')
+        hybrid_prediction = layers.TimeDistributed(dense_prediction_layer, name='hybrid_prediction')(concatenate_layer)
 
-        print("input:")
-        print(input_encoding)
-        masked_target = mask_feature_layer(target_encoding)
-        masked_input = mask_feature_layer(input_encoding)
-        print("mask output:")
-        print(masked_input)
-        lstm_output, final_memory_state, final_carry_state = lstm_layer(masked_input)
-        print("lstm output")
-        print(lstm_output)
-        print(final_memory_state)
-        # intermediate_pred = intermediate_feature_layer(lstm_output)
-        encoding_pred = output_feature_layer(lstm_output)
-        multiply_output = multiply_target_layer([encoding_pred, masked_target])
-        output_class = output_class_layer(multiply_output)
-
-        super(sentence_transformers_DKTModel, self).__init__(inputs={"input_encoding": input_encoding, "target_encoding": target_encoding},
-                                                             outputs=output_class,
-                                                             name="sentence_transformers_DKTModel")
-        self.nb_encodings = nb_encodings
-        self.hidden_units = hidden_units
+        super(hybrid_DKT_combination_of_predictions_Model, self).__init__(inputs=inputs, outputs=hybrid_prediction, name="hybrid_DKTModel")
+        self.configs = configs
 
     def compile(self, optimizer, metrics=None):
         """Configures the model for training.
@@ -73,11 +62,11 @@ class sentence_transformers_DKTModel(tf.keras.Model):
         def custom_loss(y_true, y_pred):
             return losses.binary_crossentropy(y_true, y_pred)
 
-        super(sentence_transformers_DKTModel, self).compile(
-              loss=custom_loss,
-              optimizer=optimizer,
-              metrics=metrics,
-              experimental_run_tf_function=False)
+        super(hybrid_DKT_combination_of_predictions_Model, self).compile(
+            loss=custom_loss,
+            optimizer=optimizer,
+            metrics=metrics,
+            experimental_run_tf_function=False)
 
     def fit(self,
             dataset,
@@ -148,16 +137,16 @@ class sentence_transformers_DKTModel(tf.keras.Model):
             ValueError: In case of mismatch between the provided input data
                 and what the model expects.
         """
-        return super(sentence_transformers_DKTModel, self).fit(x=dataset,
-                                                               epochs=epochs,
-                                                               verbose=verbose,
-                                                               callbacks=callbacks,
-                                                               validation_data=validation_data,
-                                                               shuffle=shuffle,
-                                                               initial_epoch=initial_epoch,
-                                                               steps_per_epoch=steps_per_epoch,
-                                                               validation_steps=validation_steps,
-                                                               validation_freq=validation_freq)
+        return super(hybrid_DKT_combination_of_predictions_Model, self).fit(x=dataset,
+                                                                            epochs=epochs,
+                                                                            verbose=verbose,
+                                                                            callbacks=callbacks,
+                                                                            validation_data=validation_data,
+                                                                            shuffle=shuffle,
+                                                                            initial_epoch=initial_epoch,
+                                                                            steps_per_epoch=steps_per_epoch,
+                                                                            validation_steps=validation_steps,
+                                                                            validation_freq=validation_freq)
 
     def custom_evaluate(self,
                         dataset,
@@ -189,10 +178,10 @@ class sentence_transformers_DKTModel(tf.keras.Model):
         Raises:
             ValueError: in case of invalid arguments.
         """
-        return super(sentence_transformers_DKTModel, self).evaluate(dataset,
-                                                                    verbose=verbose,
-                                                                    steps=steps,
-                                                                    callbacks=callbacks)
+        return super(hybrid_DKT_combination_of_predictions_Model, self).evaluate(dataset,
+                                                                                 verbose=verbose,
+                                                                                 steps=steps,
+                                                                                 callbacks=callbacks)
 
     def evaluate_generator(self, *args, **kwargs):
         raise SyntaxError("Not supported")
