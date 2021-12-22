@@ -24,7 +24,7 @@ def load_preprocessed_interactions(interactions_filepath="", dictionary=None):
 
 
 def load_preprocessed_texts(texts_filepath="", text_as_sentence=True):
-    dtypes = {'problem_id': 'int64', 'body': "string", 'question_id': "int64"}
+    dtypes = {'problem_id': 'int64', 'body': "string", 'question_id': "int64", "plain_text": "string"}
     print("loading csv.....")
     texts_df = pd.read_csv(texts_filepath, dtype=dtypes)
     texts_df['body'].fillna("no text", inplace=True)

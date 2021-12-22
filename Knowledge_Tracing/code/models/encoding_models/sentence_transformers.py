@@ -39,9 +39,9 @@ class sentence_transformer(base_model):
         self.vectors = {}
         self.vector_size = 0
 
-    def fit(self, texts_df, save_filepath='./'):
+    def fit(self, texts_df, text_coloumn='sentence', save_filepath='./'):
         self.texts_df = texts_df
-        vectors = self.sentence_transformer.encode(sentences=self.texts_df['sentence'].values, show_progress_bar=True)
+        vectors = self.sentence_transformer.encode(sentences=self.texts_df[text_coloumn].values, show_progress_bar=True)
         for problem_id, encoding in list(zip(self.texts_df['problem_id'], vectors)):
             self.vectors[problem_id] = encoding
         del vectors
