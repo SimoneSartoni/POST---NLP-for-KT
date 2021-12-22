@@ -80,7 +80,6 @@ def rem_stopwords_tokenize(data, name, personal_cleaning,
 
     def filter_existing_words(text):
         filtered_text = []
-        print("filtering existing words has removed:")
         for word in text:
             if dictionary_gb.spell(word) or dictionary_us.spell(word):
                 filtered_text.append(word)
@@ -121,7 +120,7 @@ def make_sentences(data, name):
     data[name] = data[name].apply(lambda x: re.sub(r'\s+', ' ', x, flags=re.I))
 
 
-def get_cloudacademy_texts(personal_cleaning=True, texts_filepath='../input/', n_texts=None, make_sentences_flag=True):
+def get_cloudacademy_texts(personal_cleaning=True, texts_filepath='../input/', n_texts=None, make_sentences_flag=False):
     input_types = {'id': 'int64', 'description': "string"}
     if n_texts:
         df = pd.read_csv(texts_filepath, low_memory=False, dtype=input_types, nrows=n_texts)
@@ -130,6 +129,11 @@ def get_cloudacademy_texts(personal_cleaning=True, texts_filepath='../input/', n
     # Using the preprocessing function to preprocess the tweet data
     renaming_dict = {"id": "problem_id", "description": "body"}
     df = df.rename(columns=renaming_dict, errors="raise")
+    df['unprocessed_text'] = df['body']
+    print("df after hunspell")
+    dictionary_US = hunspell.HunSpell('/usr/share/hunspell/en_US.dic', '/usr/share/hunspell/en_US.aff',  format="html")
+    df['rapid'] = df['body'].apply(lambda text: dictionary_US.spell(text))
+    print(df)
     preprocess_data(df, 'body')
     print("df after preprocess data:")
     print(df)
