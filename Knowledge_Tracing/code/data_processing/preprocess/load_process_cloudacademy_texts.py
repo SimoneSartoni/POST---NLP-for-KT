@@ -84,7 +84,6 @@ def rem_stopwords_tokenize(data, name, personal_cleaning,
             if dictionary_gb.spell(word) or dictionary_us.spell(word):
                 filtered_text.append(word)
             else:
-                print(word)
                 suggestions = dictionary_us.suggest(word)
                 if len(suggestions) > 0:
                     filtered_text.append(suggestions[0])
