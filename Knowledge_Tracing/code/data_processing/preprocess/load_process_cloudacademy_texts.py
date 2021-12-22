@@ -128,6 +128,7 @@ def get_cloudacademy_texts(personal_cleaning=True, texts_filepath='../input/', n
     # Using the preprocessing function to preprocess the tweet data
     renaming_dict = {"id": "problem_id", "description": "body"}
     df = df.rename(columns=renaming_dict, errors="raise")
+    df['unprocessed_text'] = df['body']
     print("df after hunspell")
     dictionary_US = hunspell.HunSpell('/usr/share/hunspell/en_US.dic', '/usr/share/hunspell/en_US.aff',  format="html")
     df['rapid'] = df['body'].apply(lambda text: dictionary_US.spell(text))
