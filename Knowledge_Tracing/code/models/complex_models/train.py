@@ -4,7 +4,7 @@ from Knowledge_Tracing.code.models.complex_models.models.utmti import UTMTI
 from Knowledge_Tracing.code.models.complex_models.models.saint_models.saint_on_skills import SAINT_on_skills
 from Knowledge_Tracing.code.models.complex_models.models.saint_models.saint_on_questions import SAINT_on_questions
 from Knowledge_Tracing.code.models.complex_models.models.ssakt import SSAKT
-from code.data_processing.load_preprocessed.SAINT_dataset import get_dataloaders
+from code.data_processing.load_preprocessed.saint_dataset import get_dataloaders
 
 import torch
 from torch import nn

@@ -23,7 +23,7 @@ class saint_on_encodings_2(nn.Module):
         encoder_inputs, decoder_inputs = inputs['encoder'], inputs['decoder']
         in_exercise, in_skill, in_response, in_text_encoding = encoder_inputs['input_question_id'], \
             encoder_inputs['input_skill'],  decoder_inputs['input_label'], encoder_inputs['input_text_encoding']
-        out_text_encoding = decoder_targets['target_text_encoding']
+        out_text_encoding = decoder_targets['target_text_encoding'].float()
         for n in range(self.n_encoder):
             if n >= 1:
                 first_block = False
