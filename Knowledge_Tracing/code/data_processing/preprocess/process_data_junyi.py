@@ -12,8 +12,7 @@ def process_data_junyi(min_questions=2, max_questions=50, interactions_filepath=
                                                                                            "-predictions-4-final.csv",
                                   texts_filepath='../input/', output_filepath="/kaggle/working/", n_rows=None,
                                   n_texts=None, personal_cleaning=True, make_sentences_flag=True):
-    data = pd.read_csv('C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/data/Junyi/junyi.csv', sep='\n',
-                       names=['data'])
+    data = pd.read_csv(interactions_filepath, sep='\n', names=['data'])
     data = data['data']
     index = range(0, len(data) // 4)
     real_len_index = [el * 4 for el in index]
