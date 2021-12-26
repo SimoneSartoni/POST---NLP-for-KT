@@ -5,12 +5,15 @@ from torch.utils.data import Dataset, DataLoader
 def encode_correctness_in_encodings(text_encoding_model, text_ids, max_seq, mask_value):
     i = 0
     text_encoding = np.full((max_seq, text_encoding_model.vector_size), fill_value=mask_value, dtype=np.double)
+    input_text_encoding = np.full((max_seq, text_encoding_model.vector_size), fill_value=mask_value, dtype=np.double)
+    target_text_encoding = np.full((max_seq, text_encoding_model.vector_size), fill_value=mask_value, dtype=np.double)
+
     for text_id in text_ids:
         if text_id != mask_value:
             text_encoding[i] = text_encoding_model.get_encoding(text_id)
         i += 1
-    input_text_encoding = text_encoding[-1]
-    target_text_encoding = text_encoding[1:]
+    input_text_encoding[:-1] = text_encoding[-1]
+    target_text_encoding[1:] = text_encoding[1:]
     return text_encoding, input_text_encoding, target_text_encoding
 
 
