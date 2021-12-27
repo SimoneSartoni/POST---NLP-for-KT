@@ -129,12 +129,12 @@ class PretrainedDistilBERTFinetuned(base_model):
             train_objectives=[(loader, loss)],
             epochs=epochs,
             warmup_steps=warmup_steps,
-            output_path='/content/sbert_test_mnr2',
+            output_path='/content/sdistilbert',
             show_progress_bar=False
         )  # I set 'show_progress_bar=False' as it printed every step
         #    on to a new line
-
-        vectors = self.sentence_model.encode(sentences=self.texts_df[text_coloumn].values, show_progress_bar=True)
+        inputs = self.tokenizer(list(self.texts_df['sentence'].values), truncation=True,  padding=True)
+        vectors = self.sentence_model.encode(sentences=inputs, show_progress_bar=True)
         for problem_id, encoding in list(zip(self.texts_df['problem_id'], vectors)):
             self.vectors[problem_id] = encoding
         del vectors
