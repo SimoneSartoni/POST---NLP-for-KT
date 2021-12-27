@@ -9,9 +9,9 @@ from scipy import sparse as sps
 from Knowledge_Tracing.code.Similarity.Compute_Similarity import Compute_Similarity
 from transformers import DistilBertConfig, DistilBertTokenizer, DistilBertModel
 from sentence_transformers import InputExample, models, SentenceTransformer
-from tqdm.auto import tqdm  # so we see progress bar
 import datasets
 from Knowledge_Tracing.code.models.base_model import base_model
+import torch
 
 
 def write_txt(file, data):
@@ -24,26 +24,17 @@ def identity_tokenizer(text):
     return text
 
 
-# Mean Pooling - Take attention mask into account for correct averaging
-def mean_pooling(token_embeddings, attention_mask):
-    input_mask_expanded = np.broadcast_to(np.expand_dims(attention_mask, -1), token_embeddings.shape)
-    sum_embeddings = np.sum(token_embeddings * input_mask_expanded, 0)
-    sum_mask = np.clip(np.sum(input_mask_expanded, 0), 1e-9, 1000)
-    return sum_embeddings / sum_mask
-
-
-# Max Pooling - Take attention mask into account for correct max
-def max_pooling(token_embeddings, attention_mask):
-    input_mask_expanded = np.broadcast_to(np.expand_dims(attention_mask, -1), token_embeddings.shape)
-    max_embeddings = np.amax(token_embeddings * input_mask_expanded, 0)
-    return max_embeddings
-
-
-# Min Pooling - Take attention mask into account for correct averaging
-def min_pooling(token_embeddings, attention_mask):
-    input_mask_expanded = np.broadcast_to(np.expand_dims(attention_mask, -1), token_embeddings.shape)
-    min_embeddings = np.amin(token_embeddings * input_mask_expanded, 0)
-    return min_embeddings
+# define mean pooling function
+def mean_pool(token_embeds, attention_mask):
+    # reshape attention_mask to cover 768-dimension embeddings
+    in_mask = attention_mask.unsqueeze(-1).expand(
+        token_embeds.size()
+    ).float()
+    # perform mean-pooling but exclude padding tokens (specified by in_mask)
+    pool = torch.sum(token_embeds * in_mask, 1) / torch.clamp(
+        in_mask.sum(1), min=1e-9
+    )
+    return pool
 
 
 class PretrainedDistilBERTFinetuned(base_model):
@@ -103,41 +94,111 @@ class PretrainedDistilBERTFinetuned(base_model):
         )
         print(f"after: {len(dataset)} rows")
 
-        train_samples = []
-        for row in tqdm(dataset):
-            train_samples.append(InputExample(
-                texts=[row['premise'], row['hypothesis']]
-            ))
-
-        from sentence_transformers import datasets as datasets_2
-
+        dataset = dataset.map(
+            lambda x: self.tokenizer(
+                x['premise'], max_length=128, padding='max_length',
+                truncation=True
+            ), batched=True
+        )
+        dataset = dataset.rename_column('input_ids', 'anchor_ids')
+        dataset = dataset.rename_column('attention_mask', 'anchor_mask')
+        dataset = dataset.map(
+            lambda x: self.tokenizer(
+                x['hypothesis'], max_length=128, padding='max_length',
+                truncation=True
+            ), batched=True
+        )
+        dataset = dataset.rename_column('input_ids', 'positive_ids')
+        dataset = dataset.rename_column('attention_mask', 'positive_mask')
+        dataset = dataset.remove_columns(['premise', 'hypothesis', 'label', 'token_type_ids'])
+        dataset.set_format(type='torch', output_all_columns=True)
         batch_size = 32
 
-        loader = datasets_2.NoDuplicatesDataLoader(train_samples, batch_size=batch_size)
-        pooler = models.Pooling(
-            768,
-            pooling_mode_mean_tokens=True
+        loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size)
+        # set device and move model there
+        device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+        self.model.to(device)
+        print(f'moved to {device}')
+        # define layers to be used in multiple-negatives-ranking
+        cos_sim = torch.nn.CosineSimilarity()
+        loss_func = torch.nn.CrossEntropyLoss()
+        scale = 20.0  # we multiply similarity score by this scale value
+        # move layers to device
+        cos_sim.to(device)
+        loss_func.to(device)
+        from transformers.optimization import get_linear_schedule_with_warmup
+        # initialize Adam optimizer
+        optim = torch.optim.Adam(self.model.parameters(), lr=2e-5)
+        # setup warmup for first ~10% of steps
+        total_steps = int(len(dataset) / batch_size)
+        warmup_steps = int(0.1 * total_steps)
+        scheduler = get_linear_schedule_with_warmup(
+            optim, num_warmup_steps=warmup_steps,
+            num_training_steps=total_steps - warmup_steps
         )
-
-        self.sentence_model = SentenceTransformer(modules=[self.tokenizer, self.model, pooler])
-        from sentence_transformers import losses
-        loss = losses.MultipleNegativesRankingLoss(self.sentence_model)
-
+        from tqdm.auto import tqdm
         epochs = 1
-        warmup_steps = int(len(loader) * epochs * 0.1)
-        self.sentence_model.fit(
-            train_objectives=[(loader, loss)],
-            epochs=epochs,
-            warmup_steps=warmup_steps,
-            output_path='/content/sdistilbert',
-            show_progress_bar=False
-        )  # I set 'show_progress_bar=False' as it printed every step
-        #    on to a new line
-        vectors = self.sentence_model.encode(sentences=list(self.texts_df['sentence'].values), show_progress_bar=True)
-        for problem_id, encoding in list(zip(self.texts_df['problem_id'], vectors)):
-            self.vectors[problem_id] = encoding
-        del vectors
-        gc.collect()
+        # 1 epoch should be enough, increase if wanted
+        for epoch in range(epochs):
+            self.model.train()  # make sure model is in training mode
+            # initialize the dataloader loop with tqdm (tqdm == progress bar)
+            loop = tqdm(loader, leave=True)
+            for batch in loop:
+                # zero all gradients on each new step
+                optim.zero_grad()
+                # prepare batches and more all to the active device
+                anchor_ids = batch['anchor']['input_ids'].to(device)
+                anchor_mask = batch['anchor']['attention_mask'].to(device)
+                pos_ids = batch['positive']['input_ids'].to(device)
+                pos_mask = batch['positive']['attention_mask'].to(device)
+                # extract token embeddings from BERT
+                a = self.model(
+                    anchor_ids, attention_mask=anchor_mask
+                )[0]  # all token embeddings
+                p = self.model(
+                    pos_ids, attention_mask=pos_mask
+                )[0]
+                # get the mean pooled vectors
+                a = mean_pool(a, anchor_mask)
+                p = mean_pool(p, pos_mask)
+                # calculate the cosine similarities
+                scores = torch.stack([
+                    cos_sim(
+                        a_i.reshape(1, a_i.shape[0]), p
+                    ) for a_i in a])
+                # get label(s) - we could define this before if confident of consistent batch sizes
+                labels = torch.tensor(range(len(scores)), dtype=torch.long, device=scores.device)
+                # and now calculate the loss
+                loss = loss_func(scores * scale, labels)
+                # using loss, calculate gradients and then optimize
+                loss.backward()
+                optim.step()
+                # update learning rate scheduler
+                scheduler.step()
+                # update the TDQM progress bar
+                loop.set_description(f'Epoch {epoch}')
+                loop.set_postfix(loss=loss.item())
+
+        import os
+        model_path = '/content/pretrained_sbert_mnr'
+        if not os.path.exists(model_path):
+            os.mkdir(model_path)
+        self.model.save_pretrained(model_path)
+
+        start = 0
+        batch_size = 100
+        while start < len(texts_df.index):
+            end = start + batch_size
+            inputs = self.tokenizer(list(self.texts_df['sentence'].values)[start:end], truncation=True,
+                                    return_tensors="tf",
+                                    padding=True)
+            attention_mask = inputs['attention_mask'].numpy()
+            output = self.model(inputs)
+            encoding = output.to_tuple()[0].numpy()
+            for problem_id, enc, attention in list(zip(self.texts_df['problem_id'].values[start:end],
+                                                       encoding, attention_mask)):
+                self.encodings[problem_id] = mean_pool(enc, attention)
+            start = start + batch_size
         # Save sparse matrix in current directory
         self.vector_size = len(list(self.vectors.values())[0])
 
