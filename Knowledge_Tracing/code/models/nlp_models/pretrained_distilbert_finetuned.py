@@ -115,7 +115,7 @@ class PretrainedDistilBERTFinetuned(base_model):
 
         loader = datasets_2.NoDuplicatesDataLoader(train_samples, batch_size=batch_size)
         pooler = models.Pooling(
-            self.model.get_word_embedding_dimension(),
+            768,
             pooling_mode_mean_tokens=True
         )
 
