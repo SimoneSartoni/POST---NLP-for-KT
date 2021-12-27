@@ -119,7 +119,7 @@ class PretrainedDistilBERTFinetuned(base_model):
             pooling_mode_mean_tokens=True
         )
 
-        self.sentence_model = SentenceTransformer(modules=[self.model, pooler])
+        self.sentence_model = SentenceTransformer(modules=[self.tokenizer, self.model, pooler])
         from sentence_transformers import losses
         loss = losses.MultipleNegativesRankingLoss(self.sentence_model)
 
@@ -133,8 +133,7 @@ class PretrainedDistilBERTFinetuned(base_model):
             show_progress_bar=False
         )  # I set 'show_progress_bar=False' as it printed every step
         #    on to a new line
-        inputs = self.tokenizer(list(self.texts_df['sentence'].values), truncation=True,  padding=True)
-        vectors = self.sentence_model.encode(sentences=inputs, show_progress_bar=True)
+        vectors = self.sentence_model.encode(sentences=list(self.texts_df['sentence'].values), show_progress_bar=True)
         for problem_id, encoding in list(zip(self.texts_df['problem_id'], vectors)):
             self.vectors[problem_id] = encoding
         del vectors
