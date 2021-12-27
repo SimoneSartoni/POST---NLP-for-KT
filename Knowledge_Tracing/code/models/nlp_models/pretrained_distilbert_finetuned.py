@@ -90,8 +90,8 @@ class PretrainedDistilBERTFinetuned(base_model):
         batch_size = 100
         snli = datasets.load_dataset('snli', split='train')
         mnli = datasets.load_dataset('glue', 'mnli', split='train')
-        mnli
-        snli
+        print(mnli)
+        print(snli)
         snli = snli.cast(mnli.features)
         dataset = datasets.concatenate_datasets([snli, mnli])
         del snli, mnli
