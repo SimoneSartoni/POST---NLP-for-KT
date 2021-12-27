@@ -110,7 +110,7 @@ class PretrainedDistilBERTFinetuned(base_model):
         )
         dataset = dataset.rename_column('input_ids', 'positive_ids')
         dataset = dataset.rename_column('attention_mask', 'positive_mask')
-        dataset = dataset.remove_columns(['premise', 'hypothesis', 'label', 'token_type_ids'])
+        dataset = dataset.remove_columns(['premise', 'hypothesis', 'label'])
         dataset.set_format(type='torch', output_all_columns=True)
         batch_size = 32
 
