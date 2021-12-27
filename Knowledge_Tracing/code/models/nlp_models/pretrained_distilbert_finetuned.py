@@ -65,7 +65,7 @@ class PretrainedDistilBERTFinetuned(base_model):
         """
 
         self.config = DistilBertConfig.from_json_file(config_path)
-        self.model = DistilBertModel.from_pretrained(model_filepath, config=self.config)
+        self.model = DistilBertModel.from_pretrained(model_filepath, config=self.config, from_tf=True)
         self.tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
         self.sentence_model = None
         self.encodings = {}
