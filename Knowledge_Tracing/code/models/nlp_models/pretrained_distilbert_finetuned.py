@@ -69,12 +69,6 @@ class PretrainedDistilBERTFinetuned(base_model):
         self.tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
         self.sentence_model = None
         self.encodings = {}
-        if pooling == 'mean':
-            self.pooling_method = mean_pooling
-        elif pooling == 'min':
-            self.pooling_method = min_pooling
-        elif pooling == 'max':
-            self.pooling_method = max_pooling
         self.similarity_matrix = None
         self.words_unique = None
         self.pro_num = None
