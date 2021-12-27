@@ -46,13 +46,11 @@ def min_pooling(token_embeddings, attention_mask):
     return min_embeddings
 
 
-class PretrainedDistilBERT(base_model):
+class PretrainedDistilBERTFinetuned(base_model):
     def __init__(self, config_path="/content/drive/MyDrive/simone sartoni - text enhanced deep knowledge tracing/"
                                    "pretrained_distilbert_base_uncased_24_epochs/config.json",
                  model_filepath="/content/drive/MyDrive/simone sartoni - text enhanced deep knowledge tracing/"
-                                "pretrained_distilbert_base_uncased_24_epochs/tf_model.h5",
-                 pooling='mean'
-                 ):
+                                "pretrained_distilbert_base_uncased_24_epochs/tf_model.h5"):
         super().__init__("PretrainedDistilBERT", "NLP")
 
         """

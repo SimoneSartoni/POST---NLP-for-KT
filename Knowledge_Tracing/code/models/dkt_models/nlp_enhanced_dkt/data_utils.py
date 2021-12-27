@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 
 from Knowledge_Tracing.code.models.nlp_models.count_vectorizer import count_vectorizer
 # from Knowledge_Tracing.code.models.nlp_models.BERTopic_model import BERTopic_model
-from Knowledge_Tracing.code.models.nlp_models.pretrained_distilbert import PretrainedDistilBERT
+from Knowledge_Tracing.code.models.nlp_models.pretrained_distilbert_finetuned import PretrainedDistilBERTFinetuned
 from Knowledge_Tracing.code.models.nlp_models.sentence_transformers import sentence_transformer
 
 from Knowledge_Tracing.code.data_processing.load_preprocessed.load_preprocessed_data import load_preprocessed_texts
@@ -89,13 +89,21 @@ def load_dataset(batch_size=32, shuffle=True,
         pretrained_distilBERT_args = nlp_kwargs['pretrained_distilBERT']
         config_path, model_filepath = pretrained_distilBERT_args['config_path'], \
                                       pretrained_distilBERT_args['model_filepath']
-        encode_model = PretrainedDistilBERT(config_path, model_filepath)
+        encode_model = PretrainedDistilBERTFinetuned(config_path, model_filepath)
         encode_model.fit(text_df)
 
     if 'sentence_transformers' in nlp_kwargs:
         model_name = nlp_kwargs['sentence_transformers']['model_name']
         encode_model = sentence_transformer(encoding_model=model_name)
         encode_model.fit(text_df)
+
+    if 'pretrained_distilbert_finetuned' in nlp_kwargs:
+        pretrained_distilBERT_finetuned_args = nlp_kwargs['pretrained_distilbert_finetuned']
+        config_path, model_filepath, text_coloumn = pretrained_distilBERT_finetuned_args['config_path'], \
+            pretrained_distilBERT_finetuned_args['model_filepath'], \
+            pretrained_distilBERT_finetuned_args['text_coloumn']
+        encode_model = PretrainedDistilBERTFinetuned(config_path, model_filepath)
+        encode_model.fit(text_df, text_coloumn=text_coloumn)
 
     train_gen, val_gen, test_gen, nb_questions, nb_skills = get_DKT_dataloaders(batch_size, shuffle,
                                                                                 interactions_filepath,
@@ -116,4 +124,3 @@ def load_dataset(batch_size=32, shuffle=True,
     test_loader = create_dataset(test_gen, encoding_depth, shuffle=shuffle, batch_size=batch_size)
 
     return train_loader, val_loader, test_loader, encoding_depth
-
