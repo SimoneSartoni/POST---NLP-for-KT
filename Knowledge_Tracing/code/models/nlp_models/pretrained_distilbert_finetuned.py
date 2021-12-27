@@ -90,6 +90,7 @@ class PretrainedDistilBERTFinetuned(base_model):
         batch_size = 100
         snli = datasets.load_dataset('snli', split='train')
         mnli = datasets.load_dataset('glue', 'mnli', split='train')
+        mnli = mnli.remove_columns("idx")
         print(mnli)
         print(snli)
         snli = snli.cast(mnli.features)
