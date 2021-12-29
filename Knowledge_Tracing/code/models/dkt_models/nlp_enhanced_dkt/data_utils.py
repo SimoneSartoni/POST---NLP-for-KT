@@ -99,11 +99,20 @@ def load_dataset(batch_size=32, shuffle=True,
 
     if 'pretrained_distilbert_finetuned' in nlp_kwargs:
         pretrained_distilBERT_finetuned_args = nlp_kwargs['pretrained_distilbert_finetuned']
-        config_path, model_filepath, text_coloumn = pretrained_distilBERT_finetuned_args['config_path'], \
+        config_path, model_filepath, text_column = pretrained_distilBERT_finetuned_args['config_path'], \
             pretrained_distilBERT_finetuned_args['model_filepath'], \
-            pretrained_distilBERT_finetuned_args['text_coloumn']
+            pretrained_distilBERT_finetuned_args['text_column']
         encode_model = PretrainedDistilBERTFinetuned(config_path, model_filepath)
-        encode_model.fit(text_df, text_coloumn=text_coloumn)
+        encode_model.fit(text_df, text_column=text_column)
+
+    if 'pretrained_distilbert_finetuned_on_CA' in nlp_kwargs:
+        pretrained_distilBERT_finetuned_args = nlp_kwargs['pretrained_distilbert_finetuned_on_CA']
+        config_path, model_filepath, text_column = pretrained_distilBERT_finetuned_args['config_path'], \
+            pretrained_distilBERT_finetuned_args['model_filepath'], \
+            pretrained_distilBERT_finetuned_args['text_column']
+        encode_model = PretrainedDistilBERTFinetuned(config_path, model_filepath)
+        encode_model.fit_on_CA(text_df, text_column=text_column)
+        encode_model.fit(text_df, text_column=text_column)
 
     train_gen, val_gen, test_gen, nb_questions, nb_skills = get_DKT_dataloaders(batch_size, shuffle,
                                                                                 interactions_filepath,
