@@ -48,7 +48,18 @@ class SentenceSimilarityDataset(Dataset):
     def __getitem__(self, idx):
         texts = self.texts_df[idx].sample(frac=1)
         texts_2 = self.texts_df_2[idx].sample(frac=1)
-        inputs = {"text": texts, "text_2": texts_2}
+        anchor_ids, anchor_mask = self.tokenizer(
+            texts, max_length=128, padding='max_length',
+            truncation=True
+        )
+        print(anchor_ids)
+        print(anchor_mask)
+        positive_ids, positive_mask = self.tokenizer(
+            texts_2, max_length=128, padding='max_length',
+            truncation=True
+        )
+        inputs = {"anchor_ids": anchor_ids, "anchor_mask": anchor_mask,
+                  "positive_ids": positive_ids, "positive_mask": positive_mask}
         return inputs
 
 
@@ -93,23 +104,6 @@ class PretrainedDistilBERTFinetuned(base_model):
     def fit_on_CA(self, texts_df, save_filepath='/content/', text_column="sentence"):
         self.texts_df = texts_df
         dataset = SentenceSimilarityDataset(texts_df=texts_df[text_column])
-        dataset = dataset.map(
-            lambda x: self.tokenizer(
-                x['text'], max_length=128, padding='max_length',
-                truncation=True
-            )
-        )
-        dataset = dataset.rename_column('input_ids', 'anchor_ids')
-        dataset = dataset.rename_column('attention_mask', 'anchor_mask')
-        dataset = dataset.map(
-            lambda x: self.tokenizer(
-                x['text_2'], max_length=128, padding='max_length',
-                truncation=True
-            )
-        )
-        dataset = dataset.rename_column('input_ids', 'positive_ids')
-        dataset = dataset.rename_column('attention_mask', 'positive_mask')
-        dataset = dataset.remove_columns(['text', 'text_2'])
         dataset.set_format(type='torch', output_all_columns=True)
         batch_size = 32
 
