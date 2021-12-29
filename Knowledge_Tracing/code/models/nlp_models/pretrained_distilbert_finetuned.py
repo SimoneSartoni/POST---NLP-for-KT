@@ -97,7 +97,7 @@ class PretrainedDistilBERTFinetuned(base_model):
             lambda x: self.tokenizer(
                 x['text'], max_length=128, padding='max_length',
                 truncation=True
-            ), batched=True
+            )
         )
         dataset = dataset.rename_column('input_ids', 'anchor_ids')
         dataset = dataset.rename_column('attention_mask', 'anchor_mask')
@@ -105,7 +105,7 @@ class PretrainedDistilBERTFinetuned(base_model):
             lambda x: self.tokenizer(
                 x['text_2'], max_length=128, padding='max_length',
                 truncation=True
-            ), batched=True
+            )
         )
         dataset = dataset.rename_column('input_ids', 'positive_ids')
         dataset = dataset.rename_column('attention_mask', 'positive_mask')

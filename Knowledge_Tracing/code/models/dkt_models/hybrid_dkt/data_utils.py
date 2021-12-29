@@ -109,10 +109,10 @@ def load_dataset(batch_size=32, shuffle=True,
         encode_models.append(encode_model)
 
     if 'pretrained_distilbert_finetuned_on_CA' in nlp_kwargs:
-        pretrained_distilBERT_finetuned_args = nlp_kwargs['pretrained_distilbert_finetuned_on_CA']
-        config_path, model_filepath, text_column = pretrained_distilBERT_finetuned_args['config_path'], \
-            pretrained_distilBERT_finetuned_args['model_filepath'], \
-            pretrained_distilBERT_finetuned_args['text_column']
+        pretrained_distilbert_finetuned_args = nlp_kwargs['pretrained_distilbert_finetuned_on_CA']
+        config_path, model_filepath, text_column = pretrained_distilbert_finetuned_args['config_path'], \
+            pretrained_distilbert_finetuned_args['model_filepath'], \
+            pretrained_distilbert_finetuned_args['text_column']
         encode_model = PretrainedDistilBERTFinetuned(config_path, model_filepath)
         encode_model.fit_on_CA(text_df, text_column=text_column)
         encode_model.fit(text_df, text_column=text_column)
