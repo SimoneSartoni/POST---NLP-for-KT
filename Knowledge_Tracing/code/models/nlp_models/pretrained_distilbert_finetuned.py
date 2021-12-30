@@ -109,7 +109,7 @@ class PretrainedDistilBERTFinetuned(base_model):
         self.texts_df = texts_df
         print(texts_df)
         dataset = SentenceSimilarityDataset(texts_df=texts_df, text_column=text_column, tokenizer=self.tokenizer,
-                                            batch_size=128)
+                                            batch_size=32)
         batch_size = 1
 
         loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size)
