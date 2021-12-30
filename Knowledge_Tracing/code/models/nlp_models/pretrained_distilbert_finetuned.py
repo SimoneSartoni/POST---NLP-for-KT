@@ -104,7 +104,6 @@ class PretrainedDistilBERTFinetuned(base_model):
     def fit_on_CA(self, texts_df, save_filepath='/content/', text_column="sentence"):
         self.texts_df = texts_df
         dataset = SentenceSimilarityDataset(texts_df=texts_df[text_column])
-        dataset.set_format(type='torch', output_all_columns=True)
         batch_size = 32
 
         loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size)
