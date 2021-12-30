@@ -145,10 +145,10 @@ class PretrainedDistilBERTFinetuned(base_model):
                 # zero all gradients on each new step
                 optim.zero_grad()
                 # prepare batches and more all to the active device
-                anchor_ids = torch.unsqueeze(batch['anchor_ids'], 0).to(device)
-                anchor_mask = torch.unsqueeze(batch['anchor_mask'], 0).to(device)
-                pos_ids = torch.unsqueeze(batch['positive_ids'], 0).to(device)
-                pos_mask = torch.unsqueeze(batch['positive_mask'], 0).to(device)
+                anchor_ids = torch.squeeze(batch['anchor_ids'], axis=0).to(device)
+                anchor_mask = torch.squeeze(batch['anchor_mask'], axis=0).to(device)
+                pos_ids = torch.squeeze(batch['positive_ids'], axis=0).to(device)
+                pos_mask = torch.squeeze(batch['positive_mask'], axis=0).to(device)
                 print(anchor_ids.size())
                 # extract token embeddings from BERT
                 a = self.model(input_ids=anchor_ids, attention_mask=anchor_mask, output_attentions=False).to_tuple()[0]  # all token embeddings
