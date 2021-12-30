@@ -48,7 +48,7 @@ class SentenceSimilarityDataset(Dataset):
         self.batch_size = batch_size
 
     def __len__(self):
-        return len(self.texts_df)//self.batch_size
+        return len(self.texts_df)
 
     def __getitem__(self, idx):
         start = idx * self.batch_size
