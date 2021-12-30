@@ -149,17 +149,14 @@ class PretrainedDistilBERTFinetuned(base_model):
                 anchor_mask = torch.squeeze(batch['anchor_mask'], axis=0).to(device)
                 pos_ids = torch.squeeze(batch['positive_ids'], axis=0).to(device)
                 pos_mask = torch.squeeze(batch['positive_mask'], axis=0).to(device)
-                print(anchor_ids.size())
-                print(anchor_mask.size())
                 # extract token embeddings from BERT
                 a = self.model(input_ids=anchor_ids, attention_mask=anchor_mask, output_attentions=False).to_tuple()[0]  # all token embeddings
                 p = self.model(input_ids=pos_ids, attention_mask=pos_mask, output_attentions=False).to_tuple()[0]
-                print(a)
                 # get the mean pooled vectors
                 a = mean_pool(a, anchor_mask)
                 p = mean_pool(p, pos_mask)
                 # calculate the cosine similarities
-                scores = torch.stack([cos_sim( a_i.reshape(1, a_i.shape[0]), p) for a_i in a])
+                scores = torch.stack([cos_sim(a_i.reshape(1, a_i.shape[0]), p) for a_i in a])
                 # get label(s) - we could define this before if confident of consistent batch sizes
                 labels = torch.tensor(range(len(scores)), dtype=torch.long, device=scores.device)
                 # and now calculate the loss
@@ -256,17 +253,13 @@ class PretrainedDistilBERTFinetuned(base_model):
                 a = self.model(
                     anchor_ids, attention_mask=anchor_mask
                 )[0]  # all token embeddings
-                p = self.model(
-                    pos_ids, attention_mask=pos_mask
-                )[0]
+                p = self.model(pos_ids, attention_mask=pos_mask)[0]
                 # get the mean pooled vectors
                 a = mean_pool(a, anchor_mask)
                 p = mean_pool(p, pos_mask)
                 # calculate the cosine similarities
                 scores = torch.stack([
-                    cos_sim(
-                        a_i.reshape(1, a_i.shape[0]), p
-                    ) for a_i in a])
+                    cos_sim(a_i.reshape(1, a_i.shape[0]), p) for a_i in a])
                 # get label(s) - we could define this before if confident of consistent batch sizes
                 labels = torch.tensor(range(len(scores)), dtype=torch.long, device=scores.device)
                 # and now calculate the loss
