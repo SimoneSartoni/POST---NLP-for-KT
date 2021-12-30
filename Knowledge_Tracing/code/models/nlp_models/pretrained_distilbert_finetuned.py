@@ -38,11 +38,12 @@ def mean_pool(token_embeds, attention_mask):
 
 
 class SentenceSimilarityDataset(Dataset):
-    def __init__(self, texts_df, text_column, batch_size=16):
+    def __init__(self, texts_df, text_column, tokenizer, batch_size=16):
         self.texts_df = texts_df
         self.texts_df_2 = texts_df.sample(frac=1)
         print(self.texts_df)
         print(self.texts_df_2)
+        self.tokenizer = tokenizer
         self.text_column = text_column
         self.batch_size = batch_size
 
