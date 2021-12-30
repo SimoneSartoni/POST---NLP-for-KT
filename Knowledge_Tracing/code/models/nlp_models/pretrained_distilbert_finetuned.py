@@ -56,9 +56,9 @@ class SentenceSimilarityDataset(Dataset):
         texts = list(self.texts_df['sentence'].values)[start:start+self.batch_size]
         print(texts)
         texts_2 = list(self.texts_df_2[self.text_column].values)[start:start+self.batch_size]
-        anchor_ids, anchor_mask = self.tokenizer(texts, padding='max_length', truncation=True)
+        anchor_ids = self.tokenizer(texts, padding='max_length', truncation=True)
         print(anchor_ids)
-        print(anchor_mask)
+        anchor_mask = None
         anchor_ids = torch.from_numpy(anchor_ids).float()
         anchor_mask = torch.from_numpy(anchor_mask).float()
         positive_ids, positive_mask = self.tokenizer(texts_2, padding='max_length', truncation=True)
