@@ -58,9 +58,9 @@ class SentenceSimilarityDataset(Dataset):
         anchor_ids, anchor_mask = batch_encoding['input_ids'], batch_encoding['attention_mask']
         batch_encoding = self.tokenizer(texts_2, max_length=128, padding='max_length', truncation=True)
         positive_ids, positive_mask = batch_encoding['input_ids'], batch_encoding['attention_mask']
-        anchor_ids = torch.from_numpy(np.concatenate(anchor_ids))
+        anchor_ids = torch.from_numpy(np.array(anchor_ids))
         anchor_mask = torch.from_numpy(np.array(anchor_mask))
-        positive_ids = torch.from_numpy(np.concatenate(positive_ids))
+        positive_ids = torch.from_numpy(np.array(positive_ids))
         positive_mask = torch.from_numpy(np.array(positive_mask))
         print(anchor_ids.size())
         print(anchor_mask.size())
