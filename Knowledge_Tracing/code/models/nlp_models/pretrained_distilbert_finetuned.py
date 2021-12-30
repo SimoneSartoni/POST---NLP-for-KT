@@ -150,6 +150,7 @@ class PretrainedDistilBERTFinetuned(base_model):
                 pos_ids = torch.squeeze(batch['positive_ids'], axis=0).to(device)
                 pos_mask = torch.squeeze(batch['positive_mask'], axis=0).to(device)
                 print(anchor_ids.size())
+                print(anchor_mask.size())
                 # extract token embeddings from BERT
                 a = self.model(input_ids=anchor_ids, attention_mask=anchor_mask, output_attentions=False).to_tuple()[0]  # all token embeddings
                 p = self.model(input_ids=pos_ids, attention_mask=pos_mask, output_attentions=False).to_tuple()[0]
