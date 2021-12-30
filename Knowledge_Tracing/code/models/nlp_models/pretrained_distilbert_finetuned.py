@@ -46,10 +46,11 @@ class SentenceSimilarityDataset(Dataset):
     def __len__(self):
         return len(self.texts_df)
 
-    def __getitem__(self, idx, ):
-        texts = list(self.texts_df[self.text_column].values)[idx]
-        texts_2 = list(self.texts_df_2[self.text_column].values)[idx]
+    def __getitem__(self, idx ):
+        print(idx)
+        texts = list(self.texts_df['sentence'].values)[idx]
         print(texts)
+        texts_2 = list(self.texts_df_2[self.text_column].values)[idx]
         anchor_ids, anchor_mask = self.tokenizer(
             texts, padding='max_length',
             truncation=True
