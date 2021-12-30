@@ -149,6 +149,7 @@ class PretrainedDistilBERTFinetuned(base_model):
                 anchor_mask = batch['anchor_mask'].to(device)
                 pos_ids = batch['positive_ids'].to(device)
                 pos_mask = batch['positive_mask'].to(device)
+                print(anchor_ids)
                 # extract token embeddings from BERT
                 a = self.model(anchor_ids, attention_mask=anchor_mask)[0]  # all token embeddings
                 p = self.model(pos_ids, attention_mask=pos_mask)[0]
