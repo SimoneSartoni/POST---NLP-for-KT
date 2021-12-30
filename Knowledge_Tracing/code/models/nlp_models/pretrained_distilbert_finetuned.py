@@ -51,13 +51,13 @@ class SentenceSimilarityDataset(Dataset):
         texts = list(self.texts_df[self.text_column].values[idx])
         texts_2 = list(self.texts_df_2[self.text_column].values[idx])
         anchor_ids, anchor_mask = self.tokenizer(
-            texts, max_length=128, padding='max_length',
+            texts, padding='max_length',
             truncation=True
         )
         print(anchor_ids)
         print(anchor_mask)
         positive_ids, positive_mask = self.tokenizer(
-            texts_2, max_length=128, padding='max_length',
+            texts_2, padding='max_length',
             truncation=True
         )
         inputs = {"anchor_ids": anchor_ids, "anchor_mask": anchor_mask,
