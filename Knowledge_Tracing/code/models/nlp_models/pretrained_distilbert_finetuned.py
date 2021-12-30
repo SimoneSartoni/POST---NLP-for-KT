@@ -62,6 +62,8 @@ class SentenceSimilarityDataset(Dataset):
         anchor_mask = torch.from_numpy(anchor_mask)
         positive_ids = torch.from_numpy(np.concatenate(positive_ids))
         positive_mask = torch.from_numpy(positive_mask)
+        print(anchor_ids)
+        print(anchor_mask)
         inputs = {"anchor_ids": anchor_ids, "anchor_mask": anchor_mask,
                   "positive_ids": positive_ids, "positive_mask": positive_mask}
         return inputs
