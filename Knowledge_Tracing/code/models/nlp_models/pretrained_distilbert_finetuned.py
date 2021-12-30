@@ -41,6 +41,8 @@ class SentenceSimilarityDataset(Dataset):
     def __init__(self, texts_df, text_column):
         self.texts_df = texts_df
         self.texts_df_2 = texts_df.sample(frac=1)
+        print(self.texts_df)
+        print(self.texts_df_2)
         self.text_column = text_column
 
     def __len__(self):
@@ -104,6 +106,7 @@ class PretrainedDistilBERTFinetuned(base_model):
 
     def fit_on_CA(self, texts_df, save_filepath='/content/', text_column="sentence"):
         self.texts_df = texts_df
+        print(texts_df)
         dataset = SentenceSimilarityDataset(texts_df=texts_df, text_column=text_column)
         batch_size = 32
 
