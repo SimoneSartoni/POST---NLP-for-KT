@@ -48,12 +48,12 @@ class SentenceSimilarityDataset(Dataset):
         self.batch_size = batch_size
 
     def __len__(self):
-        return len(self.texts_df)
+        return len(self.texts_df)//self.batch_size
 
     def __getitem__(self, idx):
         start = idx * self.batch_size
-        texts = list(self.texts_df['sentence'].values)[idx]
-        texts_2 = list(self.texts_df_2[self.text_column].values)[idx]
+        texts = list(self.texts_df['sentence'].values)[start: start+self.batch_siz]
+        texts_2 = list(self.texts_df_2[self.text_column].values)[start: start+self.batch_size]
         batch_encoding = self.tokenizer(texts, max_length=128, padding='max_length', truncation=True)
         anchor_ids, anchor_mask = batch_encoding['input_ids'], batch_encoding['attention_mask']
         batch_encoding = self.tokenizer(texts_2, max_length=128, padding='max_length', truncation=True)
@@ -109,7 +109,7 @@ class PretrainedDistilBERTFinetuned(base_model):
         self.texts_df = texts_df
         print(texts_df)
         dataset = SentenceSimilarityDataset(texts_df=texts_df, text_column=text_column, tokenizer=self.tokenizer)
-        batch_size = 32
+        batch_size = 1
 
         loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size)
         # set device and move model there
