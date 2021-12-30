@@ -153,6 +153,7 @@ class PretrainedDistilBERTFinetuned(base_model):
                 # extract token embeddings from BERT
                 a = self.model(input_ids=anchor_ids, attention_mask=anchor_mask).last_hidden_state  # all token embeddings
                 p = self.model(input_ids=pos_ids, attention_mask=pos_mask).last_hidden_state
+                print(a)
                 # get the mean pooled vectors
                 a = mean_pool(a, anchor_mask)
                 p = mean_pool(p, pos_mask)
