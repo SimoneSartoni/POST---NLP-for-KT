@@ -86,7 +86,7 @@ class PretrainedDistilBERTFinetuned(base_model):
         """
 
         self.config = DistilBertConfig.from_json_file(config_path)
-        self.model = DistilBertModel.from_pretrained(model_filepath, config=self.config, from_tf=True)
+        self.model = DistilBertModel.from_pretrained(model_filepath, config=self.config)
         self.tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
         self.sentence_model = None
         self.encodings = {}
@@ -149,20 +149,13 @@ class PretrainedDistilBERTFinetuned(base_model):
                 pos_ids = batch['positive_ids'].to(device)
                 pos_mask = batch['positive_mask'].to(device)
                 # extract token embeddings from BERT
-                a = self.model(
-                    anchor_ids, attention_mask=anchor_mask
-                )[0]  # all token embeddings
-                p = self.model(
-                    pos_ids, attention_mask=pos_mask
-                )[0]
+                a = self.model(anchor_ids, attention_mask=anchor_mask)[0]  # all token embeddings
+                p = self.model(pos_ids, attention_mask=pos_mask)[0]
                 # get the mean pooled vectors
                 a = mean_pool(a, anchor_mask)
                 p = mean_pool(p, pos_mask)
                 # calculate the cosine similarities
-                scores = torch.stack([
-                    cos_sim(
-                        a_i.reshape(1, a_i.shape[0]), p
-                    ) for a_i in a])
+                scores = torch.stack([cos_sim( a_i.reshape(1, a_i.shape[0]), p) for a_i in a])
                 # get label(s) - we could define this before if confident of consistent batch sizes
                 labels = torch.tensor(range(len(scores)), dtype=torch.long, device=scores.device)
                 # and now calculate the loss
