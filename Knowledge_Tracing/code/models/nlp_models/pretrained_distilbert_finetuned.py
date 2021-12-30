@@ -51,15 +51,12 @@ class SentenceSimilarityDataset(Dataset):
         return len(self.texts_df)//self.batch_size
 
     def __getitem__(self, idx):
-        print(idx)
         start = idx * self.batch_size
         texts = list(self.texts_df['sentence'].values)[start:start+self.batch_size]
-        print(texts)
         texts_2 = list(self.texts_df_2[self.text_column].values)[start:start+self.batch_size]
-        batch_encoding = self.tokenizer(texts, max_length=self.batch_size, padding='max_length', truncation=True)
+        batch_encoding = self.tokenizer(texts, max_length=128, padding='max_length', truncation=True)
         anchor_ids, anchor_mask = batch_encoding['input_ids'], batch_encoding['attention_mask']
-        print(anchor_ids)
-        batch_encoding = self.tokenizer(texts_2, max_length=self.batch_size, padding='max_length', truncation=True)
+        batch_encoding = self.tokenizer(texts_2, max_length=128, padding='max_length', truncation=True)
         positive_ids, positive_mask = batch_encoding['input_ids'], batch_encoding['attention_mask']
         anchor_ids = torch.from_numpy(np.concatenate(anchor_ids))
         anchor_mask = torch.from_numpy(np.concatenate(anchor_mask))
