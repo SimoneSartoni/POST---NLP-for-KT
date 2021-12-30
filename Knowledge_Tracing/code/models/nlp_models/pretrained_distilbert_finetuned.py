@@ -38,16 +38,16 @@ def mean_pool(token_embeds, attention_mask):
 
 
 class SentenceSimilarityDataset(Dataset):
-    def __init__(self, texts_df):
+    def __init__(self, texts_df, text_column):
         self.texts_df = texts_df
         self.texts_df_2 = texts_df.sample(frac=1)
-
+        self.text_column = text_column
     def __len__(self):
         return len(self.texts_df)
 
-    def __getitem__(self, idx):
-        texts = self.texts_df[idx].sample(frac=1)
-        texts_2 = self.texts_df_2[idx].sample(frac=1)
+    def __getitem__(self, idx, ):
+        texts = self.texts_df[idx].sample(frac=1)[self.text_column]
+        texts_2 = self.texts_df_2[idx].sample(frac=1)[self.text_column]
         anchor_ids, anchor_mask = self.tokenizer(
             texts, max_length=128, padding='max_length',
             truncation=True
@@ -103,7 +103,7 @@ class PretrainedDistilBERTFinetuned(base_model):
 
     def fit_on_CA(self, texts_df, save_filepath='/content/', text_column="sentence"):
         self.texts_df = texts_df
-        dataset = SentenceSimilarityDataset(texts_df=texts_df[text_column])
+        dataset = SentenceSimilarityDataset(texts_df=texts_df, text_column=text_column)
         batch_size = 32
 
         loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size)
