@@ -38,29 +38,27 @@ def mean_pool(token_embeds, attention_mask):
 
 
 class SentenceSimilarityDataset(Dataset):
-    def __init__(self, texts_df, text_column):
+    def __init__(self, texts_df, text_column, batch_size=16):
         self.texts_df = texts_df
         self.texts_df_2 = texts_df.sample(frac=1)
         print(self.texts_df)
         print(self.texts_df_2)
         self.text_column = text_column
+        self.batch_size = batch_size
 
     def __len__(self):
-        return len(self.texts_df)
+        return len(self.texts_df)//self.batch_size
 
     def __getitem__(self, idx):
         print(idx)
-        texts = list(self.texts_df['sentence'].values)[idx]
+        start = idx * self.batch_size
+        texts = list(self.texts_df['sentence'].values)[start:start+self.batch_size]
         print(texts)
-        texts_2 = list(self.texts_df_2[self.text_column].values)[idx]
-        anchor_ids, anchor_mask = inputs = self.tokenizer(list(self.texts_df['sentence'].values)[idx],
-                                                          truncation=True, padding=True)
+        texts_2 = list(self.texts_df_2[self.text_column].values)[start:start+self.batch_size]
+        anchor_ids, anchor_mask = self.tokenizer(texts, padding='max_length', truncation=True)
         print(anchor_ids)
         print(anchor_mask)
-        positive_ids, positive_mask = self.tokenizer(
-            texts_2, padding='max_length',
-            truncation=True
-        )
+        positive_ids, positive_mask = self.tokenizer(texts_2, padding='max_length', truncation=True)
         inputs = {"anchor_ids": anchor_ids, "anchor_mask": anchor_mask,
                   "positive_ids": positive_ids, "positive_mask": positive_mask}
         return inputs
