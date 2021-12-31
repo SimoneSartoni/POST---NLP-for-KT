@@ -310,13 +310,6 @@ class PretrainedDistilBERTFinetuned(base_model):
                                                        encoding, attention_mask)):
                 self.encodings[problem_id] = mean_pool_np(enc, attention)
             start = start + batch_size
-        # Save sparse matrix in current directory
-        self.vector_size = len(list(self.vectors.values())[0])
-
-        self.pro_num = len(list(self.vectors.values()))
-        self.words_num = self.vector_size
-        print(len(list(self.encodings.keys())))
-        print("pretrainedBERT model created")
 
         self.words_num = list(self.encodings.values())[0].shape[0]
         print("vector_size: " + str(self.words_num))
