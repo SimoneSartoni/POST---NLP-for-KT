@@ -6,10 +6,10 @@ import torch
 from torch import nn
 
 
-class saint_on_encodings_2(nn.Msaint_on_encodings_2.pyodule):
+class saint_on_encodings(nn.Module):
     def __init__(self, n_encoder, n_decoder, enc_heads, dec_heads, n_dims, nb_questions, encoding_size, nb_skills,
                  nb_responses, seq_len):
-        super(saint_on_encodings_2, self).__init__()
+        super(saint_on_encodings, self).__init__()
         self.n_encoder = n_encoder
         self.n_decoder = n_decoder
         self.encoder = get_clones(EncoderBlock(enc_heads, n_dims, nb_questions, encoding_size, nb_skills, seq_len),
