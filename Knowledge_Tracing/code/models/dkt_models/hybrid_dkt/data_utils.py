@@ -112,6 +112,7 @@ def load_dataset(batch_size=32, shuffle=True,
         encode_model = PretrainedDistilBERTFinetuned()
         pretrained_distilbert_finetuned_args = nlp_kwargs['pretrained_distilbert_finetuned_on_CA']
         if 'load' in nlp_kwargs:
+            print("load")
             config_path, model_filepath = pretrained_distilbert_finetuned_args['load']['config_path'], \
                                           pretrained_distilbert_finetuned_args['load']['model_filepath']
             encode_model.load(config_path=config_path, model_filepath=model_filepath)
