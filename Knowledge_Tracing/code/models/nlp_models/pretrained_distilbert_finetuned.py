@@ -68,10 +68,7 @@ class SentenceSimilarityDataset(Dataset):
 
 
 class PretrainedDistilBERTFinetuned(base_model):
-    def __init__(self, use_tf=True, config_path="/content/drive/MyDrive/simone sartoni - text enhanced deep knowledge tracing/"
-                                   "pretrained_distilbert_base_uncased_24_epochs/config.json",
-                 model_filepath="/content/drive/MyDrive/simone sartoni - text enhanced deep knowledge tracing/"
-                                "pretrained_distilbert_base_uncased_24_epochs/tf_model.h5"):
+    def __init__(self, ):
         super().__init__("PretrainedDistilBERT", "NLP")
 
         """
@@ -84,8 +81,6 @@ class PretrainedDistilBERTFinetuned(base_model):
                                   metric=metric,
                                   cluster_selection_method=cluster_selection_method)
         """
-        self.config_path = config_path
-        self.model_filepath = model_filepath
         self.config = None
         self.model = None
         self.tokenizer = None
@@ -106,10 +101,11 @@ class PretrainedDistilBERTFinetuned(base_model):
         self.texts = None
         self.vector_size = 0
 
-    def fit_on_CA(self, texts_df, save_filepath='/content/', text_column="sentence", batch_size=64):
+    def fit_on_custom(self, texts_df, config_path, model_filepath, save_filepath='/content/', text_column="sentence",
+                      batch_size=64):
         self.texts_df = texts_df
-        self.config = DistilBertConfig.from_json_file(self.config_path)
-        self.model = DistilBertModel.from_pretrained(self.model_filepath, config=self.config, from_tf=True)
+        self.config = DistilBertConfig.from_json_file(config_path)
+        self.model = DistilBertModel.from_pretrained(model_filepath, config=self.config, from_tf=True)
         self.tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
         print(texts_df)
         dataset = SentenceSimilarityDataset(texts_df=texts_df, text_column=text_column, tokenizer=self.tokenizer,
@@ -175,14 +171,14 @@ class PretrainedDistilBERTFinetuned(base_model):
                 loop.set_postfix(loss=loss.item())
 
         import os
-        model_path = '/content/sbert_trained_on_CA/'
+        model_path = save_filepath + '/sbert_trained_on_CA/'
         if not os.path.exists(model_path):
             os.mkdir(model_path)
         self.model.save_pretrained(model_path)
 
-    def fit_on_nli(self, save_filepath='/content/', ):
-        self.config = DistilBertConfig.from_json_file(self.config_path)
-        self.model = DistilBertModel.from_pretrained(self.model_filepath, config=self.config, from_tf=True)
+    def fit_on_nli(self, config_path, model_filepath, save_filepath='/content/', ):
+        self.config = DistilBertConfig.from_json_file(config_path)
+        self.model = DistilBertModel.from_pretrained(model_filepath, config=self.config, from_tf=True)
         self.tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
         snli = datasets.load_dataset('snli', split='train')
         mnli = datasets.load_dataset('glue', 'mnli', split='train')
@@ -281,22 +277,18 @@ class PretrainedDistilBERTFinetuned(base_model):
                 loop.set_postfix(loss=loss.item())
 
         import os
-        model_path = '/content/pretrained_sbert_mnr'
+        model_path = save_filepath + 'pretrained_sbert_mnr'
         if not os.path.exists(model_path):
             os.mkdir(model_path)
         self.model.save_pretrained(model_path)
 
-    def transform(self, texts_df, save_filepath="", text_column="sentence", config_path="", model_filepath=""):
-        self.texts_df = texts_df
-        if config_path:
-            self.config = DistilBertConfig.from_json_file(self.config_path)
-        else:
-            self.config = DistilBertConfig.from_json_file(self.config_path)
-        if model_filepath:
-            self.model = TFDistilBertModel.from_pretrained(self.model_filepath, config=self.config, from_tf=True)
-        else:
-            self.model = TFDistilBertModel.from_pretrained(self.model_filepath, config=self.config, from_tf=True)
+    def load(self, config_path, model_filepath):
+        self.config = DistilBertConfig.from_json_file(config_path)
+        self.model = TFDistilBertModel.from_pretrained(model_filepath, config=self.config, from_tf=True)
         self.tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
+
+    def transform(self, texts_df, save_filepath="", text_column="sentence"):
+        self.texts_df = texts_df
         start = 0
         batch_size = 100
         while start < len(texts_df.index):

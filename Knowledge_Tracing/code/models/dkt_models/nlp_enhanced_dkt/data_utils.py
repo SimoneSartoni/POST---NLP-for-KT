@@ -111,7 +111,7 @@ def load_dataset(batch_size=32, shuffle=True,
             pretrained_distilBERT_finetuned_args['model_filepath'], \
             pretrained_distilBERT_finetuned_args['text_column']
         encode_model = PretrainedDistilBERTFinetuned(config_path, model_filepath)
-        encode_model.fit_on_CA(text_df, text_column=text_column)
+        encode_model.fit_on_custom(text_df, text_column=text_column)
         encode_model.fit(text_df, text_column=text_column)
 
     train_gen, val_gen, test_gen, nb_questions, nb_skills = get_DKT_dataloaders(batch_size, shuffle,
