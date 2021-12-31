@@ -111,19 +111,19 @@ def load_dataset(batch_size=32, shuffle=True,
     if 'pretrained_distilbert_finetuned_on_CA' in nlp_kwargs:
         encode_model = PretrainedDistilBERTFinetuned()
         pretrained_distilbert_finetuned_args = nlp_kwargs['pretrained_distilbert_finetuned_on_CA']
-        if 'load' in nlp_kwargs:
+        if 'load' in pretrained_distilbert_finetuned_args:
             print("load")
             config_path, model_filepath = pretrained_distilbert_finetuned_args['load']['config_path'], \
                                           pretrained_distilbert_finetuned_args['load']['model_filepath']
             encode_model.load(config_path=config_path, model_filepath=model_filepath)
-        elif 'fit_on_custom' in nlp_kwargs:
+        elif 'fit_on_custom' in pretrained_distilbert_finetuned_args:
             config_path, model_filepath = pretrained_distilbert_finetuned_args['fit_on_custom']['config_path'], \
                                           pretrained_distilbert_finetuned_args['fit_on_custom']['model_filepath']
             text_column, batch_size = pretrained_distilbert_finetuned_args['fit_on_custom']['text_column'], \
                 pretrained_distilbert_finetuned_args['fit_on_custom']['text_column']
             encode_model.fit_on_custom(text_df, config_path=config_path, model_filepath=model_filepath,
                                        save_filepath=save_filepath, text_column=text_column, batch_size=batch_size)
-        elif 'fit_on_nli' in nlp_kwargs:
+        elif 'fit_on_nli' in pretrained_distilbert_finetuned_args:
             config_path, model_filepath = pretrained_distilbert_finetuned_args['fit_on_custom']['config_path'], \
                                           pretrained_distilbert_finetuned_args['fit_on_custom']['model_filepath']
             encode_model.fit_on_custom(text_df, config_path=config_path, model_filepath=model_filepath,
