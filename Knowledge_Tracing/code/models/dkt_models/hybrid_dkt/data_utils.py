@@ -129,7 +129,7 @@ def load_dataset(batch_size=32, shuffle=True,
                                        save_filepath=save_filepath)
         text_column, batch_size = pretrained_distilbert_finetuned_args['transform']['text_column'], \
             pretrained_distilbert_finetuned_args['transform']['batch_size']
-        encode_model.transform(text_df, text_column=text_column, config_path=config_path, model_filepath=model_filepath)
+        encode_model.transform(text_df, text_column=text_column, batch_size=batch_size)
 
     train_gen, val_gen, test_gen, nb_questions, nb_skills = get_hybrid_dkt_dataloaders(
         batch_size, shuffle, interactions_filepath, output_filepath=save_filepath,
