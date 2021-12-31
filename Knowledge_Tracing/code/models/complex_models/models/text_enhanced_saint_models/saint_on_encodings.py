@@ -74,8 +74,6 @@ class DecoderBlock(nn.Module):
         super(DecoderBlock, self).__init__()
         self.seq_len = seq_len
         self.total_dim = encoding_size
-        self.correct_answer = torch.full(encoding_size, 1.0)
-        self.wrong_answer = torch.full(encoding_size, 0.0)
         self.position_embed = nn.Embedding(seq_len, encoding_size)
         self.layer_norm = nn.LayerNorm(self.total_dim)
         self.multihead_attention = nn.MultiheadAttention(embed_dim=self.total_dim,
