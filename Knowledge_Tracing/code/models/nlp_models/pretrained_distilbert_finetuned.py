@@ -284,7 +284,7 @@ class PretrainedDistilBERTFinetuned(base_model):
 
     def load(self, config_path, model_filepath):
         self.config = DistilBertConfig.from_json_file(config_path)
-        self.model = TFDistilBertModel.from_pretrained(model_filepath, config=self.config)
+        self.model = TFDistilBertModel.from_pretrained(model_filepath, config=self.config, from_pt=True)
         self.tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
 
     def transform(self, texts_df, save_filepath="", text_column="sentence", batch_size=100):
