@@ -37,6 +37,13 @@ def mean_pool(token_embeds, attention_mask):
     return pool
 
 
+def mean_pool_np(token_embeddings, attention_mask):
+    input_mask_expanded = np.broadcast_to(np.expand_dims(attention_mask, -1), token_embeddings.shape)
+    sum_embeddings = np.sum(token_embeddings * input_mask_expanded, 0)
+    sum_mask = np.clip(np.sum(input_mask_expanded, 0), 1e-9, 1000)
+    return sum_embeddings / sum_mask
+
+
 class SentenceSimilarityDataset(Dataset):
     def __init__(self, texts_df, text_column, tokenizer, batch_size=16):
         self.texts_df = texts_df
@@ -301,7 +308,7 @@ class PretrainedDistilBERTFinetuned(base_model):
             encoding = output.to_tuple()[0].numpy()
             for problem_id, enc, attention in list(zip(self.texts_df['problem_id'].values[start:end],
                                                        encoding, attention_mask)):
-                self.encodings[problem_id] = mean_pool(enc, attention)
+                self.encodings[problem_id] = mean_pool_np(enc, attention)
             start = start + batch_size
         # Save sparse matrix in current directory
         self.vector_size = len(list(self.vectors.values())[0])
