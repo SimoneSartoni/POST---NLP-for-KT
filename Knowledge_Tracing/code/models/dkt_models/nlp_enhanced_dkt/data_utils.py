@@ -95,7 +95,7 @@ def load_dataset(batch_size=32, shuffle=True,
     if 'sentence_transformers' in nlp_kwargs:
         model_name = nlp_kwargs['sentence_transformers']['model_name']
         encode_model = sentence_transformer(encoding_model=model_name)
-        encode_model.fit(text_df)
+        encode_model.transform(text_df)
 
     if 'pretrained_distilbert_finetuned' in nlp_kwargs:
         pretrained_distilBERT_finetuned_args = nlp_kwargs['pretrained_distilbert_finetuned']

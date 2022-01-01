@@ -108,7 +108,7 @@ def load_dataset(batch_size=32, shuffle=True,
         encode_model = sentence_transformer(encoding_model=model_name)
         if fit:
             batch_size, fraction = fit['batch_size'], fit['fraction']
-            encode_model.fit_on_custom(text_df, text_column=text_column, batch_size=batch_size, frac=frac)
+            encode_model.fit_on_custom(text_df, text_column=text_column, batch_size=batch_size, frac=fraction)
         encode_model.transform(text_df, text_column)
         encode_models.append(encode_model)
 
