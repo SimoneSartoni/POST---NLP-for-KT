@@ -38,8 +38,8 @@ class SentenceSimilarityDataset(Dataset):
     def __getitem__(self, idx):
         texts_a = list(self.texts_df[self.text_column].values)[idx]
         texts_b = list(self.texts_df_2[self.text_column].values)[idx]
-        list_a = list(self.texts_df_2['body'].values)[idx]
-        list_b = list(self.texts_df_2['body'].values)[idx]
+        list_a = list(self.texts_df_2['list_of_words'].values)[idx]
+        list_b = list(self.texts_df_2['list_of_words'].values)[idx]
         counter_a = Counter(list_a)
         counter_b = Counter(list_b)
         def counter_cosine_similarity(c1, c2):
