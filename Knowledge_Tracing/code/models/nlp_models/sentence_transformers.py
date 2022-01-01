@@ -42,6 +42,8 @@ class SentenceSimilarityDataset(Dataset):
         list_b = list(self.texts_df_2['list_of_words'].values)[idx]
         counter_a = Counter(list_a)
         counter_b = Counter(list_b)
+        print(texts_a)
+        print(texts_b)
 
         def counter_cosine_similarity(c1, c2):
             terms = set(c1).union(c2)
