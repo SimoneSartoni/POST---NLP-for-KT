@@ -46,7 +46,7 @@ class SentenceSimilarityDataset(Dataset):
             dot_product = len(common)
             mag_a = math.sqrt(float(len(set(c1))))
             mag_b = math.sqrt(float(len(set(c2))))
-            if mag_a + mag_b != 0:
+            if mag_a * mag_b != 0:
                 return float(dot_product) / float(mag_a * mag_b)
             else:
                 return 0.0
