@@ -76,7 +76,7 @@ class sentence_transformer(base_model):
         dataset = SentenceSimilarityDataset(texts_df, text_column, frac=frac)
         train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True, )
         train_loss = losses.CosineSimilarityLoss(self.st_model)
-        self.st_model.fit(train_objectives=[(train_dataloader, train_loss)], epochs=1, warmup_steps=10,
+        self.st_model.fit(train_objectives=[(train_dataloader, train_loss)], epochs=epochs, warmup_steps=10,
                           show_progress_bar=True)
 
     def transform(self, texts_df, text_column='sentence', save_filepath='./'):
