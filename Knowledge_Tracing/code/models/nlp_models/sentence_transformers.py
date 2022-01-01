@@ -40,10 +40,6 @@ class SentenceSimilarityDataset(Dataset):
         texts_b = list(self.texts_df_2[self.text_column].values)[idx]
         list_a = list(self.texts_df_2['list_of_words'].values)[idx]
         list_b = list(self.texts_df_2['list_of_words'].values)[idx]
-        counter_a = Counter(list_a)
-        counter_b = Counter(list_b)
-        print("text_a:" + texts_a)
-        print("text_b" + texts_b)
 
         def counter_cosine_similarity(c1, c2):
             common = set(c1).intersection(c2)
@@ -54,8 +50,10 @@ class SentenceSimilarityDataset(Dataset):
                 return dot_product / (mag_a * mag_b)
             else:
                 return 0.0
-        cos_sim = counter_cosine_similarity(counter_a, counter_b)
+        cos_sim = counter_cosine_similarity(list_a, list_b)
         if idx % 10 == 0:
+            print("text_a:" + texts_a)
+            print("text_b" + texts_b)
             print(cos_sim)
         return InputExample(texts=[texts_a, texts_b], label=cos_sim)
 
