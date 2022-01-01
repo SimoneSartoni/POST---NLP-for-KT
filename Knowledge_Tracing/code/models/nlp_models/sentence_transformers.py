@@ -51,10 +51,6 @@ class SentenceSimilarityDataset(Dataset):
             else:
                 return 0.0
         cos_sim = counter_cosine_similarity(list_a, list_b)
-        if idx % 10 == 0:
-            print("text_a:" + texts_a)
-            print("text_b" + texts_b)
-            print(cos_sim)
         return InputExample(texts=[texts_a, texts_b], label=cos_sim)
 
 
@@ -75,14 +71,15 @@ class sentence_transformer(base_model):
         self.vectors = {}
         self.vector_size = 0
 
-    def fit_on_custom(self, texts_df, save_filepath='/content/', text_column="sentence", batch_size=128, frac=1):
+    def fit_on_custom(self, texts_df, save_filepath='/content/', text_column="sentence", batch_size=128, frac=1,
+                      epochs=1):
         dataset = SentenceSimilarityDataset(texts_df, text_column, frac=frac)
         train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True, )
         train_loss = losses.CosineSimilarityLoss(self.st_model)
         self.st_model.fit(train_objectives=[(train_dataloader, train_loss)], epochs=1, warmup_steps=10,
                           show_progress_bar=True)
 
-    def transform(self, texts_df, text_coloumn='sentence', save_filepath='./'):
+    def transform(self, texts_df, text_column='sentence', save_filepath='./'):
         self.texts_df = texts_df
         vectors = self.st_model.encode(sentences=self.texts_df[text_coloumn].values, show_progress_bar=True)
         for problem_id, encoding in list(zip(self.texts_df['problem_id'], vectors)):
