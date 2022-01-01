@@ -38,24 +38,15 @@ class SentenceSimilarityDataset(Dataset):
     def __getitem__(self, idx):
         texts_a = list(self.texts_df[self.text_column].values)[idx]
         texts_b = list(self.texts_df_2[self.text_column].values)[idx]
-        list_a = list(self.texts_df_2['list_of_words'].values)[idx]
+        list_a = list(self.texts_df['list_of_words'].values)[idx]
         list_b = list(self.texts_df_2['list_of_words'].values)[idx]
 
         def counter_cosine_similarity(c1, c2):
-            common = set(c1).intersection(c2)
-            print("common:")
-            print(common)
+            common = set(c1).intersection(set(c2))
             dot_product = len(common)
-            print("dot_product:")
-            print(dot_product)
             mag_a = math.sqrt(float(len(set(c1))))
             mag_b = math.sqrt(float(len(set(c2))))
-            print("mag_a:")
-            print(mag_a)
-            print("mag_b:")
-            print(mag_b)
             if mag_a + mag_b != 0:
-                print(float(dot_product) / (mag_a * mag_b))
                 return float(dot_product) / float(mag_a * mag_b)
             else:
                 return 0.0
