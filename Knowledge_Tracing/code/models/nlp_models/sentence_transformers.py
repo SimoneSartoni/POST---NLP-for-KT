@@ -47,7 +47,7 @@ class SentenceSimilarityDataset(Dataset):
             mag_a = math.sqrt(len(c1))
             mag_b = math.sqrt(len(c2))
             if mag_a + mag_b != 0:
-                return dot_product / (mag_a * mag_b)
+                return float(dot_product) / (mag_a * mag_b)
             else:
                 return 0.0
         cos_sim = counter_cosine_similarity(list_a, list_b)
