@@ -43,11 +43,20 @@ class SentenceSimilarityDataset(Dataset):
 
         def counter_cosine_similarity(c1, c2):
             common = set(c1).intersection(c2)
+            print("common:")
+            print(common)
             dot_product = len(common)
+            print("dot_product:")
+            print(dot_product)
             mag_a = math.sqrt(float(len(set(c1))))
             mag_b = math.sqrt(float(len(set(c2))))
+            print("mag_a:")
+            print(mag_a)
+            print("mag_b:")
+            print(mag_b)
             if mag_a + mag_b != 0:
-                return float(dot_product) / (mag_a * mag_b)
+                print(float(dot_product) / (mag_a * mag_b))
+                return float(dot_product) / float(mag_a * mag_b)
             else:
                 return 0.0
         cos_sim = counter_cosine_similarity(list_a, list_b)
