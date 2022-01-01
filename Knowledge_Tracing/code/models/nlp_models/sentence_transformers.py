@@ -5,10 +5,12 @@ import numpy as np
 import os
 import scipy
 from scipy import sparse as sps
-from sentence_transformers import SentenceTransformer
-
+from sentence_transformers import SentenceTransformer, InputExample, losses, models, datasets, evaluation
+from torch.utils.data import Dataset, DataLoader
+import torch
+from collections import Counter
+        import math
 from Knowledge_Tracing.code.Similarity.Compute_Similarity import Compute_Similarity
-
 from Knowledge_Tracing.code.models.base_model import base_model
 
 
@@ -22,10 +24,40 @@ def identity_tokenizer(text):
     return text
 
 
+class SentenceSimilarityDataset(Dataset):
+    def __init__(self, texts_df, text_column, frac=1):
+        self.texts_df = texts_df.sample(frac=frac)
+        self.texts_df_2 = texts_df.sample(frac=frac)
+        print(self.texts_df)
+        print(self.texts_df_2)
+        self.text_column = text_column
+
+    def __len__(self):
+        return len(self.texts_df)
+
+    def __getitem__(self, idx):
+        texts_a = list(self.texts_df[self.text_column].values)[idx]
+        texts_b = list(self.texts_df_2[self.text_column].values)[idx]
+        list_a = list(self.texts_df_2['body'].values)[idx]
+        list_b = list(self.texts_df_2['body'].values)[idx]
+        counter_a = Counter(list_a)
+        counter_b = Counter(list_b)
+        def counter_cosine_similarity(c1, c2):
+            terms = set(c1).union(c2)
+            dot_product = sum(c1.get(k, 0) * c2.get(k, 0) for k in terms)
+            mag_a = math.sqrt(sum(c1.get(k, 0) ** 2 for k in terms))
+            mag_b = math.sqrt(sum(c2.get(k, 0) ** 2 for k in terms))
+            return dot_product / (mag_a * mag_b)
+        cos_sim = counter_cosine_similarity(counter_a, counter_b)
+        return InputExample(texts=[texts_a, texts_b], label=cos_sim)
+
+
+
+
 class sentence_transformer(base_model):
     def __init__(self, encoding_model='all-mpnet-base-v2'):
         super().__init__("sentence_transformers", "NLP")
-        self.sentence_transformer = SentenceTransformer(encoding_model)
+        self.st_model = SentenceTransformer(encoding_model)
         self.texts_df = None
         self.similarity_matrix = None
         self.words_unique = None
@@ -39,9 +71,15 @@ class sentence_transformer(base_model):
         self.vectors = {}
         self.vector_size = 0
 
-    def fit(self, texts_df, text_coloumn='sentence', save_filepath='./'):
+    def fit_on_custom(self, texts_df, save_filepath='/content/', text_column="sentence", batch_size=128, frac=1):
+        dataset = SentenceSimilarityDataset(texts_df, text_column, frac=frac)
+        train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True,)
+        train_loss = losses.CosineSimilarityLoss(self.st_model)
+        self.st_model.fit(train_objectives=[(train_dataloader, train_loss)], epochs=1, warmup_steps=10, show_progress_bar=True)
+
+    def transform(self, texts_df, text_coloumn='sentence', save_filepath='./'):
         self.texts_df = texts_df
-        vectors = self.sentence_transformer.encode(sentences=self.texts_df[text_coloumn].values, show_progress_bar=True)
+        vectors = self.st_model.encode(sentences=self.texts_df[text_coloumn].values, show_progress_bar=True)
         for problem_id, encoding in list(zip(self.texts_df['problem_id'], vectors)):
             self.vectors[problem_id] = encoding
         del vectors
