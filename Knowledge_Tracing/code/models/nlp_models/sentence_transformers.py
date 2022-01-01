@@ -42,16 +42,20 @@ class SentenceSimilarityDataset(Dataset):
         list_b = list(self.texts_df_2['list_of_words'].values)[idx]
         counter_a = Counter(list_a)
         counter_b = Counter(list_b)
+
         def counter_cosine_similarity(c1, c2):
             terms = set(c1).union(c2)
             dot_product = sum(c1.get(k, 0) * c2.get(k, 0) for k in terms)
             mag_a = math.sqrt(sum(c1.get(k, 0) ** 2 for k in terms))
             mag_b = math.sqrt(sum(c2.get(k, 0) ** 2 for k in terms))
-            return dot_product / (mag_a * mag_b)
+            if mag_a + mag_b != 0:
+                return dot_product / (mag_a * mag_b)
+            else:
+                return 0.0
         cos_sim = counter_cosine_similarity(counter_a, counter_b)
+        if idx % 10 == 0:
+            print(cos_sim)
         return InputExample(texts=[texts_a, texts_b], label=cos_sim)
-
-
 
 
 class sentence_transformer(base_model):
@@ -73,9 +77,10 @@ class sentence_transformer(base_model):
 
     def fit_on_custom(self, texts_df, save_filepath='/content/', text_column="sentence", batch_size=128, frac=1):
         dataset = SentenceSimilarityDataset(texts_df, text_column, frac=frac)
-        train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True,)
+        train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True, )
         train_loss = losses.CosineSimilarityLoss(self.st_model)
-        self.st_model.fit(train_objectives=[(train_dataloader, train_loss)], epochs=1, warmup_steps=10, show_progress_bar=True)
+        self.st_model.fit(train_objectives=[(train_dataloader, train_loss)], epochs=1, warmup_steps=10,
+                          show_progress_bar=True)
 
     def transform(self, texts_df, text_coloumn='sentence', save_filepath='./'):
         self.texts_df = texts_df
@@ -169,6 +174,7 @@ class sentence_transformer(base_model):
         return encoding
 
     def get_serializable_params(self):
-        return {"min_df": self.min_df, "max_df": self.max_df, "binary":self.binary, "name": self.name, "topK": self.topK,
+        return {"min_df": self.min_df, "max_df": self.max_df, "binary": self.binary, "name": self.name,
+                "topK": self.topK,
                 "shrink": self.shrink, "normalize": self.normalize,
                 "similarity": self.similarity}
