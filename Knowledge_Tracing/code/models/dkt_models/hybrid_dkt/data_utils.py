@@ -102,10 +102,14 @@ def load_dataset(batch_size=32, shuffle=True,
         encode_models.append(encode_model)
 
     if 'sentence_transformers' in nlp_kwargs:
-        model_name, text_column = nlp_kwargs['sentence_transformers']['model_name'], \
-                                   nlp_kwargs['sentence_transformers']['text_column']
+        model_name, text_column, fit = nlp_kwargs['sentence_transformers']['model_name'], \
+                                       nlp_kwargs['sentence_transformers']['text_column'], \
+                                       nlp_kwargs['sentence_transformers']['fit']
         encode_model = sentence_transformer(encoding_model=model_name)
-        encode_model.fit(text_df, text_column)
+        if fit:
+            batch_size, fraction = fit['batch_size'], fit['fraction']
+            encode_model.fit_on_custom(text_df, text_column=text_column, batch_size=batch_size, frac=frac)
+        encode_model.transform(text_df, text_column)
         encode_models.append(encode_model)
 
     if 'pretrained_distilbert_finetuned_on_CA' in nlp_kwargs:
