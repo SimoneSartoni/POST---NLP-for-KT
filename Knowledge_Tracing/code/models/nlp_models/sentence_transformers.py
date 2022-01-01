@@ -9,7 +9,7 @@ from sentence_transformers import SentenceTransformer, InputExample, losses, mod
 from torch.utils.data import Dataset, DataLoader
 import torch
 from collections import Counter
-        import math
+import math
 from Knowledge_Tracing.code.Similarity.Compute_Similarity import Compute_Similarity
 from Knowledge_Tracing.code.models.base_model import base_model
 
