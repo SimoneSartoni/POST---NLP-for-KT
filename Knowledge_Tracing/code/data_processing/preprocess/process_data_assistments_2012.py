@@ -52,7 +52,7 @@ def process_data_assistments_2012(min_questions=2, max_questions=50, interaction
     print("shape after at least 2 interactions:", train_df.shape)
 
     # Step 2.1 - Fill no skilled question with "no_skill" token
-    train_df.fillna("no_skill", inplace=True)
+    train_df['skill'] = train_df['skill'].fillna("no_skill")
     print("shape after drop no skill:", train_df.shape)
 
     # Step 2.2 - Enumerate skill ids and question ids
