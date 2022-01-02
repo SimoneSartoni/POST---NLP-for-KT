@@ -59,7 +59,7 @@ class SentenceSimilarityDataset(Dataset):
 
     def __getitem__(self, idx):
         start = idx * self.batch_size
-        texts = list(self.texts_df['sentence'].values)[start: start+self.batch_size]
+        texts = list(self.texts_df[self.text_column].values)[start: start+self.batch_size]
         texts_2 = list(self.texts_df_2[self.text_column].values)[start: start+self.batch_size]
         batch_encoding = self.tokenizer(texts, max_length=128, padding='max_length', truncation=True)
         anchor_ids, anchor_mask = batch_encoding['input_ids'], batch_encoding['attention_mask']
@@ -157,7 +157,7 @@ class PretrainedDistilBERTFinetuned(base_model):
                 pos_ids = torch.squeeze(batch['positive_ids'], axis=0).to(device)
                 pos_mask = torch.squeeze(batch['positive_mask'], axis=0).to(device)
                 # extract token embeddings from BERT
-                a = self.model(input_ids=anchor_ids, attention_mask=anchor_mask, output_attentions=False)[0]  # all token embeddings
+                a = self.model(input_ids=anchor_ids, attention_mask=anchor_mask, output_attentions=False)[0]
                 p = self.model(input_ids=pos_ids, attention_mask=pos_mask, output_attentions=False)[0]
                 # get the mean pooled vectors
                 a = mean_pool(a, anchor_mask)

@@ -90,7 +90,7 @@ class PretrainedDistilBERT():
         self.texts_df = None
         self.vector_size = 0
 
-    def fit_on_custom(self, texts_df, config_path, model_filepath, save_filepath='/content/', text_column="sentence",
+    def fit_on_custom(self, texts_df, save_filepath='/content/', text_column="sentence",
                       batch_size=64):
         self.texts_df = texts_df
         print(texts_df)
