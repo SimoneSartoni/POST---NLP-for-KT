@@ -98,7 +98,18 @@ def load_dataset(batch_size=32, shuffle=True,
         config_path, model_filepath = pretrained_distilBERT_args['config_path'], \
                                       pretrained_distilBERT_args['model_filepath']
         encode_model = PretrainedDistilBERT(config_path, model_filepath)
-        encode_model.fit(text_df)
+        encode_model.transform(text_df)
+        encode_models.append(encode_model)
+
+    if 'pretrained_distilBERT' in nlp_kwargs:
+        model_name, text_column, fit = nlp_kwargs['sentence_transformers']['model_name'], \
+                                               nlp_kwargs['sentence_transformers']['text_column'], \
+                                               nlp_kwargs['sentence_transformers']['fit'],
+        encode_model = PretrainedDistilBERT(config_path, model_filepath)
+        if fit:
+            batch_size, text_column = fit['batch_size'], fit['text_column'], fit['epochs']
+            encode_model.fit_on_custom(text_df, text_column=text_column, batch_size=batch_size)
+        encode_model.transform(text_df)
         encode_models.append(encode_model)
 
     if 'sentence_transformers' in nlp_kwargs:
