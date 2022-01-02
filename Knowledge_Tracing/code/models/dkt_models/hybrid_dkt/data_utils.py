@@ -102,9 +102,10 @@ def load_dataset(batch_size=32, shuffle=True,
         encode_models.append(encode_model)
 
     if 'pretrained_distilBERT' in nlp_kwargs:
-        model_name, text_column, fit = nlp_kwargs['sentence_transformers']['model_name'], \
-                                               nlp_kwargs['sentence_transformers']['text_column'], \
-                                               nlp_kwargs['sentence_transformers']['fit'],
+        pretrained_distilBERT_args = nlp_kwargs['pretrained_distilBERT']
+        config_path, model_filepath, fit = pretrained_distilBERT_args['config_path'], \
+                                           pretrained_distilBERT_args['model_filepath'], \
+                                           pretrained_distilBERT_args['fit']
         encode_model = PretrainedDistilBERT(config_path, model_filepath)
         if fit:
             batch_size, text_column = fit['batch_size'], fit['text_column'], fit['epochs']
