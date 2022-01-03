@@ -19,7 +19,7 @@ def mean_pool(token_embeds, attention_mask, dim=1):
         token_embeds.size()
     ).float()
     # perform mean-pooling but exclude padding tokens (specified by in_mask)
-    pool = torch.sum(token_embeds * in_mask, dim) / torch.clamp(in_mask.sum(1), min=1e-9)
+    pool = torch.sum(token_embeds * in_mask, dim) / torch.clamp(in_mask.sum(dim), min=1e-9)
     return pool
 
 
