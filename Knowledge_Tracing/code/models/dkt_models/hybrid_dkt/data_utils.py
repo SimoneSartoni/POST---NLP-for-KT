@@ -8,6 +8,7 @@ from Knowledge_Tracing.code.models.nlp_models.count_vectorizer import count_vect
 # from Knowledge_Tracing.code.models.nlp_models.BERTopic_model import BERTopic_model
 from Knowledge_Tracing.code.models.nlp_models.pretrained_distilbert import PretrainedDistilBERT
 from Knowledge_Tracing.code.models.nlp_models.sentence_transformers import sentence_transformer
+from Knowledge_Tracing.code.models.nlp_models.bertopic_model import BERTopic_model
 
 from Knowledge_Tracing.code.data_processing.load_preprocessed.load_preprocessed_data import load_preprocessed_texts
 from Knowledge_Tracing.code.data_processing.load_preprocessed.get_hybrid_dkt_dataloaders import \
@@ -118,29 +119,22 @@ def load_dataset(batch_size=32, shuffle=True,
         encode_model.transform(text_df, text_column)
         encode_models.append(encode_model)
 
-    if 'pretrained_distilbert_finetuned_on_CA' in nlp_kwargs:
-        encode_model = PretrainedDistilBERTFinetuned()
-        pretrained_distilbert_finetuned_args = nlp_kwargs['pretrained_distilbert_finetuned_on_CA']
-        if 'load' in pretrained_distilbert_finetuned_args:
-            print("load")
-            config_path, model_filepath = pretrained_distilbert_finetuned_args['load']['config_path'], \
-                                          pretrained_distilbert_finetuned_args['load']['model_filepath']
-            encode_model.load(config_path=config_path, model_filepath=model_filepath)
-        elif 'fit_on_custom' in pretrained_distilbert_finetuned_args:
-            config_path, model_filepath = pretrained_distilbert_finetuned_args['fit_on_custom']['config_path'], \
-                                          pretrained_distilbert_finetuned_args['fit_on_custom']['model_filepath']
-            text_column, batch_size = pretrained_distilbert_finetuned_args['fit_on_custom']['text_column'], \
-                pretrained_distilbert_finetuned_args['fit_on_custom']['text_column']
-            encode_model.fit_on_custom(text_df, config_path=config_path, model_filepath=model_filepath,
-                                       save_filepath=save_filepath, text_column=text_column, batch_size=batch_size)
-        elif 'fit_on_nli' in pretrained_distilbert_finetuned_args:
-            config_path, model_filepath = pretrained_distilbert_finetuned_args['fit_on_custom']['config_path'], \
-                                          pretrained_distilbert_finetuned_args['fit_on_custom']['model_filepath']
-            encode_model.fit_on_custom(text_df, config_path=config_path, model_filepath=model_filepath,
-                                       save_filepath=save_filepath)
-        text_column, batch_size = pretrained_distilbert_finetuned_args['transform']['text_column'], \
-            pretrained_distilbert_finetuned_args['transform']['batch_size']
-        encode_model.transform(text_df, text_column=text_column, batch_size=batch_size)
+    if 'bertopic' in nlp_kwargs:
+        bertopic_args = nlp_kwargs['bertopic']
+        pretrained, custom, text_column = bertopic_args['pretrained'], bertopic_args['custom'], \
+                                          bertopic_args['text_column']
+        nr_topics, calculate_probabilities, cluster_selection_method, output = bertopic_args['nr_topics'], \
+            bertopic_args['calculate_probabilities'], bertopic_args['cluster_selection_method'], bertopic_args['output']
+        encode_model = BERTopic_model(nr_topics, calculate_probabilities, cluster_selection_method, output)
+        if pretrained:
+            model_path_or_name = custom['model_path_or_name']
+            encode_model.initialize_custom_bertopic(model_path_or_name)
+        if custom:
+            config_path, model_path_or_name, tokenizer_name, from_tf = custom['config_path'], \
+                custom['model_path_or_name'], custom['tokenizer_name'], custom['from_tf']
+            encode_model.initialize_custom_bertopic(config_path, model_path_or_name, from_tf)
+        encode_model.fit(text_df)
+        encode_model.transform(text_df, text_column)
         encode_models.append(encode_model)
 
     train_gen, val_gen, test_gen, nb_questions, nb_skills = get_hybrid_dkt_dataloaders(
