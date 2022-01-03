@@ -1,8 +1,6 @@
 import gc
 
 import tensorflow as tf
-import numpy as np
-from sklearn.model_selection import train_test_split
 
 from Knowledge_Tracing.code.models.nlp_models.count_vectorizer import count_vectorizer
 # from Knowledge_Tracing.code.models.nlp_models.BERTopic_model import BERTopic_model
@@ -13,7 +11,6 @@ from Knowledge_Tracing.code.models.nlp_models.bertopic_model import BERTopic_mod
 from Knowledge_Tracing.code.data_processing.load_preprocessed.load_preprocessed_data import load_preprocessed_texts
 from Knowledge_Tracing.code.data_processing.load_preprocessed.get_hybrid_dkt_dataloaders import \
     get_hybrid_dkt_dataloaders
-from Knowledge_Tracing.code.models.nlp_models.pretrained_distilbert_finetuned import PretrainedDistilBERTFinetuned
 
 MASK_VALUE = -1.0  # The masking value cannot be zero.
 
