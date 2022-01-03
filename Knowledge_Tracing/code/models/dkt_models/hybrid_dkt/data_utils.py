@@ -95,11 +95,14 @@ def load_dataset(batch_size=32, shuffle=True,
 
     if 'pretrained_distilbert' in nlp_kwargs:
         pretrained_distilbert_args = nlp_kwargs['pretrained_distilbert']
-        config_path, model_filepath, fit = pretrained_distilbert_args['config_path'], \
-            pretrained_distilbert_args['model_filepath'], pretrained_distilbert_args['fit']
+        config_path, model_filepath, fit_on_custom, fit_on_nli = pretrained_distilbert_args['config_path'], \
+            pretrained_distilbert_args['model_filepath'], pretrained_distilbert_args['fit_on_custom'], \
+            pretrained_distilbert_args['fit_on_nli']
         encode_model = PretrainedDistilBERT(config_path, model_filepath)
-        if fit:
-            batch_size, text_column = fit['batch_size'], fit['text_column']
+        if fit_on_nli:
+            encode_model.fit_on_nli(text_df)
+        if fit_on_custom:
+            batch_size, text_column = fit_on_custom['batch_size'], fit_on_custom['text_column']
             encode_model.fit_on_custom(text_df, text_column=text_column, batch_size=batch_size)
         encode_model.transform(text_df)
         encode_models.append(encode_model)
