@@ -59,8 +59,6 @@ def process_data_assistments_2012(min_questions=2, max_questions=50, interaction
     train_df['skill'], _ = pd.factorize(train_df['skill'], sort=True)
     print("shape after factorize:", train_df.shape)
 
-
-
     # Step 5 - Compute number of unique skills ids and number of unique question ids
     questions_ids = train_df['problem_id'].unique()
     n_ids = len(questions_ids)
