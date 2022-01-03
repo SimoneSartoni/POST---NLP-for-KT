@@ -67,7 +67,7 @@ class SentenceSimilarityDataset(Dataset):
                 return float(dot_product) / float(mag_a * mag_b)
             else:
                 return 0.0
-        cos_sim = [counter_cosine_similarity(a, b) for a, b in list(zip(list_a, list_b))]
+        cos_sim = [[counter_cosine_similarity(a, b) for a in list_a] for b in list_b]
 
         inputs = {"anchor_ids": anchor_ids, "anchor_mask": anchor_mask,
                   "positive_ids": positive_ids, "positive_mask": positive_mask,
