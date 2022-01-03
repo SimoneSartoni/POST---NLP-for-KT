@@ -82,7 +82,7 @@ class PretrainedDistilBERT():
                                 "pretrained_distilbert_base_uncased_24_epochs/tf_model.h5",
                  ):
         self.config = DistilBertConfig.from_json_file(config_path)
-        self.model = TFDistilBertModel.from_pretrained(model_filepath, config=self.config)
+        self.model = DistilBertModel.from_pretrained(model_filepath, config=self.config, from_tf=True)
         self.tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
         self.encodings = {}
         self.pro_num = None
