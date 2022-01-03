@@ -94,7 +94,7 @@ def load_dataset(batch_size=32, shuffle=True,
         encode_models.append(encode_model)
 
     if 'pretrained_distilbert' in nlp_kwargs:
-        pretrained_distilbert_args = nlp_kwargs['pretrained_distilBERT']
+        pretrained_distilbert_args = nlp_kwargs['pretrained_distilbert']
         config_path, model_filepath, fit = pretrained_distilbert_args['config_path'], \
             pretrained_distilbert_args['model_filepath'], pretrained_distilbert_args['fit']
         encode_model = PretrainedDistilBERT(config_path, model_filepath)
