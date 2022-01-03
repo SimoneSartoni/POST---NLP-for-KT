@@ -137,7 +137,6 @@ class PretrainedDistilBERT():
                 pos_mask = torch.squeeze(batch['positive_mask'], axis=0).to(device)
                 cos_sim_list = batch['cos_sim']
                 print(cos_sim_list)
-                cos_sim_list = cos_sim_list[0]
                 a = self.model(input_ids=anchor_ids, attention_mask=anchor_mask, output_attentions=False)[0]
                 p = self.model(input_ids=pos_ids, attention_mask=pos_mask, output_attentions=False)[0]
                 # get the mean pooled vectors

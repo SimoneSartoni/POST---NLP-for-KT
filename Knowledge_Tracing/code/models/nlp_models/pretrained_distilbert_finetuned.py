@@ -167,6 +167,7 @@ class PretrainedDistilBERTFinetuned(base_model):
                 # get label(s) - we could define this before if confident of consistent batch sizes
                 labels = torch.tensor(range(len(scores)), dtype=torch.long, device=scores.device)
                 # and now calculate the loss
+
                 loss = loss_func(scores * scale, labels)
                 # using loss, calculate gradients and then optimize
                 loss.backward()
