@@ -18,15 +18,15 @@ def process_data_poj(min_questions=2, max_questions=50,
 
     print("loading csv.....")
     if n_rows:
-        train_df = pd.read_csv(interactions_filepath, dtype=dtypes, nrows=n_rows)
+        train_df = pd.read_csv(interactions_filepath, nrows=n_rows)
     else:
-        train_df = pd.read_csv(interactions_filepath, dtype=dtypes)
+        train_df = pd.read_csv(interactions_filepath,)
     print("shape of dataframe :", train_df.shape)
-    renaming_dict = {"Problem": "problem_id", "User":"user_id", "Result":"correct", "Submit Time": "order_id"}
+    renaming_dict = {"Problem": "problem_id", "User": "user_id", "Result": "correct", "Submit Time": "order_id"}
     train_df = train_df.rename(columns=renaming_dict, errors="raise")
     # Step 3.1 - Define start, end and elapsed time, fill no timed elapsed time and cap values under a max
     train_df['order_id'] = [try_parsing_date(x) for x in train_df['order_id']]
-
+    train_df['correct'] = [1.0 if c == "Accepted" else 0.0 for c in train_df['correct']]
     # Step 3.2 - Generate timestamps from start time
     train_df["timestamp"] = [datetime.strptime(start, '%Y-%m-%d %H:%M:%S').timestamp()
                              for start in train_df['order_id']]
