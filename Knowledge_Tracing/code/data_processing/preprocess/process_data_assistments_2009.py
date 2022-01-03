@@ -9,7 +9,7 @@ from Knowledge_Tracing.code.data_processing.preprocess.load_process_assistments_
 
 def process_data_assistments_2009(min_questions=2, max_questions=50,
                                   interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4"
-                                                    "-final.csv",
+                                                        "-final.csv",
                                   texts_filepath='../input/', output_filepath="/kaggle/working/", n_rows=None,
                                   n_texts=None, personal_cleaning=True, make_sentences_flag=True):
     dtypes = {'user_id': 'int32', 'problem_id': 'int64',
