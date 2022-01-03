@@ -144,9 +144,9 @@ class PretrainedDistilBERT():
                 p = mean_pool(p, pos_mask)
                 # calculate the cosine similarities
 
-                scores = torch.stack([cos_sim(a_i, p) for a_i in a])
+                scores = torch.stack([cos_sim(a_i.reshape(1, a_i.shape[0]), p) for a_i in a])
                 # get label(s) - we could define this before if confident of consistent batch sizes
-                labels = torch.stack([sim for sim in cos_sim_list])
+                labels = torch.stack([torch.stack([sim for sim in sim_list]) for sim_list in cos_sim_list])
                 print(scores)
                 print(labels)
                 # and now calculate the loss
