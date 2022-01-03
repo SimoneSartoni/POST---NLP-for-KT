@@ -4,7 +4,7 @@ import pandas as pd
 
 
 from Knowledge_Tracing.code.utils.utils import try_parsing_date
-from Knowledge_Tracing.code.data_processing.preprocess.load_process_assistments_texts import load_process_assistments_texts
+from Knowledge_Tracing.code.data_processing.preprocess.load_process_poj_texts import load_process_poj_texts
 
 
 def process_data_poj(min_questions=2, max_questions=50,
@@ -46,7 +46,7 @@ def process_data_poj(min_questions=2, max_questions=50,
 
     print("Get texts, intersection...")
     # Step 6 - Remove questions interactions we do not have text
-    texts_df = load_process_assistments_texts(personal_cleaning=personal_cleaning, texts_filepath=texts_filepath,
+    texts_df = load_process_poj_texts(personal_cleaning=personal_cleaning, texts_filepath=texts_filepath,
                                               n_texts=n_texts, make_sentences_flag=make_sentences_flag)
     train_df = train_df.loc[train_df['problem_id'].isin(texts_df['problem_id'])]
 
