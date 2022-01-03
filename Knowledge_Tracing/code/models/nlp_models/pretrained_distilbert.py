@@ -278,11 +278,12 @@ class PretrainedDistilBERT():
             inputs = self.tokenizer(list(self.texts_df[text_column].values)[start:end], truncation=True,
                                     return_tensors="pt",
                                     padding=True)
-            attention_mask = torch.from_numpy(np.array(inputs['attention_mask']))
-            output = self.model(inputs)
+            ids, attention_mask = inputs['input_ids'], inputs['attention_mask']
+            output = self.model(input_ids=ids, attention_mask=attention_mask, output_attentions=False)
             print(output)
+            encoding = output.to_tuple()[0].numpy()
             for problem_id, enc, attention in list(zip(self.texts_df['problem_id'].values[start:end],
-                                                       output, attention_mask)):
+                                                       encoding, attention_mask)):
                 self.encodings[problem_id] = F.normalize(mean_pool(enc, attention), p=2, dim=1).numpy().float()
             start = start + batch_size
         print(len(list(self.encodings.keys())))
