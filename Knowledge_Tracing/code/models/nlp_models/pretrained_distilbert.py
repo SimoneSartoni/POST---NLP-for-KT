@@ -164,7 +164,7 @@ class PretrainedDistilBERT():
             os.mkdir(model_path)
         self.model.save_pretrained(model_path)
 
-    def fit_on_nli(self, config_path, model_filepath, save_filepath='/content/', ):
+    def fit_on_nli(self, save_filepath='/content/', ):
         snli = datasets.load_dataset('snli', split='train')
         mnli = datasets.load_dataset('glue', 'mnli', split='train')
         mnli = mnli.remove_columns("idx")
