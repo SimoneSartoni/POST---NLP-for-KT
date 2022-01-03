@@ -81,6 +81,8 @@ class PretrainedDistilBERT():
                  model_filepath="/content/drive/MyDrive/simone sartoni - text enhanced deep knowledge tracing/"
                                 "pretrained_distilbert_base_uncased_24_epochs/tf_model.h5",
                  ):
+        self.name = "pretrained_distilbert"
+        self.method = "nlp_model"
         self.config = DistilBertConfig.from_json_file(config_path)
         self.model = DistilBertModel.from_pretrained(model_filepath, config=self.config, from_tf=True)
         self.tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
