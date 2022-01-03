@@ -13,13 +13,13 @@ def identity_tokenizer(text):
 
 
 # define mean pooling function
-def mean_pool(token_embeds, attention_mask):
+def mean_pool(token_embeds, attention_mask, dim=1):
     # reshape attention_mask to cover 768-dimension embeddings
     in_mask = attention_mask.unsqueeze(-1).expand(
         token_embeds.size()
     ).float()
     # perform mean-pooling but exclude padding tokens (specified by in_mask)
-    pool = torch.sum(token_embeds * in_mask, 1) / torch.clamp(in_mask.sum(1), min=1e-9)
+    pool = torch.sum(token_embeds * in_mask, dim) / torch.clamp(in_mask.sum(1), min=1e-9)
     return pool
 
 
@@ -284,7 +284,7 @@ class PretrainedDistilBERT():
             encoding = output.to_tuple()[0]
             for problem_id, enc, attention in list(zip(self.texts_df['problem_id'].values[start:end],
                                                        encoding, attention_mask)):
-                self.encodings[problem_id] = F.normalize(mean_pool(enc, attention), p=2, dim=0).detach().numpy()
+                self.encodings[problem_id] = F.normalize(mean_pool(enc, attention, dim=0), p=2, dim=0).detach().numpy()
                 print(self.encodings[problem_id])
             start = start + batch_size
         print(len(list(self.encodings.keys())))
