@@ -18,9 +18,9 @@ def process_data_poj(min_questions=2, max_questions=50,
 
     print("loading csv.....")
     if n_rows:
-        train_df = pd.read_csv(interactions_filepath, dtype=dtypes, nrows=n_rows, encoding_errors='ignore')
+        train_df = pd.read_csv(interactions_filepath, dtype=dtypes, nrows=n_rows)
     else:
-        train_df = pd.read_csv(interactions_filepath, dtype=dtypes, encoding_errors='ignore')
+        train_df = pd.read_csv(interactions_filepath, dtype=dtypes)
     print("shape of dataframe :", train_df.shape)
     renaming_dict = {"Problem": "problem_id", "User":"user_id", "Result":"correct", "Submit Time": "order_id"}
     train_df = train_df.rename(columns=renaming_dict, errors="raise")
