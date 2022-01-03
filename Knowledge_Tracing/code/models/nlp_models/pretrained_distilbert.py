@@ -285,7 +285,6 @@ class PretrainedDistilBERT():
             for problem_id, enc, attention in list(zip(self.texts_df['problem_id'].values[start:end],
                                                        encoding, attention_mask)):
                 self.encodings[problem_id] = F.normalize(mean_pool(enc, attention, dim=0), p=2, dim=0).detach().numpy()
-                print(self.encodings[problem_id])
             start = start + batch_size
         print(len(list(self.encodings.keys())))
         print("pretrainedBERT model created")
