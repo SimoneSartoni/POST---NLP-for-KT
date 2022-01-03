@@ -115,6 +115,7 @@ def load_process_assistments_texts(personal_cleaning=True, texts_filepath='../in
     preprocess_data(df, 'body')
     print("df after preprocess data:")
     print(df)
+    df['plain_text'] = df['body']
     # Using tokenizer and removing the stopwords
     rem_stopwords_tokenize(df, 'body', personal_cleaning)
     print("df after stopwords tokenize:")

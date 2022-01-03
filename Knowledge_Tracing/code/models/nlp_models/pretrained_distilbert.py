@@ -146,6 +146,8 @@ class PretrainedDistilBERT():
                 scores = torch.stack([cos_sim(a_i.reshape(1, a_i.shape[0]), p) for a_i in a])
                 # get label(s) - we could define this before if confident of consistent batch sizes
                 labels = torch.stack([sim for sim in cos_sim_list])
+                print(scores)
+                print(labels)
                 # and now calculate the loss
                 loss = loss_func(scores * scale, labels)
                 # using loss, calculate gradients and then optimize
