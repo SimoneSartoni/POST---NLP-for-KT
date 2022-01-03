@@ -53,24 +53,11 @@ def process_data_junyi(min_questions=2, max_questions=50, interactions_filepath=
     train_df = train_df.groupby('user_id').filter(lambda q: len(q) >= min_questions).copy()
     print("shape after at least " + min_questions + " interactions:", train_df.shape)
 
-    # Step 2.1 - Fill no skilled question with "no_skill" token
-    train_df.fillna("fill_value", inplace=True)
-    print("shape after drop no skill:", train_df.shape)
-
-    # Step 2.2 - Enumerate skill ids and question ids
-    train_df['skill'], _ = pd.factorize(train_df['skill'], sort=True)
-    print("shape after factorize:", train_df.shape)
-
-
-
     # Step 5 - Compute number of unique skills ids and number of unique question ids
     questions_ids = train_df['problem_id'].unique()
     n_ids = len(questions_ids)
-    n_skills = len(train_df['skill'].unique())
     print("no. of problems :", n_ids)
-    print("no. of skills: ", n_skills)
     print("shape after exclusion:", train_df.shape)
-
     print("Get texts, intersection...")
 
     # Step 6 - Remove questions interactions we do not have text
@@ -79,11 +66,8 @@ def process_data_junyi(min_questions=2, max_questions=50, interactions_filepath=
     texts_df = texts_df.loc[texts_df['problem_id'].isin(train_df['problem_id'])]
 
     n_ids = len(questions_ids)
-    n_skills = len(train_df['skill'].unique())
     print("no. of problems :", n_ids)
-    print("no. of skills: ", n_skills)
     print("shape after exclusion:", train_df.shape)
-    train_df['skill'], _ = pd.factorize(train_df['skill'], sort=True)
     texts_df['question_id'], _ = pd.factorize(texts_df['problem_id'], sort=True)
     train_df['question_id'], _ = pd.factorize(train_df['problem_id'], sort=True)
 

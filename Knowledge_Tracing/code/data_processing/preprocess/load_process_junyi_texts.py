@@ -115,9 +115,10 @@ def load_process_junyi_texts(personal_cleaning=True, texts_filepath='../input/',
         'chinese_question_desc']
     df['body'] = df['question_name'] + df['chinese_question'] + df['chinese_question_desc']
     df['problem_id'], _ = pd.factorize(df['question_name'], sort=False)
-    """preprocess_data(df, 'body')
+    preprocess_data(df, 'body')
     print("df after preprocess data:")
     print(df)
+    df['plain_text'] = df['body']
     # Using tokenizer and removing the stopwords
     rem_stopwords_tokenize(df, 'body', personal_cleaning)
     print("df after stopwords tokenize:")
@@ -130,5 +131,5 @@ def load_process_junyi_texts(personal_cleaning=True, texts_filepath='../input/',
     print("df after lemmatize all:")
     print(df)
     if make_sentences_flag:
-        make_sentences(df, 'body')"""
+        make_sentences(df, 'body')
     return df
