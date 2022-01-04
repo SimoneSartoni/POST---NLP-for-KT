@@ -1,8 +1,9 @@
+import gc
 from datetime import datetime
 
 import numpy as np
 import pandas as pd
-
+import itertools
 from Knowledge_Tracing.code.utils.utils import try_parsing_date
 from Knowledge_Tracing.code.data_processing.preprocess.load_process_junyi_texts import load_process_junyi_texts
 
@@ -24,11 +25,23 @@ def process_data_junyi(min_questions=2, max_questions=50, interactions_filepath=
     corrects_data = [data[x].split(',') for x in corrects_index]
     timestamps_index = [el * 4 + 3 for el in index]
     timestamps_data = [data[x].split(',') for x in timestamps_index]
-    problems = []
-    corrects = []
-    timestamps = []
-    users = []
     user_id = 0
+    del data
+    gc.collect()
+    problems = list(itertools.chain(problem_data))
+    del problem_data
+    gc.collect()
+    corrects = list(itertools.chain(corrects_data))
+    del corrects_data
+    gc.collect()
+    timestamps = list(itertools.chain(timestamps_data))
+    del timestamps_data
+    gc.collect()
+    users_list = [[index for i in range(0, real_len)] for index, real_len in list(zip(range(0, len(real_lens)), real_lens))]
+    users = list(itertools.chain(users_list))
+    del users_list
+    del real_lens
+    gc.collect()
     for problem, correct, timestamp, real_len in list(zip(*(problem_data, corrects_data, timestamps_data, real_lens))):
         for index in range(real_len):
             problems.append(int(problem[index]))
