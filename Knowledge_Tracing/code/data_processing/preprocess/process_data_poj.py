@@ -36,6 +36,7 @@ def process_data_poj(min_questions=2, max_questions=50,
     print("shape after at max max " + str(max_questions) + " interactions:", train_df.shape)
 
     train_df = train_df.drop_duplicates(subset=['user_id', 'problem_id'], keep='first').reset_index(drop=True)
+    print("shape after remove duplicates:", train_df.shape)
 
     # Step 1 - Remove users with less than a certain number of answers
     train_df = train_df.groupby('user_id').filter(lambda q: len(q) >= min_questions).copy()
