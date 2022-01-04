@@ -70,7 +70,7 @@ class TruePositives(tf.keras.metrics.TruePositives):
 class ColdStartBinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
     def __init__(self, window_size=30):
         self.window_size = window_size
-        super(ColdStartBinaryAccuracy, self).__init__(name="ColdStartBinaryAccuracy")
+        super(ColdStartBinaryAccuracy, self).__init__(name="ColdStartBinaryAccuracy"+str(window_size))
 
     def update_state(self, y_true, y_pred, sample_weight=None):
         y_true, y_pred = y_true[:, 0:self.window_size], y_pred[:, 0:self.window_size]
@@ -82,7 +82,7 @@ class ColdStartBinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
 class ColdStartAUC(tf.keras.metrics.AUC):
     def __init__(self, window_size=30):
         self.window_size = window_size
-        super(ColdStartAUC, self).__init__(name="ColdStartAUC")
+        super(ColdStartAUC, self).__init__(name="ColdStartAUC"+str(window_size))
 
     def update_state(self, y_true, y_pred, sample_weight=None):
         y_true, y_pred = y_true[:, 0:self.window_size], y_pred[:, 0:self.window_size]
