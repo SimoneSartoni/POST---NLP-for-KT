@@ -1,12 +1,9 @@
 import tensorflow as tf
-from sklearn.model_selection import train_test_split
 
 from Knowledge_Tracing.code.data_processing.load_preprocessed.get_dkt_dataloaders import get_DKT_dataloaders
 
 MASK_VALUE = -1.  # The masking value cannot be zero.
-from Knowledge_Tracing.code.data_processing.load_preprocessed.load_preprocessed_data import load_preprocessed_texts, \
-    load_preprocessed_interactions
-import sys
+
 
 def create_dataset(generator, ids_depth, nb_questions, shuffle=True, batch_size=1024):
     input_types = {"feature_id": tf.float32, "target_id": tf.int32}

@@ -36,6 +36,7 @@ class BERTopic_model():
         self.texts_df = None
 
     def initialize_pretrained_bertopic(self, model_path_or_name="all-mpnet-base-v2"):
+        self.st_model = SentenceTransformer(model_path_or_name)
         self.bertopic = BERTopic(embedding_model=model_path_or_name, language="english",
                                  calculate_probabilities=self.calculate_probabilities, nr_topics=self.nr_topics)
 
