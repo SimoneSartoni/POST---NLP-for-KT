@@ -86,7 +86,7 @@ def load_dataset(batch_size=32, shuffle=True,
     if 'count_vectorizer' in nlp_kwargs:
         count_vectorizer_args = nlp_kwargs['count_vectorizer']
         min_df, max_df, max_features = count_vectorizer_args['min_df'], count_vectorizer_args['max_df'], \
-                                       count_vectorizer_args['max_features']
+            count_vectorizer_args['max_features']
         encode_model = count_vectorizer(min_df=min_df, max_df=max_df, binary=False, max_features=max_features)
         encode_model.fit(text_df, save_filepath)
         encode_models.append(encode_model)
