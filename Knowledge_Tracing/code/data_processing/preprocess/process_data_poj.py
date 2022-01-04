@@ -12,7 +12,7 @@ def process_data_poj(min_questions=2, max_questions=50,
     dtypes = {'User': 'int32', 'Problem': 'int64',
               'Result': 'string',
               'Submit Time': "string"}
-
+    import pandas as pd
     print("loading csv.....")
     if n_rows:
         train_df = pd.read_csv(interactions_filepath, nrows=n_rows)

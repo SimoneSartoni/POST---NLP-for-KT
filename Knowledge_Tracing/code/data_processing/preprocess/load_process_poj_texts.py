@@ -1,7 +1,7 @@
 from Knowledge_Tracing.code.data_processing.preprocess.text_processing_utils import *
 
-
 def load_process_poj_texts(personal_cleaning=True, texts_filepath='../input/', n_texts=None, make_sentences_flag=True):
+    import pandas as pd
     if n_texts:
         df = pd.read_csv(texts_filepath, low_memory=False, sep='\n', names=["data"], nrows=n_texts)
     else:
