@@ -42,13 +42,6 @@ def process_data_junyi(min_questions=2, max_questions=50, interactions_filepath=
     del users_list
     del real_lens
     gc.collect()
-    for problem, correct, timestamp, real_len in list(zip(*(problem_data, corrects_data, timestamps_data, real_lens))):
-        for index in range(real_len):
-            problems.append(int(problem[index]))
-            corrects.append(float(correct[index]))
-            timestamps.append(try_parsing_date(timestamp[index]))
-            users.append(user_id)
-        user_id += 1
     dictionary = {'user_id': users, 'problem_id': problems, 'correct': corrects, "timestamp": timestamps}
     train_df = pd.DataFrame(dictionary)
 
