@@ -2,7 +2,7 @@ import tensorflow as tf
 
 
 class ColdStartLoss:
-    def __init__(self, window_size):
+    def __init__(self, window_size=30):
         self.window_size = window_size
 
     def compute_loss(self, y_true, y_pred):
