@@ -25,16 +25,22 @@ def process_data_junyi(min_questions=2, max_questions=50, interactions_filepath=
     corrects_data = [data[x].split(',') for x in corrects_index]
     timestamps_index = [el * 4 + 3 for el in index]
     timestamps_data = [data[x].split(',') for x in timestamps_index]
-    user_id = 0
     del data
+    del [real_len_index, problem_index, corrects_index, timestamps_index]
     gc.collect()
-    problems = list(itertools.chain(problem_data))
+    problems = []
+    for p in problem_data:
+        problems += p
     del problem_data
     gc.collect()
-    corrects = list(itertools.chain(corrects_data))
+    corrects = []
+    for c in corrects_data:
+        corrects += c
     del corrects_data
     gc.collect()
-    timestamps = list(itertools.chain(timestamps_data))
+    timestamps = []
+    for t in timestamps_data:
+        timestamps += t
     del timestamps_data
     gc.collect()
     index = 0
