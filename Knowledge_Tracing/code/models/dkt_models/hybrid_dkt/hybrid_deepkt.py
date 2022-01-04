@@ -19,11 +19,11 @@ class hybrid_DKTModel(Model):
         if len(list(configs.keys())) > 0:
             for config in configs.values():
                 name, embedding_size, hidden_units = config['name'], config['embedding_size'], \
-                                                     config['hidden_units']
+                                                                 config['hidden_units']
                 input_embedding = Input(shape=[None, embedding_size], name=name)
                 target_embedding = Input(shape=[None, embedding_size], name="target_" + name)
                 inputs[name] = input_embedding
-                inputs['target_' + name] = target_embedding
+                inputs['target_'+name] = target_embedding
                 mask_embedding = layers.Masking(mask_value=-1.0)(input_embedding)
                 mask_target_embedding = layers.Masking(mask_value=-1.0)(target_embedding)
                 lstm_embedding = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_embedding)
@@ -59,13 +59,10 @@ class hybrid_DKTModel(Model):
                 `optimizer` or `metrics`.
         """
 
-        def custom_loss(y_true, y_pred):
-            if self.loss == None:
-                return losses.binary_crossentropy(y_true, y_pred)
-            return self.loss(y_true, y_pred)
-
+        if not self.loss:
+            self.loss = losses.binary_crossentropy
         super(hybrid_DKTModel, self).compile(
-            loss=custom_loss,
+            loss=self.loss,
             optimizer=optimizer,
             metrics=metrics,
             experimental_run_tf_function=False)
