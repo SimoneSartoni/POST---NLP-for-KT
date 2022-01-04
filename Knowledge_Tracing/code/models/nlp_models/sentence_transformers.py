@@ -69,6 +69,7 @@ class sentence_transformer:
         self.similarity = "cosine"
         self.embeddings = {}
         self.vector_size = 0
+        self.name = "sentence_transformer"
 
     def fit_on_custom(self, texts_df, save_filepath='/content/', text_column="sentence", batch_size=128, frac=1,
                       epochs=1):

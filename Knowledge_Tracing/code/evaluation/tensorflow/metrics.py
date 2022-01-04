@@ -75,17 +75,37 @@ class ColdStartBinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
     def update_state(self, y_true, y_pred, sample_weight=None):
         y_true, y_pred = y_true[:, 0:self.window_size], y_pred[:, 0:self.window_size]
         sample_weight = sample_weight[:, 0:self.window_size]
-        super(ColdStartBinaryAccuracy, self).update_state(y_true=y_true,
-                                                 y_pred=y_pred,
-                                                 sample_weight=sample_weight)
+        super(ColdStartBinaryAccuracy, self).update_state(y_true=y_true, y_pred=y_pred, sample_weight=sample_weight)
 
 
 class ColdStartAUC(tf.keras.metrics.AUC):
     def __init__(self, window_size=30):
         self.window_size = window_size
-        super(ColdStartAUC, self).__init__(name="ColdStartAUC"+str(window_size))
+        super(ColdStartAUC, self).__init__(name="ColdStartAUC" + str(window_size))
 
     def update_state(self, y_true, y_pred, sample_weight=None):
         y_true, y_pred = y_true[:, 0:self.window_size], y_pred[:, 0:self.window_size]
         sample_weight = sample_weight[:, 0:self.window_size]
         super(ColdStartAUC, self).update_state(y_true=y_true, y_pred=y_pred, sample_weight=sample_weight)
+
+
+class ColdProblemsBinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
+    def __init__(self, cold_items):
+        self.cold_items = cold_items
+        super(ColdProblemsBinaryAccuracy, self).__init__(name="ColdProblemsBinaryAccuracy")
+
+    def update_state(self, y_true, y_pred, sample_weight=None):
+        y_true, y_pred = y_true[:, 0:self.window_size], y_pred[:, 0:self.window_size]
+        sample_weight = sample_weight[:, 0:self.window_size]
+        super(ColdProblemsBinaryAccuracy, self).update_state(y_true=y_true, y_pred=y_pred, sample_weight=sample_weight)
+
+
+class ColdProblemsAUC(tf.keras.metrics.AUC):
+    def __init__(self, cold_items):
+        self.cold_items = cold_items
+        super(ColdProblemsAUC, self).__init__(name="ColdProblemsAUC")
+
+    def update_state(self, y_true, y_pred, sample_weight=None):
+        y_true, y_pred = y_true[:, 0:self.window_size], y_pred[:, 0:self.window_size]
+        sample_weight = sample_weight[:, 0:self.window_size]
+        super(ColdProblemsAUC, self).update_state(y_true=y_true, y_pred=y_pred, sample_weight=sample_weight)
