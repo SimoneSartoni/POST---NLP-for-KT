@@ -37,11 +37,15 @@ def process_data_junyi(min_questions=2, max_questions=50, interactions_filepath=
     timestamps = list(itertools.chain(timestamps_data))
     del timestamps_data
     gc.collect()
-    users_list = [[index for i in range(0, real_len)] for index, real_len in list(zip(range(0, len(real_lens)), real_lens))]
-    users = list(itertools.chain(users_list))
-    print(users)
-    del users_list
+    index = 0
+    users = []
+    for real_len in real_lens:
+        for i in range(0, len(real_len)):
+            users.append(index)
+        index += 1
     del real_lens
+    print(len(users))
+    print(len(problems))
     gc.collect()
     dictionary = {'user_id': users, 'problem_id': problems, 'correct': corrects, "timestamp": timestamps}
     train_df = pd.DataFrame(dictionary)
