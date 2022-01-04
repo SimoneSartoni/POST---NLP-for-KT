@@ -12,7 +12,7 @@ class hybrid_DKTModel(Model):
             and what the model expects.
     """
 
-    def __init__(self, configs={}, dropout_rate=0.2):
+    def __init__(self, configs={}, dropout_rate=0.2, loss=None):
         inputs = {}
         multiply_outputs = []
 
@@ -37,7 +37,7 @@ class hybrid_DKTModel(Model):
         dense_label = layers.Dense(1, activation='sigmoid')
 
         output_label = layers.TimeDistributed(dense_label, name='output_class')(concatenate_layer)
-
+        self.loss = loss
         super(hybrid_DKTModel, self).__init__(inputs=inputs, outputs=output_label, name="hybrid_DKTModel")
         self.configs = configs
 
@@ -60,6 +60,8 @@ class hybrid_DKTModel(Model):
         """
 
         def custom_loss(y_true, y_pred):
+            if self.loss:
+                return self.loss(y_true, y_pred)
             return losses.binary_crossentropy(y_true, y_pred)
 
         super(hybrid_DKTModel, self).compile(
