@@ -18,9 +18,9 @@ def process_data_assistments_2009(min_questions=2, max_questions=50,
 
     print("loading csv.....")
     if n_rows:
-        train_df = pd.read_csv(interactions_filepath, dtype=dtypes, nrows=n_rows)
+        train_df = pd.read_csv(interactions_filepath, dtype=dtypes, nrows=n_rows, encoding='unicode_escape')
     else:
-        train_df = pd.read_csv(interactions_filepath, dtype=dtypes)
+        train_df = pd.read_csv(interactions_filepath, dtype=dtypes, encoding='unicode_escape')
     print("shape of dataframe :", train_df.shape)
 
     # Step 3.1 - Define start, end and elapsed time, fill no timed elapsed time and cap values under a max
