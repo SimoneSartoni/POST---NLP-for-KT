@@ -24,7 +24,6 @@ def load_process_poj_texts(personal_cleaning=True, texts_filepath='../input/', n
         else:
             new = str(questions[index]) + str(row)
             questions[index] = new
-    questions.append([])
     dictionary = {'problem_id': problem_ids, 'body': questions}
     df = pd.DataFrame(dictionary)
     # Using the preprocessing function to preprocess the tweet data
