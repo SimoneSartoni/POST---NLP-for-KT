@@ -37,10 +37,9 @@ class hybrid_DKTModel(Model):
         dense_label = layers.Dense(1, activation='sigmoid')
 
         output_label = layers.TimeDistributed(dense_label, name='output_class')(concatenate_layer)
+        self.loss = loss
         super(hybrid_DKTModel, self).__init__(inputs=inputs, outputs=output_label, name="hybrid_DKTModel")
         self.configs = configs
-        self.loss = loss
-
 
     def compile(self, optimizer, metrics=None):
         """Configures the model for training.
@@ -60,11 +59,11 @@ class hybrid_DKTModel(Model):
                 `optimizer` or `metrics`.
         """
 
-        if not self.loss:
-            self.loss = losses.binary_crossentropy
-        print(self.loss)
+        def custom_loss(y_true, y_pred):
+            return losses.binary_crossentropy(y_true, y_pred)
+
         super(hybrid_DKTModel, self).compile(
-            loss=self.loss,
+            loss=custom_loss,
             optimizer=optimizer,
             metrics=metrics,
             experimental_run_tf_function=False)
