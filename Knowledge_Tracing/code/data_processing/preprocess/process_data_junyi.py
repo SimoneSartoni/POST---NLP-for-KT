@@ -55,7 +55,7 @@ def process_data_junyi(min_questions=2, max_questions=50, interactions_filepath=
     gc.collect()
     dictionary = {'user_id': users, 'problem_id': problems, 'correct': corrects, "timestamp": timestamps}
     train_df = pd.DataFrame(dictionary)
-
+    del [users, problems, corrects, timestamps]
     print("shape of dataframe :", train_df.shape)
 
     # Step 4 - Sort interactions according to timestamp
@@ -69,7 +69,7 @@ def process_data_junyi(min_questions=2, max_questions=50, interactions_filepath=
 
     # Step 1 - Remove users with less than a certain number of answers
     train_df = train_df.groupby('user_id').filter(lambda q: len(q) >= min_questions).copy()
-    print("shape after at least " + min_questions + " interactions:", train_df.shape)
+    print("shape after at least " + str(min_questions) + " interactions:", train_df.shape)
 
     # Step 5 - Compute number of unique skills ids and number of unique question ids
     questions_ids = train_df['problem_id'].unique()
