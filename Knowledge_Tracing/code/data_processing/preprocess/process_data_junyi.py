@@ -39,6 +39,7 @@ def process_data_junyi(min_questions=2, max_questions=50, interactions_filepath=
     gc.collect()
     users_list = [[index for i in range(0, real_len)] for index, real_len in list(zip(range(0, len(real_lens)), real_lens))]
     users = list(itertools.chain(users_list))
+    print(users)
     del users_list
     del real_lens
     gc.collect()
