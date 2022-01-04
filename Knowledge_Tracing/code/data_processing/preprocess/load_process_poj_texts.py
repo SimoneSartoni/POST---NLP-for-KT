@@ -1,4 +1,3 @@
-import pandas as pd
 from Knowledge_Tracing.code.data_processing.preprocess.text_processing_utils import *
 
 
