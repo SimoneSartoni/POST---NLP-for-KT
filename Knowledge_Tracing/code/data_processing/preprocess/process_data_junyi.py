@@ -40,7 +40,7 @@ def process_data_junyi(min_questions=2, max_questions=50, interactions_filepath=
     index = 0
     users = []
     for real_len in real_lens:
-        for i in range(0, len(real_len)):
+        for i in range(0, real_len):
             users.append(index)
         index += 1
     del real_lens
