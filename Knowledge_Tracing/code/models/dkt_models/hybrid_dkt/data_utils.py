@@ -124,7 +124,7 @@ def load_dataset(batch_size=32, shuffle=True,
             bertopic_args['calculate_probabilities'], bertopic_args['cluster_selection_method'], bertopic_args['output']
         encode_model = BERTopic_model(nr_topics, calculate_probabilities, cluster_selection_method, output)
         if pretrained:
-            model_path_or_name = custom['model_path_or_name']
+            model_path_or_name = pretrained['model_path_or_name']
             encode_model.initialize_custom_bertopic(model_path_or_name)
         if custom:
             config_path, model_path_or_name, tokenizer_name, from_tf = custom['config_path'], \
