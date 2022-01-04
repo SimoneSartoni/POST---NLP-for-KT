@@ -1,7 +1,8 @@
 from Knowledge_Tracing.code.data_processing.preprocess.text_processing_utils import *
+import pandas as pd
+
 
 def load_process_poj_texts(personal_cleaning=True, texts_filepath='../input/', n_texts=None, make_sentences_flag=True):
-    import pandas as pd
     if n_texts:
         df = pd.read_csv(texts_filepath, low_memory=False, sep='\n', names=["data"], nrows=n_texts)
     else:
@@ -25,7 +26,7 @@ def load_process_poj_texts(personal_cleaning=True, texts_filepath='../input/', n
             questions[index] = new
     questions.append([])
     dictionary = {'problem_id': problem_ids, 'body': questions}
-    df = pd.Dataframe(dictionary)
+    df = pd.DataFrame(dictionary)
     # Using the preprocessing function to preprocess the tweet data
     preprocess_data(df, 'body')
     print("df after preprocess data:")

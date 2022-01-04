@@ -2,6 +2,7 @@ from datetime import datetime
 
 from Knowledge_Tracing.code.utils.utils import try_parsing_date
 from Knowledge_Tracing.code.data_processing.preprocess.load_process_poj_texts import load_process_poj_texts
+import pandas as pd
 
 
 def process_data_poj(min_questions=2, max_questions=50,
@@ -12,7 +13,6 @@ def process_data_poj(min_questions=2, max_questions=50,
     dtypes = {'User': 'int32', 'Problem': 'int64',
               'Result': 'string',
               'Submit Time': "string"}
-    import pandas as pd
     print("loading csv.....")
     if n_rows:
         train_df = pd.read_csv(interactions_filepath, nrows=n_rows)
