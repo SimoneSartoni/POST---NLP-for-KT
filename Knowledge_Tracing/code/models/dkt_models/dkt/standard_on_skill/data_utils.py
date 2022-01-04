@@ -58,7 +58,7 @@ def load_dataset(batch_size=32, shuffle=True,
 
     train_gen, val_gen, test_gen, \
         nb_questions, nb_skills = get_DKT_dataloaders(batch_size, shuffle, interactions_filepath,
-                                                      output_filepath='/kaggle/working/',
+                                                      output_filepath=save_filepath,
                                                       interaction_sequence_len=interaction_sequence_len
                                                       , min_seq_len=min_seq_len,
                                                       text_encoding_model=None,
