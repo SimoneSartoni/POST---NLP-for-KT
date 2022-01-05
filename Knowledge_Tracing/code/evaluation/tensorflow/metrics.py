@@ -2,6 +2,9 @@ import tensorflow as tf
 
 
 class BinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
+    def __init__(self):
+        super(BinaryAccuracy, self).__init__("BinaryAccuracy")
+
     def update_state(self, y_true, y_pred, sample_weight=None):
         super(BinaryAccuracy, self).update_state(y_true=y_true,
                                                  y_pred=y_pred,
@@ -9,16 +12,25 @@ class BinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
 
 
 class AUC(tf.keras.metrics.AUC):
+    def __init__(self):
+        super(AUC, self).__init__("AUC")
+
     def update_state(self, y_true, y_pred, sample_weight=None):
         super(AUC, self).update_state(y_true=y_true, y_pred=y_pred, sample_weight=sample_weight)
 
 
 class Precision(tf.keras.metrics.Precision):
+    def __init__(self):
+        super(Precision, self).__init__("Precision")
+
     def update_state(self, y_true, y_pred, sample_weight=None):
         super(Precision, self).update_state(y_true=y_true, y_pred=y_pred, sample_weight=sample_weight)
 
 
 class Recall(tf.keras.metrics.Recall):
+    def __init__(self):
+        super(Recall, self).__init__("Recall")
+
     def update_state(self, y_true, y_pred, sample_weight=None):
         super(Recall, self).update_state(y_true=y_true,
                                          y_pred=y_pred,
@@ -26,6 +38,9 @@ class Recall(tf.keras.metrics.Recall):
 
 
 class SensitivityAtSpecificity(tf.keras.metrics.SensitivityAtSpecificity):
+    def __init__(self):
+        super(SensitivityAtSpecificity, self).__init__("SensitivityAtSpecificity")
+
     def update_state(self, y_true, y_pred, sample_weight=None):
         super(SensitivityAtSpecificity, self).update_state(y_true=y_true,
                                                            y_pred=y_pred,
@@ -33,6 +48,9 @@ class SensitivityAtSpecificity(tf.keras.metrics.SensitivityAtSpecificity):
 
 
 class SpecificityAtSensitivity(tf.keras.metrics.SpecificityAtSensitivity):
+    def __init__(self):
+        super(SpecificityAtSensitivity, self).__init__("SpecificityAtSensitivity")
+
     def update_state(self, y_true, y_pred, sample_weight=None):
         super(SpecificityAtSensitivity, self).update_state(y_true=y_true,
                                                            y_pred=y_pred,
@@ -40,6 +58,9 @@ class SpecificityAtSensitivity(tf.keras.metrics.SpecificityAtSensitivity):
 
 
 class FalseNegatives(tf.keras.metrics.FalseNegatives):
+    def __init__(self):
+        super(FalseNegatives, self).__init__("FalseNegatives")
+
     def update_state(self, y_true, y_pred, sample_weight=None):
         super(FalseNegatives, self).update_state(y_true=y_true,
                                                  y_pred=y_pred,
@@ -47,6 +68,9 @@ class FalseNegatives(tf.keras.metrics.FalseNegatives):
 
 
 class FalsePositives(tf.keras.metrics.FalsePositives):
+    def __init__(self):
+        super(FalsePositives, self).__init__("FalsePositives")
+
     def update_state(self, y_true, y_pred, sample_weight=None):
         super(FalsePositives, self).update_state(y_true=y_true,
                                                  y_pred=y_pred,
@@ -54,6 +78,9 @@ class FalsePositives(tf.keras.metrics.FalsePositives):
 
 
 class TrueNegatives(tf.keras.metrics.TrueNegatives):
+    def __init__(self):
+        super(TrueNegatives, self).__init__("TrueNegatives")
+
     def update_state(self, y_true, y_pred, sample_weight=None):
         super(TrueNegatives, self).update_state(y_true=y_true,
                                                 y_pred=y_pred,
@@ -61,6 +88,9 @@ class TrueNegatives(tf.keras.metrics.TrueNegatives):
 
 
 class TruePositives(tf.keras.metrics.TruePositives):
+    def __init__(self):
+        super(TruePositives, self).__init__("TruePositives")
+
     def update_state(self, y_true, y_pred, sample_weight=None):
         super(TruePositives, self).update_state(y_true=y_true,
                                                 y_pred=y_pred,
