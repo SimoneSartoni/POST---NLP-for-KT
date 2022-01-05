@@ -15,11 +15,12 @@ class hybrid_DKTModel(Model):
     def __init__(self, configs={}, dropout_rate=0.2, loss=None):
         inputs = {}
         multiply_outputs = []
-
+        model_name = ""
         if len(list(configs.keys())) > 0:
             for config in configs.values():
                 name, embedding_size, hidden_units = config['name'], config['embedding_size'], \
                                                                  config['hidden_units']
+                model_name = model_name + name + "_"
                 input_embedding = Input(shape=[None, embedding_size], name=name)
                 target_embedding = Input(shape=[None, embedding_size], name="target_" + name)
                 inputs[name] = input_embedding
@@ -38,7 +39,8 @@ class hybrid_DKTModel(Model):
 
         output_label = layers.TimeDistributed(dense_label, name='output_class')(concatenate_layer)
         self.loss = loss
-        super(hybrid_DKTModel, self).__init__(inputs=inputs, outputs=output_label, name="hybrid_DKTModel")
+        model_name = model_name + "hybrid_dkt"
+        super(hybrid_DKTModel, self).__init__(inputs=inputs, outputs=output_label, name=model_name)
         self.configs = configs
 
     def compile(self, optimizer, metrics=None):
