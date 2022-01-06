@@ -148,7 +148,7 @@ class PretrainedDistilBERT():
 
                 scores = torch.stack([cos_sim(a_i.reshape(1, a_i.shape[0]), p) for a_i in a])
                 # get label(s) - we could define this before if confident of consistent batch sizes
-                labels = torch.stack([torch.Tensor(sim_list) for sim_list in cos_sim_list])
+                labels = torch.stack([torch.Tensor(sim_list) for sim_list in cos_sim_list]).cuda()
                 print(scores)
                 print(labels)
                 # and now calculate the loss
