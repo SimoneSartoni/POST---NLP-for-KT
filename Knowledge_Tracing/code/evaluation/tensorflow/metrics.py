@@ -3,7 +3,7 @@ import tensorflow as tf
 
 class BinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
     def __init__(self):
-        super(BinaryAccuracy, self).__init__("BinaryAccuracy")
+        super(BinaryAccuracy, self).__init__(name="BinaryAccuracy")
 
     def update_state(self, y_true, y_pred, sample_weight=None):
         super(BinaryAccuracy, self).update_state(y_true=y_true,
@@ -13,7 +13,7 @@ class BinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
 
 class AUC(tf.keras.metrics.AUC):
     def __init__(self):
-        super(AUC, self).__init__("AUC")
+        super(AUC, self).__init__(name="AUC")
 
     def update_state(self, y_true, y_pred, sample_weight=None):
         super(AUC, self).update_state(y_true=y_true, y_pred=y_pred, sample_weight=sample_weight)
@@ -21,7 +21,7 @@ class AUC(tf.keras.metrics.AUC):
 
 class Precision(tf.keras.metrics.Precision):
     def __init__(self):
-        super(Precision, self).__init__("Precision")
+        super(Precision, self).__init__(name="Precision")
 
     def update_state(self, y_true, y_pred, sample_weight=None):
         super(Precision, self).update_state(y_true=y_true, y_pred=y_pred, sample_weight=sample_weight)
@@ -29,7 +29,7 @@ class Precision(tf.keras.metrics.Precision):
 
 class Recall(tf.keras.metrics.Recall):
     def __init__(self):
-        super(Recall, self).__init__("Recall")
+        super(Recall, self).__init__(name="Recall")
 
     def update_state(self, y_true, y_pred, sample_weight=None):
         super(Recall, self).update_state(y_true=y_true,
@@ -39,7 +39,7 @@ class Recall(tf.keras.metrics.Recall):
 
 class SensitivityAtSpecificity(tf.keras.metrics.SensitivityAtSpecificity):
     def __init__(self):
-        super(SensitivityAtSpecificity, self).__init__("SensitivityAtSpecificity")
+        super(SensitivityAtSpecificity, self).__init__(name="SensitivityAtSpecificity")
 
     def update_state(self, y_true, y_pred, sample_weight=None):
         super(SensitivityAtSpecificity, self).update_state(y_true=y_true,
@@ -49,7 +49,7 @@ class SensitivityAtSpecificity(tf.keras.metrics.SensitivityAtSpecificity):
 
 class SpecificityAtSensitivity(tf.keras.metrics.SpecificityAtSensitivity):
     def __init__(self):
-        super(SpecificityAtSensitivity, self).__init__("SpecificityAtSensitivity")
+        super(SpecificityAtSensitivity, self).__init__(name="SpecificityAtSensitivity")
 
     def update_state(self, y_true, y_pred, sample_weight=None):
         super(SpecificityAtSensitivity, self).update_state(y_true=y_true,
@@ -59,7 +59,7 @@ class SpecificityAtSensitivity(tf.keras.metrics.SpecificityAtSensitivity):
 
 class FalseNegatives(tf.keras.metrics.FalseNegatives):
     def __init__(self):
-        super(FalseNegatives, self).__init__("FalseNegatives")
+        super(FalseNegatives, self).__init__(name="FalseNegatives")
 
     def update_state(self, y_true, y_pred, sample_weight=None):
         super(FalseNegatives, self).update_state(y_true=y_true,
@@ -69,7 +69,7 @@ class FalseNegatives(tf.keras.metrics.FalseNegatives):
 
 class FalsePositives(tf.keras.metrics.FalsePositives):
     def __init__(self):
-        super(FalsePositives, self).__init__("FalsePositives")
+        super(FalsePositives, self).__init__(name="FalsePositives")
 
     def update_state(self, y_true, y_pred, sample_weight=None):
         super(FalsePositives, self).update_state(y_true=y_true,
@@ -79,7 +79,7 @@ class FalsePositives(tf.keras.metrics.FalsePositives):
 
 class TrueNegatives(tf.keras.metrics.TrueNegatives):
     def __init__(self):
-        super(TrueNegatives, self).__init__("TrueNegatives")
+        super(TrueNegatives, self).__init__(name="TrueNegatives")
 
     def update_state(self, y_true, y_pred, sample_weight=None):
         super(TrueNegatives, self).update_state(y_true=y_true,
@@ -89,7 +89,7 @@ class TrueNegatives(tf.keras.metrics.TrueNegatives):
 
 class TruePositives(tf.keras.metrics.TruePositives):
     def __init__(self):
-        super(TruePositives, self).__init__("TruePositives")
+        super(TruePositives, self).__init__(name="TruePositives")
 
     def update_state(self, y_true, y_pred, sample_weight=None):
         super(TruePositives, self).update_state(y_true=y_true,
