@@ -138,7 +138,6 @@ class PretrainedDistilBERT():
                 pos_ids = torch.squeeze(batch['positive_ids'], axis=0).to(device)
                 pos_mask = torch.squeeze(batch['positive_mask'], axis=0).to(device)
                 cos_sim_list = batch['cos_sim']
-                print(cos_sim_list)
                 a = self.model(input_ids=anchor_ids, attention_mask=anchor_mask, output_attentions=False)[0]
                 p = self.model(input_ids=pos_ids, attention_mask=pos_mask, output_attentions=False)[0]
                 # get the mean pooled vectors
@@ -149,8 +148,6 @@ class PretrainedDistilBERT():
                 scores = torch.stack([cos_sim(a_i.reshape(1, a_i.shape[0]), p) for a_i in a])
                 # get label(s) - we could define this before if confident of consistent batch sizes
                 labels = torch.stack([torch.Tensor(sim_list) for sim_list in cos_sim_list]).cuda()
-                print(scores)
-                print(labels)
                 # and now calculate the loss
                 loss = loss_func(scores * scale, labels)
                 # using loss, calculate gradients and then optimize
