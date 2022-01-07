@@ -9,10 +9,10 @@ from Knowledge_Tracing.code.data_processing.load_preprocessed.saint_dataset impo
 
 
 def get_saint_dataloaders(batch_size=128,
-                          interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final"
-                                       ".csv", texts_filepath='../input/', output_filepath='/kaggle/working/',
-                          interaction_sequence_len=25, min_seq_len=5, text_encoding_model=None,
-                          negative_value=False, mask_value=0.0, encode_correct_in_encodings=True, dictionary=None):
+                          interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final.csv"
+                          , output_filepath='/kaggle/working/', interaction_sequence_len=25, min_seq_len=5,
+                          text_encoding_model=None, negative_value=0.0, mask_value=0.0, dictionary=None,
+                          encoder_inputs=None, decoder_inputs=None, outputs=None):
 
     df = load_preprocessed_interactions(interactions_filepath=interactions_filepath, dictionary=dictionary)
     print(df)
@@ -31,15 +31,19 @@ def get_saint_dataloaders(batch_size=128,
     train, test = train_test_split(group, test_size=0.2)
     train, val = train_test_split(train, test_size=0.2)
     print("train size: ", train.shape, "validation size: ", val.shape)
-    encoder_inputs_dict = {"question_id": True, "text_id": True, "skill": True,
+    complete_dict = {"question_id": True, "text_id": True, "skill": True,
                            "label": False, "r_elapsed_time": False, "text_encoding": True,
                            "input_question_id": True, "input_text_id": True, "input_skill": True,
-                           "input_label": True, "input_r_elapsed_time": False, "input_text_encoding":True,
+                           "input_label": True, "input_r_elapsed_time": False, "input_text_encoding": True,
                            "target_id": True,  "target_text_id": True, "target_skill": True,
-                           "target_r_elapsed_time": True, 'target_label': True, "target_text_encoding":True}
-    decoder_inputs_dict = encoder_inputs_dict
-    outputs_dict = decoder_inputs_dict
-    inputs_output_dict = {"encoder": encoder_inputs_dict, "decoder": decoder_inputs_dict, "output": outputs_dict}
+                           "target_r_elapsed_time": True, 'target_label': True, "target_text_encoding": True}
+    if not encoder_inputs:
+        encoder_inputs = complete_dict
+    if not decoder_inputs:
+        decoder_inputs = complete_dict
+    if not  outputs:
+        outputs = complete_dict
+    inputs_output_dict = {"encoder": encoder_inputs, "decoder": decoder_inputs, "output": outputs}
     train_dataset = SAINT_Dataset(train.values, text_encoding_model=text_encoding_model,
                                   max_seq=interaction_sequence_len, negative_value=negative_value, mask_value=mask_value,
                                   inputs_output_dict=inputs_output_dict)

@@ -24,7 +24,6 @@ class SAINT_on_skills(nn.Module):
         for n in range(self.n_encoder):
             if n >= 1:
                 first_block = False
-
             enc = self.encoder[n](in_exercise, in_skill, first_block=first_block)
             in_exercise = enc
             in_skill = enc

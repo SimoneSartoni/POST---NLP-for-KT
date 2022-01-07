@@ -20,7 +20,7 @@ class SAINT_on_questions(nn.Module):
         first_block = True
         encoder_inputs, decoder_inputs = inputs['encoder'], inputs['decoder']
         in_exercise, in_skill, in_response = encoder_inputs['question_id'], encoder_inputs['skill'], \
-                                             decoder_inputs['label']
+                                             decoder_inputs['input_label']
         for n in range(self.n_encoder):
             if n >= 1:
                 first_block = False
