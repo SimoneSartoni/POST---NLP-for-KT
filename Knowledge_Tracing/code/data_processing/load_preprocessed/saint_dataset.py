@@ -91,20 +91,15 @@ class SAINT_Dataset(Dataset):
                            "target_r_elapsed_time": target_r_elapsed_time, 'target_label': target_label,
                            "target_text_encoding": target_text_encoding
                            }
-        possible_outputs = possible_inputs
         encoder_inputs = {}
-        for key in possible_inputs.keys():
-            if self.encoder_inputs_dict[key]:
-                encoder_inputs[key] = possible_inputs[key]
-
+        for key in self.encoder_inputs_dict:
+            encoder_inputs[key] = possible_inputs[key]
         decoder_inputs = {}
-        for key in possible_inputs.keys():
-            if self.decoder_inputs_dict[key]:
-                decoder_inputs[key] = possible_inputs[key]
-
+        for key in self.decoder_inputs_dict:
+            decoder_inputs[key] = possible_inputs[key]
         outputs = {}
-        for key in possible_outputs.keys():
-            if self.outputs_dict[key]:
-                outputs[key] = possible_outputs[key]
+        for key in self.outputs_dict:
+            outputs[key] = possible_inputs[key]
+
         inputs = {"decoder": decoder_inputs, "encoder": encoder_inputs}
         return inputs, outputs

@@ -13,7 +13,6 @@ def get_saint_dataloaders(batch_size=128,
                           , output_filepath='/kaggle/working/', interaction_sequence_len=25, min_seq_len=5,
                           text_encoding_model=None, negative_value=0.0, mask_value=0.0, dictionary=None,
                           encoder_inputs=None, decoder_inputs=None, outputs=None):
-
     df = load_preprocessed_interactions(interactions_filepath=interactions_filepath, dictionary=dictionary)
     print(df)
     # grouping based on user_id to get the data supply
@@ -21,7 +20,8 @@ def get_saint_dataloaders(batch_size=128,
     nb_skills = df['skill'].max()
     print("Grouping users...")
 
-    group = generate_sequences_of_same_length(df, seq_len=interaction_sequence_len, min_seq_len=min_seq_len, output_filepath=output_filepath)
+    group = generate_sequences_of_same_length(df, seq_len=interaction_sequence_len, min_seq_len=min_seq_len,
+                                              output_filepath=output_filepath)
     del df
     gc.collect()
     print(group)
@@ -31,21 +31,22 @@ def get_saint_dataloaders(batch_size=128,
     train, test = train_test_split(group, test_size=0.2)
     train, val = train_test_split(train, test_size=0.2)
     print("train size: ", train.shape, "validation size: ", val.shape)
-    complete_dict = {"question_id": True, "text_id": True, "skill": True,
-                           "label": False, "r_elapsed_time": False, "text_encoding": True,
-                           "input_question_id": True, "input_text_id": True, "input_skill": True,
-                           "input_label": True, "input_r_elapsed_time": False, "input_text_encoding": True,
-                           "target_id": True,  "target_text_id": True, "target_skill": True,
-                           "target_r_elapsed_time": True, 'target_label': True, "target_text_encoding": True}
+    complete_dict = ["question_id", "text_id", "skill",
+                     "label", "r_elapsed_time", "text_encoding",
+                     "input_question_id", "input_text_id", "input_skill",
+                     "input_label", "input_r_elapsed_time", "input_text_encoding",
+                     "target_id", "target_text_id", "target_skill",
+                     "target_r_elapsed_time", 'target_label', "target_text_encoding"]
     if not encoder_inputs:
         encoder_inputs = complete_dict
     if not decoder_inputs:
         decoder_inputs = complete_dict
-    if not  outputs:
+    if not outputs:
         outputs = complete_dict
     inputs_output_dict = {"encoder": encoder_inputs, "decoder": decoder_inputs, "output": outputs}
     train_dataset = SAINT_Dataset(train.values, text_encoding_model=text_encoding_model,
-                                  max_seq=interaction_sequence_len, negative_value=negative_value, mask_value=mask_value,
+                                  max_seq=interaction_sequence_len, negative_value=negative_value,
+                                  mask_value=mask_value,
                                   inputs_output_dict=inputs_output_dict)
     val_dataset = SAINT_Dataset(val.values, text_encoding_model=text_encoding_model,
                                 max_seq=interaction_sequence_len, negative_value=negative_value, mask_value=mask_value,
