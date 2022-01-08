@@ -10,7 +10,7 @@ class saint_on_skills_questions_summed(nn.Module):
     def __init__(self, n_encoder, n_decoder, enc_heads, dec_heads, n_dims, nb_questions, nb_skills, nb_responses,
 
                  seq_len):
-        super(SAINT_plus, self).__init__()
+        super(saint_on_skills_questions_summed, self).__init__()
         self.n_encoder = n_encoder
         self.n_decoder = n_decoder
         self.embedding = EmbeddingBlock(n_dims, nb_questions, nb_skills, nb_responses,  seq_len)
