@@ -74,6 +74,7 @@ class DecoderBlock(nn.Module):
         self.seq_len = seq_len
         self.position_embed = nn.Embedding(seq_len, n_dims)
         self.layer_norm = nn.LayerNorm(n_dims)
+        self.total_dim = n_dims
         self.multihead_attention = nn.MultiheadAttention(embed_dim=n_dims,
                                                          num_heads=n_heads,
                                                          dropout=0.2)
