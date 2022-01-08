@@ -6,7 +6,7 @@ import torch
 from torch import nn
 
 
-class SAINT_plus(nn.Module):
+class SAINT_on_skills_questions_concatenated(nn.Module):
     def __init__(self, n_encoder, n_decoder, enc_heads, dec_heads, n_dims, nb_questions, nb_skills, nb_responses,
 
                  seq_len):
