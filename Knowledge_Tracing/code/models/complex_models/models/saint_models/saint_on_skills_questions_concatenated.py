@@ -20,7 +20,7 @@ class saint_on_skills_questions_concatenated(nn.Module):
         first_block = True
         encoder_inputs, decoder_inputs = inputs['encoder'], inputs['decoder']
         in_exercise, in_skill, in_response = encoder_inputs['question_id'], encoder_inputs['skill'], \
-                                             decoder_inputs['label']
+                                             decoder_inputs['input_label']
         for n in range(self.n_encoder):
             if n >= 1:
                 first_block = False
@@ -44,12 +44,13 @@ class EncoderBlock(nn.Module):
     def __init__(self, n_heads, n_dims, nb_questions, nb_skills, seq_len):
         super(EncoderBlock, self).__init__()
         self.seq_len = seq_len
+        self.total_dim = 2 * n_dims
         self.exercise_embed = nn.Embedding(nb_questions, n_dims)
         self.skill_embed = nn.Embedding(nb_skills, n_dims)
         self.position_embed = nn.Embedding(seq_len, n_dims)
-        self.layer_norm = nn.LayerNorm(2 * n_dims)
+        self.layer_norm = nn.LayerNorm(self.total_dim)
 
-        self.multihead = MultiHeadWithFFN(n_heads=n_heads, n_dims=2*n_dims)
+        self.multihead = MultiHeadWithFFN(n_heads=n_heads, n_dims=self.total_dim)
 
     def forward(self, input_encoding, input_skill, first_block=True):
         if first_block:
@@ -70,14 +71,15 @@ class DecoderBlock(nn.Module):
     def __init__(self, n_heads, n_dims, nb_responses, seq_len):
         super(DecoderBlock, self).__init__()
         self.seq_len = seq_len
+        self.total_dim = 2 * n_dims
         self.response_embed = nn.Embedding(nb_responses, n_dims)
         self.position_embed = nn.Embedding(seq_len, n_dims)
-        self.layer_norm = nn.LayerNorm(2*n_dims)
-        self.multihead_attention = nn.MultiheadAttention(embed_dim=2*n_dims,
+        self.layer_norm = nn.LayerNorm(self.total_dim)
+        self.multihead_attention = nn.MultiheadAttention(embed_dim=self.total_dim,
                                                          num_heads=n_heads,
                                                          dropout=0.2)
         self.multihead = MultiHeadWithFFN(n_heads=n_heads,
-                                          n_dims=2*n_dims)
+                                          n_dims=self.total_dim)
 
     def forward(self, input_r, encoder_output, first_block=True):
         if first_block:

@@ -48,7 +48,6 @@ class EncoderBlock(nn.Module):
         # self.skill_embed = nn.Embedding(nb_skills, n_dims)
         self.position_embed = nn.Embedding(seq_len, n_dims)
         self.layer_norm = nn.LayerNorm(n_dims)
-
         self.multihead = MultiHeadWithFFN(n_heads=n_heads,
                                           n_dims=n_dims)
 
