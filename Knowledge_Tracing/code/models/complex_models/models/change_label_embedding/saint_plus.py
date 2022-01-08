@@ -6,23 +6,24 @@ import torch
 from torch import nn
 
 
-class SAINT_on_questions(nn.Module):
+class SAINT_plus(nn.Module):
     def __init__(self, n_encoder, n_decoder, enc_heads, dec_heads, n_dims, nb_questions, nb_skills, nb_responses,
+
                  seq_len):
-        super(SAINT_on_questions, self).__init__()
+        super(SAINT_plus, self).__init__()
         self.n_encoder = n_encoder
         self.n_decoder = n_decoder
         self.encoder = get_clones(EncoderBlock(enc_heads, n_dims, nb_questions, nb_skills, seq_len), n_encoder)
         self.decoder = get_clones(DecoderBlock(dec_heads, n_dims, nb_responses, seq_len), n_decoder)
-        self.target_encoder = EncoderBlock(enc_heads, n_dims, nb_questions, nb_skills, seq_len)
+        self.elapsed_time = nn.Linear(1, n_dims)
         self.fc = nn.Linear(n_dims, 1)
 
     def forward(self, inputs, decoder_targets):
         first_block = True
-        target_exercise = decoder_targets['target_question_id']
         encoder_inputs, decoder_inputs = inputs['encoder'], inputs['decoder']
         in_exercise, in_skill, in_response = encoder_inputs['question_id'], encoder_inputs['skill'], \
-                                             decoder_inputs['label']
+                                             decoder_inputs['input_label']
+        in_elapsed_time = decoder_inputs['input_r_elapsed_time']
         for n in range(self.n_encoder):
             if n >= 1:
                 first_block = False
@@ -35,10 +36,10 @@ class SAINT_on_questions(nn.Module):
         for n in range(self.n_decoder):
             if n >= 1:
                 first_block = False
-            dec = self.decoder[n](in_response, encoder_output=in_exercise, first_block=first_block)
+            dec = self.decoder[n](in_response, in_elapsed_time, elapsed_time_model=self.elapsed_time, encoder_output=in_exercise, first_block=first_block)
             in_exercise = dec
             in_response = dec
-        output = self.target_encoder(target_exercise, dec, None)
+
         return torch.sigmoid(self.fc(dec))
 
 
@@ -47,7 +48,7 @@ class EncoderBlock(nn.Module):
         super(EncoderBlock, self).__init__()
         self.seq_len = seq_len
         self.exercise_embed = nn.Embedding(nb_questions, n_dims)
-        # self.skill_embed = nn.Embedding(nb_skills, n_dims)
+        self.skill_embed = nn.Embedding(nb_skills, n_dims)
         self.position_embed = nn.Embedding(seq_len, n_dims)
         self.layer_norm = nn.LayerNorm(n_dims)
 
@@ -57,10 +58,10 @@ class EncoderBlock(nn.Module):
     def forward(self, input_encoding, input_skill, first_block=True):
         if first_block:
             _exe = self.exercise_embed(input_encoding)
-            # _skill = self.skill_embed(input_skill)
+            _skill = self.skill_embed(input_skill)
             position_encoded = pos_encode(self.seq_len).cuda()
             _pos = self.position_embed(position_encoded)
-            out = _exe + _pos
+            out = _exe + _skill + _pos
         else:
             out = input_encoding
         output = self.multihead(q_input=out, kv_input=out)
@@ -71,7 +72,6 @@ class DecoderBlock(nn.Module):
     def __init__(self, n_heads, n_dims, nb_responses, seq_len):
         super(DecoderBlock, self).__init__()
         self.seq_len = seq_len
-        self.response_embed = nn.Embedding(nb_responses, n_dims)
         self.position_embed = nn.Embedding(seq_len, n_dims)
         self.layer_norm = nn.LayerNorm(n_dims)
         self.multihead_attention = nn.MultiheadAttention(embed_dim=n_dims,
@@ -80,16 +80,17 @@ class DecoderBlock(nn.Module):
         self.multihead = MultiHeadWithFFN(n_heads=n_heads,
                                           n_dims=n_dims)
 
-    def forward(self, input_r, encoder_output, first_block=True):
+    def forward(self, input_r, in_elapsed_time, elapsed_time_model, encoder_output, first_block=True):
         if first_block:
-            _response = self.response_embed(input_r)
+            _response = input_r.unsqueeze(-1).expand(-1, -1, self.total_dim)
+            _elapsed_time = elapsed_time_model(in_elapsed_time)
             position_encoded = pos_encode(self.seq_len)
             _pos = self.position_embed(position_encoded.cuda())
-            out = _response + _pos
+            out = _response + _pos + _elapsed_time
         else:
             out = input_r
         out = out.permute(1, 0, 2)
-        # assert out_embed.size(0)==n_dims, "input dimention should be (seq_len,batch_size,dims)"
+        # assert out_embed.size(0)==n_dims, "input dimension should be (seq_len, batch_size, dims)"
         out_norm = self.layer_norm(out)
         mask = ut_mask(out_norm.size(0))
         if config.device == "cuda":
@@ -101,21 +102,4 @@ class DecoderBlock(nn.Module):
         out_attention += out_norm
         out_attention = out_attention.permute(1, 0, 2)
         output = self.multihead(q_input=out_attention, kv_input=encoder_output)
-        return output
-
-class TargetBlock(nn.Module):
-    def __init__(self, n_heads, n_dims, nb_questions, nb_skills, seq_len):
-        super(TargetBlock, self).__init__()
-        self.seq_len = seq_len
-        self.exercise_embed = nn.Embedding(nb_questions, n_dims)
-        # self.skill_embed = nn.Embedding(nb_skills, n_dims)
-        self.position_embed = nn.Embedding(seq_len, n_dims)
-
-    def forward(self, input_exercise, decoder_output, input_skill):
-        _exe = self.exercise_embed(input_exercise)
-        # _skill = self.skill_embed(input_skill)
-        position_encoded = pos_encode(self.seq_len).cuda()
-        _pos = self.position_embed(position_encoded)
-        output = _exe + _pos
-        output = output * decoder_output
         return output

@@ -22,8 +22,8 @@ class SAINT_plus(nn.Module):
         first_block = True
         encoder_inputs, decoder_inputs = inputs['encoder'], inputs['decoder']
         in_exercise, in_skill, in_response = encoder_inputs['question_id'], encoder_inputs['skill'], \
-                                             decoder_inputs['label']
-        in_elapsed_time = decoder_inputs['r_elapsed_time'].unsqueeze(-1).float()
+                                             decoder_inputs['input_label']
+        in_elapsed_time = decoder_inputs['input_r_elapsed_time']
         for n in range(self.n_encoder):
             if n >= 1:
                 first_block = False
@@ -61,7 +61,7 @@ class EncoderBlock(nn.Module):
             _skill = self.skill_embed(input_skill)
             position_encoded = pos_encode(self.seq_len).cuda()
             _pos = self.position_embed(position_encoded)
-            out = _skill + _pos + _exe
+            out = _exe + _skill + _pos
         else:
             out = input_encoding
         output = self.multihead(q_input=out, kv_input=out)

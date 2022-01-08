@@ -7,49 +7,62 @@ from torch import nn
 
 
 class saint_on_encodings(nn.Module):
-    def __init__(self, n_encoder, n_decoder, enc_heads, dec_heads, encoding_size, nb_responses, seq_len):
+    def __init__(self, n_encoder, n_decoder, enc_heads, dec_heads, n_dims, nb_questions, encoding_size, nb_skills,
+                 nb_responses, seq_len):
         super(saint_on_encodings, self).__init__()
         self.n_encoder = n_encoder
         self.n_decoder = n_decoder
-        self.encoder = get_clones(EncoderBlock(enc_heads, encoding_size, seq_len),
+        self.encoder = get_clones(EncoderBlock(enc_heads, n_dims, nb_questions, encoding_size, nb_skills, seq_len),
                                   n_encoder)
-        self.decoder = get_clones(DecoderBlock(dec_heads, nb_responses, encoding_size, seq_len), n_decoder)
+        self.decoder = get_clones(DecoderBlock(dec_heads, n_dims, nb_responses, encoding_size, seq_len), n_decoder)
+        self.multiply = MultiplyBlock()
         self.fc = nn.Linear(encoding_size, 1)
 
     def forward(self, inputs, decoder_targets):
         first_block = True
         encoder_inputs, decoder_inputs = inputs['encoder'], inputs['decoder']
-        in_response, text_encoding = decoder_inputs['input_label'], encoder_inputs['text_encoding']
+        in_exercise, in_skill, in_response, in_text_encoding = encoder_inputs['input_question_id'], \
+                                                               encoder_inputs['input_skill'], decoder_inputs[
+                                                                   'input_label'], encoder_inputs['input_text_encoding']
+        out_text_encoding = decoder_targets['target_text_encoding'].float()
         for n in range(self.n_encoder):
             if n >= 1:
                 first_block = False
 
-            text_encoding = self.encoder[n](text_encoding, first_block=first_block)
+            enc = self.encoder[n](in_exercise, in_text_encoding, in_skill, first_block=first_block)
+            in_exercise = enc
+            in_text_encoding = enc
+            in_skill = enc
 
         first_block = True
         for n in range(self.n_decoder):
             if n >= 1:
                 first_block = False
-            dec = self.decoder[n](in_response, encoder_output=text_encoding, first_block=first_block)
-            text_encoding = dec
+            dec = self.decoder[n](in_response, encoder_output=in_exercise, first_block=first_block)
+            in_exercise = dec
             in_response = dec
-        return torch.sigmoid(self.fc(dec))
+        multiply_output = self.multiply(dec, out_text_encoding)
+        return torch.sigmoid(self.fc(multiply_output))
 
 
 class EncoderBlock(nn.Module):
-    def __init__(self, n_heads, encoding_size, seq_len):
+    def __init__(self, n_heads, n_dims, nb_questions, encoding_size, nb_skills, seq_len):
         super(EncoderBlock, self).__init__()
         self.seq_len = seq_len
         self.total_dim = encoding_size
-        self.position_embed = nn.Embedding(seq_len, self.total_dim)
+        self.position_embed = nn.Embedding(seq_len, encoding_size)
         self.layer_norm = nn.LayerNorm(self.total_dim)
 
         self.multihead = MultiHeadWithFFN(n_heads=n_heads, n_dims=self.total_dim)
 
-    def forward(self, input_encoding, first_block=True):
+    def forward(self, input_exercise, input_encoding, input_skill, first_block=True):
         if first_block:
+            # _exe = self.exercise_embed(input_exercise)
+            # _skill = self.skill_embed(input_skill)
             position_encoded = pos_encode(self.seq_len).cuda()
             _pos = self.position_embed(position_encoded)
+            # out_skill = _skill + _pos
+            # out_ex = _exe + _pos
             out = input_encoding.float() + _pos
         else:
             out = input_encoding
@@ -58,12 +71,11 @@ class EncoderBlock(nn.Module):
 
 
 class DecoderBlock(nn.Module):
-    def __init__(self, n_heads, nb_responses, encoding_size, seq_len):
+    def __init__(self, n_heads, n_dims, nb_responses, encoding_size, seq_len):
         super(DecoderBlock, self).__init__()
         self.seq_len = seq_len
         self.total_dim = encoding_size
-        self.response_embed = nn.Embedding(nb_responses, self.total_dim)
-        self.position_embed = nn.Embedding(seq_len, self.total_dim)
+        self.position_embed = nn.Embedding(seq_len, encoding_size)
         self.layer_norm = nn.LayerNorm(self.total_dim)
         self.multihead_attention = nn.MultiheadAttention(embed_dim=self.total_dim,
                                                          num_heads=n_heads,
@@ -73,7 +85,7 @@ class DecoderBlock(nn.Module):
 
     def forward(self, input_r, encoder_output, first_block=True):
         if first_block:
-            _response = self.response_embed(input_r)
+            _response = input_r.unsqueeze(-1).expand(-1, -1, self.total_dim)
             position_encoded = pos_encode(self.seq_len)
             _pos = self.position_embed(position_encoded.cuda())
             out = _response + _pos
@@ -92,4 +104,13 @@ class DecoderBlock(nn.Module):
         out_attention += out_norm
         out_attention = out_attention.permute(1, 0, 2)
         output = self.multihead(q_input=out_attention, kv_input=encoder_output)
+        return output
+
+
+class MultiplyBlock(nn.Module):
+    def __init__(self):
+        super(MultiplyBlock, self).__init__()
+
+    def forward(self, input_encoding, target_encoding):
+        output = input_encoding * target_encoding
         return output
