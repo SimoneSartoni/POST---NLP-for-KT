@@ -30,7 +30,7 @@ class SAINT_plus(nn.Module):
         out_exercise, out_skill = decoder_targets['target_id'], decoder_targets['target_skill']
 
         in_encoder, in_decoder, target_output = self.embedding(in_exercise, in_skill, in_response, in_elapsed_time,
-                                                        out_exercise, out_skill)
+                                                                out_exercise, out_skill)
         for n in range(self.n_encoder):
             in_encoder = self.encoder[n](in_encoder)
         out_encoder = in_encoder
