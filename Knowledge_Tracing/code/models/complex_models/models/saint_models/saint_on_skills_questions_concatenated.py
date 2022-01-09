@@ -13,9 +13,10 @@ class saint_on_skills_questions_concatenated(nn.Module):
         super(saint_on_skills_questions_concatenated, self).__init__()
         self.n_encoder = n_encoder
         self.n_decoder = n_decoder
+        self.total_dim = 2 * n_dims
         self.embedding = EmbeddingBlock(n_dims, nb_questions, nb_skills, nb_responses,  seq_len)
-        self.encoder = get_clones(EncoderBlock(enc_heads, n_dims, nb_questions, nb_skills, seq_len), n_encoder)
-        self.decoder = get_clones(DecoderBlock(dec_heads, n_dims, nb_responses, seq_len), n_decoder)
+        self.encoder = get_clones(EncoderBlock(enc_heads, self.total_dim, nb_questions, nb_skills, seq_len), n_encoder)
+        self.decoder = get_clones(DecoderBlock(dec_heads, self.total_dim, nb_responses, seq_len), n_decoder)
         self.fc = nn.Linear(n_dims, 1)
 
     def forward(self, inputs, decoder_targets):
