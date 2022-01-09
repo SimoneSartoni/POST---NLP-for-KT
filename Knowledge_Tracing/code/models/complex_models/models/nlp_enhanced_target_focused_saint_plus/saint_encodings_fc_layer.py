@@ -9,7 +9,7 @@ from torch import nn
 class SaintEncodingsFCLayer(nn.Module):
     def __init__(self, n_encoder, n_decoder, enc_heads, dec_heads, n_dims, nb_questions, nb_skills, nb_responses,
                  seq_len):
-        super(SaintEncodings, self).__init__()
+        super(SaintEncodingsFCLayer, self).__init__()
         self.n_encoder = n_encoder
         self.n_decoder = n_decoder
         self.embedding = EmbeddingBlock(n_dims, nb_questions, nb_skills, nb_responses, seq_len)
