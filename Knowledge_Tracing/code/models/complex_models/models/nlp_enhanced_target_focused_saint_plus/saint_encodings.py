@@ -22,14 +22,12 @@ class SaintEncodings(nn.Module):
     def forward(self, inputs, decoder_targets):
         first_block = True
         encoder_inputs, decoder_inputs = inputs['encoder'], inputs['decoder']
-        input_nlp_embedding, in_exercise, in_skill, in_response = encoder_inputs['input_text_encoding'], \
-                                                                  encoder_inputs['input_question_id'], \
-                                                                  encoder_inputs['input_skill'], \
-                                                                  decoder_inputs['input_label']
+        input_nlp_embedding, in_exercise, in_skill, in_response = encoder_inputs['input_text_encoding'].float(), \
+            encoder_inputs['input_question_id'], encoder_inputs['input_skill'], decoder_inputs['input_label']
         in_elapsed_time = decoder_inputs['input_r_elapsed_time'].float().unsqueeze(-1)
 
-        out_exercise, out_skill, output_nlp_embedding = decoder_targets['target_id'], decoder_targets['target_skill'],\
-            decoder_targets['target_text_encoding']
+        out_exercise, out_skill, output_nlp_embedding = decoder_targets['target_id'], decoder_targets['target_skill'], \
+            decoder_targets['target_text_encoding'].float()
 
         in_encoder, in_decoder, target_output = self.embedding(input_nlp_embedding, in_response,
                                                                in_elapsed_time, output_nlp_embedding)
@@ -48,7 +46,7 @@ class SaintEncodings(nn.Module):
 
 
 class EmbeddingBlock(nn.Module):
-    def __init__(self, n_dims, nb_questions, nb_skills, nb_responses,  seq_len):
+    def __init__(self, n_dims, nb_questions, nb_skills, nb_responses, seq_len):
         super(EmbeddingBlock, self).__init__()
         self.seq_len = seq_len
         self.response_embed = nn.Embedding(nb_responses, n_dims)
