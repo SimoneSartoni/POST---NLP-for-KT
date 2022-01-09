@@ -68,7 +68,7 @@ class EmbeddingBlock(nn.Module):
         _output_nlp_embedding = self.nlp_embed(output_nlp_embedding)
         _out_exe = self.exercise_embed(out_exercise)
         _out_skill = self.skill_embed(out_skill)
-        input_encoder = _input_nlp_embedding + input_exercise + input_skill + _pos
+        input_encoder = _input_nlp_embedding + _exe + _skill + _pos
         input_decoder = _response + _elapsed_time + _pos
         output = _output_nlp_embedding + _out_exe + _out_skill
         return input_encoder, input_decoder, output
