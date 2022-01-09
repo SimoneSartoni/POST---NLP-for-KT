@@ -44,9 +44,9 @@ class EmbeddingBlock(nn.Module):
         self.seq_len = seq_len
         self.exercise_embed = nn.Embedding(nb_questions, n_dims)
         self.skill_embed = nn.Embedding(nb_skills, n_dims)
-        self.response_embed = nn.Embedding(nb_responses, n_dims)
+        self.response_embed = nn.Embedding(nb_responses, 2*n_dims)
         self.elapsed_time = nn.Linear(1, n_dims)
-        self.position_embed = nn.Embedding(seq_len, n_dims)
+        self.position_embed = nn.Embedding(seq_len, 2*n_dims)
 
     def forward(self, input_exercise, input_skill, input_r):
         position_encoded = pos_encode(self.seq_len).cuda()
