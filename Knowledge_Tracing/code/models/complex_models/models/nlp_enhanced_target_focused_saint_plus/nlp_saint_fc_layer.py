@@ -6,7 +6,7 @@ import torch
 from torch import nn
 
 
-class SaintEncodingsFCLayer(nn.Module):
+class NlpSaintFCLayer(nn.Module):
     def __init__(self, n_encoder, n_decoder, enc_heads, dec_heads, n_dims, nb_questions, nb_skills, nb_responses, nlp_embedding_size,
                  seq_len):
         super(SaintEncodingsFCLayer, self).__init__()
