@@ -12,12 +12,12 @@ def load_preprocessed_interactions(interactions_filepath="", dictionary=None):
               'skill': "int32", 'elapsed_time': 'int64',
               'timestamp': "string", 'question_id': "int64"}
     if dictionary:
-        train_df = pd.read_csv(interactions_filepath, dtype=dictionary)
+        train_df = pd.read_csv(interactions_filepath, dtype=dictionary, header=0)
         for key in dtypes.keys():
             if key not in dictionary:
                 train_df[key] = 0.0
     else:
-        train_df = pd.read_csv(interactions_filepath, dtype=dtypes)
+        train_df = pd.read_csv(interactions_filepath, dtype=dtypes, header=0)
     print("loading csv.....")
     print("shape of dataframe :", train_df.shape)
     return train_df
