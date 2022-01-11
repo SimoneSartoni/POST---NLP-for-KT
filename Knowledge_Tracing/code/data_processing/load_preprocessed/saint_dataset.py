@@ -38,6 +38,10 @@ class SAINT_Dataset(Dataset):
 
     def __getitem__(self, idx):
         user_id, unique_question_id, unique_text_id, answered_correctly, response_elapsed_time, exe_skill = self.data[idx]
+        print(user_id)
+        print(unique_question_id)
+        print(unique_text_id)
+        print(answered_correctly)
         seq_len = len(unique_question_id)
 
         question_id = np.full(self.max_seq, fill_value=self.mask_value, dtype=np.int)
