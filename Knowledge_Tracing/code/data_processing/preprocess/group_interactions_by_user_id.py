@@ -37,6 +37,6 @@ def generate_sequences_of_same_length(df, seq_len, min_seq_len, output_filepath=
             'skill': skill, 'start_time': start_time, 'end_time': end_time, 'elapsed_time': elapsed_time,
             'timestamp': timestamp}
     new_df = pd.DataFrame(data=data)
-    new_df.to_csv(output_filepath + 'interactions_grouped_with_same_length')
+    new_df.to_csv(output_filepath + 'interactions_grouped_with_same_length.csv')
     return new_df
 

@@ -18,23 +18,17 @@ def get_saint_dataloaders(batch_size=128,
     # grouping based on user_id to get the data supply
     nb_questions = df['question_id'].max()
     nb_skills = df['skill'].max()
-    print(df.where(df['problem_id'] == 97595))
     print("Grouping users...")
-
+    print("question_ids:")
+    print(list(df["question_id"].values)[0:10])
+    print("problem_ids:")
+    print(list(df["problem_id"].values)[0:10])
     group = generate_sequences_of_same_length(df, seq_len=interaction_sequence_len, min_seq_len=min_seq_len,
                                               output_filepath=output_filepath)
     del df
     gc.collect()
     print(group)
-    print("question_ids:")
-    print(list(group["question_id"].values)[0:10])
-    print("problem_ids:")
-    print(list(group["problem_id"].values)[0:10])
     group = group[["user_id", "question_id", "problem_id", "correct", "elapsed_time", "skill"]]
-    print("question_ids:")
-    print(list(group["question_id"].values)[0:10])
-    print("problem_ids:")
-    print(list(group["problem_id"].values)[0:10])
     print("splitting")
     train, test = train_test_split(group, test_size=0.2)
     train, val = train_test_split(train, test_size=0.2)
