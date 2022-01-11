@@ -82,7 +82,7 @@ class sentence_transformer:
     def transform(self, texts_df, text_column='sentence', save_filepath='./'):
         self.texts_df = texts_df
         embeddings = self.st_model.encode(sentences=self.texts_df[text_column].values, show_progress_bar=True)
-        for problem_id, embedding in list(zip(self.texts_df['problem_id'], embeddings)):
+        for problem_id, embedding in list(zip(list(self.texts_df['problem_id'].values), embeddings)):
             self.embeddings[problem_id] = embedding
         del embeddings
         gc.collect()
