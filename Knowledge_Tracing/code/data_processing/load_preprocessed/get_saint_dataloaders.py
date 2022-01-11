@@ -26,8 +26,15 @@ def get_saint_dataloaders(batch_size=128,
     del df
     gc.collect()
     print(group)
+    print("question_ids:")
+    print(list(group["question_id"].values)[0:10])
+    print("problem_ids:")
+    print(list(group["problem_id"].values)[0:10])
     group = group[["user_id", "question_id", "problem_id", "correct", "elapsed_time", "skill"]]
-
+    print("question_ids:")
+    print(list(group["question_id"].values)[0:10])
+    print("problem_ids:")
+    print(list(group["problem_id"].values)[0:10])
     print("splitting")
     train, test = train_test_split(group, test_size=0.2)
     train, val = train_test_split(train, test_size=0.2)
