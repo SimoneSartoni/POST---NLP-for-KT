@@ -4,7 +4,6 @@ from torch.utils.data import Dataset, DataLoader
 
 def encode_correctness_in_encodings(text_encoding_model, text_ids, max_seq, mask_value):
     i = 0
-    print(text_ids)
     text_encoding = np.full((max_seq, text_encoding_model.vector_size), fill_value=mask_value, dtype=np.double)
     input_text_encoding = np.full((max_seq, text_encoding_model.vector_size), fill_value=mask_value, dtype=np.double)
     target_text_encoding = np.full((max_seq, text_encoding_model.vector_size), fill_value=mask_value, dtype=np.double)
