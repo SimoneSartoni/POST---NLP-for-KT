@@ -18,6 +18,7 @@ def get_saint_dataloaders(batch_size=128,
     # grouping based on user_id to get the data supply
     nb_questions = df['question_id'].max()
     nb_skills = df['skill'].max()
+    print(df.loc(df['problem_id'] == 97595))
     print("Grouping users...")
 
     group = generate_sequences_of_same_length(df, seq_len=interaction_sequence_len, min_seq_len=min_seq_len,
