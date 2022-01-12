@@ -108,6 +108,7 @@ class ColdStartBinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
         print(y_pred)
         print(sample_weight)
         if tf.shape(y_true)[1] > 10:
+            print("true")
             y_true, y_pred = y_true[:, 0:self.window_size], y_pred[:, 0:self.window_size]
             if sample_weight:
                 sample_weight = sample_weight[:, 0:self.window_size]
