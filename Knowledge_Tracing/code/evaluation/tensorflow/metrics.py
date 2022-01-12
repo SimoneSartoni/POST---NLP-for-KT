@@ -104,9 +104,9 @@ class ColdStartBinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
 
     def update_state(self, y_true, y_pred, sample_weight=None):
         print("y_true")
-        print(tf.shape(y_true))
-        print(tf.shape(y_pred))
-        print(tf.shape(sample_weight))
+        print(tf.shape(y_true)[1])
+        print(tf.shape(y_pred)[1])
+        print(tf.shape(sample_weight)[1])
         if tf.shape(y_true)[1] > self.window_size:
             print("true")
             y_true, y_pred = y_true[:, 0:self.window_size], y_pred[:, 0:self.window_size]
