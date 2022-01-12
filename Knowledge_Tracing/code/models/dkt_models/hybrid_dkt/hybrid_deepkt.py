@@ -60,9 +60,10 @@ class hybrid_DKTModel(Model):
             ValueError: In case of invalid arguments for
                 `optimizer` or `metrics`.
         """
-
+        def custom_loss(y_true, y_pred):
+            return losses.binary_crossentropy(y_true, y_pred)
         super(hybrid_DKTModel, self).compile(
-            loss=losses.binary_crossentropy,
+            loss=custom_loss,
             optimizer=optimizer,
             metrics=metrics,
             )
