@@ -52,9 +52,7 @@ class SpecificityAtSensitivity(tf.keras.metrics.SpecificityAtSensitivity):
         super(SpecificityAtSensitivity, self).__init__(name="SpecificityAtSensitivity")
 
     def update_state(self, y_true, y_pred, sample_weight=None):
-        super(SpecificityAtSensitivity, self).update_state(y_true=y_true,
-                                                           y_pred=y_pred,
-                                                           sample_weight=sample_weight)
+        super(SpecificityAtSensitivity, self).update_state(y_true=y_true, y_pred=y_pred, sample_weight=sample_weight)
 
 
 class FalseNegatives(tf.keras.metrics.FalseNegatives):
@@ -104,15 +102,17 @@ class ColdStartBinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
 
     def update_state(self, y_true, y_pred, sample_weight=None):
         print("y_true")
-        print(tf.shape(y_true)[1])
-        print(tf.shape(y_pred)[1])
-        print(tf.shape(sample_weight)[1])
+        print(tf.shape(y_true).numpy())
+        print(tf.shape(y_pred).numpy())
+        print(tf.shape(sample_weight).numpy())
         if tf.shape(y_true)[1] > self.window_size:
             print("true")
-            y_true, y_pred = y_true[:, 0:self.window_size], y_pred[:, 0:self.window_size]
+            y_true_2, y_pred_2 = y_true[:, 0:self.window_size], y_pred[:, 0:self.window_size]
             if sample_weight:
-                sample_weight = sample_weight[:, 0:self.window_size]
-        super(ColdStartBinaryAccuracy, self).update_state(y_true=y_true, y_pred=y_pred, sample_weight=sample_weight)
+                sample_weight_2 = sample_weight[:, 0:self.window_size]
+            else:
+                sample_weight_2 = sample_weight
+        super(ColdStartBinaryAccuracy, self).update_state(y_true=y_true_2, y_pred=y_pred_2, sample_weight=sample_weight_2)
 
 
 class ColdStartAUC(tf.keras.metrics.AUC):
@@ -121,10 +121,14 @@ class ColdStartAUC(tf.keras.metrics.AUC):
         super(ColdStartAUC, self).__init__(name="ColdStartAUC" + str(window_size))
 
     def update_state(self, y_true, y_pred, sample_weight=None):
-        y_true, y_pred = y_true[:, 0:self.window_size], y_pred[:, 0:self.window_size]
-        if sample_weight:
-            sample_weight = sample_weight[:, 0:self.window_size]
-        super(ColdStartAUC, self).update_state(y_true=y_true, y_pred=y_pred, sample_weight=sample_weight)
+        if tf.shape(y_true)[1] > self.window_size:
+            print("true")
+            y_true_2, y_pred_2 = y_true[:, 0:self.window_size], y_pred[:, 0:self.window_size]
+            if sample_weight:
+                sample_weight_2 = sample_weight[:, 0:self.window_size]
+            else:
+                sample_weight_2 = sample_weight
+        super(ColdStartAUC, self).update_state(y_true=y_true_2, y_pred=y_pred_2, sample_weight=sample_weight_2)
 
 
 class ColdProblemsBinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
