@@ -68,7 +68,7 @@ class hybrid_DKT_combination_of_predictions_Model(Model):
             loss=custom_loss,
             optimizer=optimizer,
             metrics=metrics,
-            experimental_run_tf_function=False)
+            run_eagerly=False)
 
     def fit(self,
             dataset,
