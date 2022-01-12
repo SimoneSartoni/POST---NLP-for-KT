@@ -42,8 +42,7 @@ def create_dataset(generator, encode_models, encoding_depths, shuffle=True, batc
     dataset = tf.data.Dataset.from_generator(
         generator=generator.generator,
         output_types=types,
-        output_shapes=shapes,
-
+        output_shapes=shapes
     )
 
     nb_users = generator.__len__()
@@ -53,7 +52,7 @@ def create_dataset(generator, encode_models, encoding_depths, shuffle=True, batc
     print(dataset)
     dataset = dataset.map(
         lambda inputs, outputs: (
-            tf.convert_to_tensor(inputs),
+            inputs,
             tf.expand_dims(outputs['target_label'], axis=-1)
         )
     )
