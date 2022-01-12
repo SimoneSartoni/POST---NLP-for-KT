@@ -66,6 +66,7 @@ class hybrid_DKTModel(Model):
             loss=custom_loss,
             optimizer=optimizer,
             metrics=metrics,
+            run_eagerly=True
             )
 
     def fit(self,
