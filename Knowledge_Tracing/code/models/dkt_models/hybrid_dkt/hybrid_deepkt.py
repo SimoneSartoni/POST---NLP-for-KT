@@ -62,10 +62,10 @@ class hybrid_DKTModel(Model):
         """
 
         super(hybrid_DKTModel, self).compile(
-            loss=losses.BinaryCrossentropy(from_logits=False),
+            loss=losses.BinaryCrossentropy(from_logits=True),
             optimizer=optimizer,
             metrics=metrics,
-        )
+            experimental_run_tf_function=False)
 
     def fit(self,
             dataset,
