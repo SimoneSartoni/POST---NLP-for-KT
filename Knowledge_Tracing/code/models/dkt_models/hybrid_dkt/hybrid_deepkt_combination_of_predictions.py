@@ -60,8 +60,6 @@ class hybrid_DKT_combination_of_predictions_Model(Model):
         """
 
         def custom_loss(y_true, y_pred):
-            if self.loss:
-                return self.loss(y_true, y_pred)
             return losses.binary_crossentropy(y_true, y_pred)
 
         super(hybrid_DKT_combination_of_predictions_Model, self).compile(
