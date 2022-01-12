@@ -103,6 +103,8 @@ class ColdStartBinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
         super(ColdStartBinaryAccuracy, self).__init__(name="ColdStartBinaryAccuracy"+str(window_size))
 
     def update_state(self, y_true, y_pred, sample_weight=None):
+        print(y_true)
+        print(y_pred)
         y_true, y_pred = y_true[:, 0:self.window_size], y_pred[:, 0:self.window_size]
         if sample_weight:
             sample_weight = sample_weight[:, 0:self.window_size]
