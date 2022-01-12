@@ -112,6 +112,8 @@ class ColdStartBinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
                 sample_weight_2 = sample_weight[:, 0:self.window_size]
             else:
                 sample_weight_2 = sample_weight
+        else:
+            y_true_2, y_pred_2, sample_weight_2 = y_true, y_pred, sample_weight
         super(ColdStartBinaryAccuracy, self).update_state(y_true=y_true_2, y_pred=y_pred_2, sample_weight=sample_weight_2)
 
 
@@ -128,6 +130,8 @@ class ColdStartAUC(tf.keras.metrics.AUC):
                 sample_weight_2 = sample_weight[:, 0:self.window_size]
             else:
                 sample_weight_2 = sample_weight
+        else:
+            y_true_2, y_pred_2, sample_weight_2 = y_true, y_pred, sample_weight
         super(ColdStartAUC, self).update_state(y_true=y_true_2, y_pred=y_pred_2, sample_weight=sample_weight_2)
 
 
