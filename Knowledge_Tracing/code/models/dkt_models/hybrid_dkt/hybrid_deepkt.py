@@ -61,11 +61,8 @@ class hybrid_DKTModel(Model):
                 `optimizer` or `metrics`.
         """
 
-        def custom_loss(y_true, y_pred):
-            return losses.binary_crossentropy(y_true, y_pred)
-
         super(hybrid_DKTModel, self).compile(
-            loss=custom_loss,
+            loss=losses.BinaryCrossentropy(),
             optimizer=optimizer,
             metrics=metrics,
             experimental_run_tf_function=False)
