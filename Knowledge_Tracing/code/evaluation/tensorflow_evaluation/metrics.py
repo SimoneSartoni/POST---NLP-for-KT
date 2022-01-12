@@ -105,7 +105,7 @@ class ColdStartBinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
         """print(tf.shape(y_true).numpy())
         print(tf.shape(y_pred).numpy())
         print(tf.shape(sample_weight).numpy())"""
-        if tf.shape(y_true)[1] > self.window_size:
+        if tf.shape(y_true.numpy())[1] > self.window_size:
             print("true")
             y_true_2, y_pred_2 = y_true[:, 0:self.window_size], y_pred[:, 0:self.window_size]
             if sample_weight:
@@ -123,7 +123,7 @@ class ColdStartAUC(tf.keras.metrics.AUC):
         super(ColdStartAUC, self).__init__(name="ColdStartAUC" + str(window_size))
 
     def update_state(self, y_true, y_pred, sample_weight=None):
-        if tf.shape(y_true)[1] > self.window_size:
+        if tf.shape(y_true.numpy())[1] > self.window_size:
             print("true")
             y_true_2, y_pred_2 = y_true[:, 0:self.window_size], y_pred[:, 0:self.window_size]
             if sample_weight:
