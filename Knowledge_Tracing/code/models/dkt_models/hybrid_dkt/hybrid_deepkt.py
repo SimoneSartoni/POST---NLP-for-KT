@@ -33,12 +33,12 @@ class hybrid_DKTModel(Model):
                 multiply_target_layer = layers.Multiply()
                 multiply_output = multiply_target_layer([dense_output, mask_target_embedding])
                 multiply_outputs.append(multiply_output)
-        concatenate_layer = layers.concatenate(multiply_outputs)
-
         dense_label = layers.Dense(1, activation='sigmoid')
-
-        output_label = layers.TimeDistributed(dense_label, name='output_class')(concatenate_layer)
-        self.loss = loss
+        if len(multiply_outputs)>1:
+            concatenate_layer = layers.concatenate(multiply_outputs)
+            output_label = layers.TimeDistributed(dense_label, name='output_class')(concatenate_layer)
+        else:
+            output_label = layers.TimeDistributed(dense_label, name='output_class')(multiply_outputs[0])
         model_name = model_name + "hybrid_dkt"
         super(hybrid_DKTModel, self).__init__(inputs=inputs, outputs=output_label, name=model_name)
         self.configs = configs
@@ -62,7 +62,7 @@ class hybrid_DKTModel(Model):
         """
 
         super(hybrid_DKTModel, self).compile(
-            loss=losses.BinaryCrossentropy(from_logits=False),
+            loss=losses.binary_crossentropy,
             optimizer=optimizer,
             metrics=metrics,
             )
