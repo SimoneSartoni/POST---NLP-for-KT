@@ -1,5 +1,5 @@
 import tensorflow as tf
-
+import numpy as np
 
 class BinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
     def __init__(self):
@@ -101,6 +101,8 @@ class ColdStartBinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
         super(ColdStartBinaryAccuracy, self).__init__(name="ColdStartBinaryAccuracy"+str(window_size))
 
     def update_state(self, y_true, y_pred, sample_weight=None):
+        """with tf.Session().as_default():
+            need_window = np.shape(y_true.eval().numpy())[1] > self.window_size
         if tf.shape(y_true.eval().numpy())[1] > self.window_size:
             print("true")
             y_true_2, y_pred_2 = y_true[:, 0:self.window_size], y_pred[:, 0:self.window_size]
@@ -109,7 +111,9 @@ class ColdStartBinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
             else:
                 sample_weight_2 = sample_weight
         else:
-            y_true_2, y_pred_2, sample_weight_2 = y_true, y_pred, sample_weight
+            y_true_2, y_pred_2, sample_weight_2 = y_true, y_pred, sample_weight"""
+        y_true_2, y_pred_2 = y_true[:, 0:self.window_size], y_pred[:, 0:self.window_size]
+        sample_weight_2 = sample_weight[:, 0:self.window_size]
         super(ColdStartBinaryAccuracy, self).update_state(y_true=y_true_2, y_pred=y_pred_2, sample_weight=sample_weight_2)
 
 
@@ -119,7 +123,7 @@ class ColdStartAUC(tf.keras.metrics.AUC):
         super(ColdStartAUC, self).__init__(name="ColdStartAUC" + str(window_size))
 
     def update_state(self, y_true, y_pred, sample_weight=None):
-        if tf.shape(y_true.eval().numpy())[1] > self.window_size:
+        """if tf.shape(y_true.eval().numpy())[1] > self.window_size:
             print("true")
             y_true_2, y_pred_2 = y_true[:, 0:self.window_size], y_pred[:, 0:self.window_size]
             if sample_weight:
@@ -127,7 +131,9 @@ class ColdStartAUC(tf.keras.metrics.AUC):
             else:
                 sample_weight_2 = sample_weight
         else:
-            y_true_2, y_pred_2, sample_weight_2 = y_true, y_pred, sample_weight
+            y_true_2, y_pred_2, sample_weight_2 = y_true, y_pred, sample_weight"""
+        y_true_2, y_pred_2 = y_true[:, 0:self.window_size], y_pred[:, 0:self.window_size]
+        sample_weight_2 = sample_weight[:, 0:self.window_size]
         super(ColdStartAUC, self).update_state(y_true=y_true_2, y_pred=y_pred_2, sample_weight=sample_weight_2)
 
 
