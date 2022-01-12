@@ -1,4 +1,4 @@
-from keras.layers import Model, Input, layers, losses
+from keras import Model, Input, layers, losses
 
 
 class hybrid_DKTModel(Model):
