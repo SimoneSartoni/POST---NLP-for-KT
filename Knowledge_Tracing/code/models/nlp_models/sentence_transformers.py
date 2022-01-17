@@ -1,17 +1,10 @@
 import gc
 
-import pandas as pd
 import numpy as np
-import os
-import scipy
-from scipy import sparse as sps
-from sentence_transformers import SentenceTransformer, InputExample, losses, models, datasets, evaluation
-from torch.utils.data import Dataset, DataLoader
+from sentence_transformers import SentenceTransformer, InputExample, losses
+from torch.utils.data import Dataset
 import torch
-from collections import Counter
 import math
-from Knowledge_Tracing.code.Similarity.Compute_Similarity import Compute_Similarity
-from Knowledge_Tracing.code.models.base_model import base_model
 
 
 def write_txt(file, data):

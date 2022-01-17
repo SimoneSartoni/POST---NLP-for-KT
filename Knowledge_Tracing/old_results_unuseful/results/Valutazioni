@@ -1,0 +1,32 @@
+Assistments:
+    2019) Questo dataset contiene interazioni ben strutturate di cui conosciamo molti problemi, pulire il dataset
+        tenendo solo le interazioni coi problemi di cui conosciamo il testo non influisce sulla complessità
+        computazionale in maniera significativa
+    2012_npz) Questo dataset è stato preso dagli autori di Relational Self-Aware Attention KT, è ben strutturato,
+        ma la maggior parte della maggior parte dei problemi che compaiono nelle interazioni non conosciamo il testo.
+        è sicuramente sensato rimuovere le interazioni con problemi di cui non si conosce il testo, per ridurre la
+        dimensione del dataset e i conseguenti tempi di training e prediction NEL CASO SI UTILIZZINO METODI BASATI SUL
+        TESTO.
+        Nel caso invece si usino per la prediction anche metodi non basati sul testo, allora il dataset è già pronto per
+        essere utilizzato, in particolare per RKT o SAINT.
+    2012) #TODO
+POJ:
+    Questo dataset contiene pochi problemi (774 con testo e interazione) lunghi (249 in media), ma interazioni per
+    utente: 50 per utente prima della pulizia, 25 di cui conosciamo il testo.
+    Il problema è la presenza di tantissime ripetizioni, probabilmente derivanti dal fatto che i problemi sono di natura
+    informatica e perciò serve scrivere del codice con conseguenti errori di compilazione e bug.
+
+    è il dataset che richiede minor costo computazionale data la piccola mole di informazione e può essere utilizzato
+    per verificare il funzionamento dei modelli su testi più lunghi (avendo 249 parole per testo) rispetto agli altri
+    datasets.
+    Dopo l'eliminazione dei duplicati rimangono pochissime interazioni per utente (5 in media), quindi le possibilità
+    sono: 1) prendere solo gli utenti con abbastanza interazioni
+          2) usare il dataset per valutare solo in condizione di poche interazioni per utente (cold start)
+
+
+JUNYI:
+    Junyi contiene un numero elevato di interazioni per ogni utente anche dopo la pulizia. Il numero di problemi
+    disponibili è motlo basso (287), perciò ci sono moltissime ripetizioni.
+
+
+Using Optimize_tf_idf I have seen that augmenting min_df decrease performances in each datasets

@@ -1,6 +1,6 @@
 import pandas as pd
 
-from Knowledge_Tracing.code.utils.utils import try_parsing_date
+from code.garbage.utils.utils import try_parsing_date
 from Knowledge_Tracing.code.data_processing.preprocess.load_process_cloudacademy_texts import get_cloudacademy_texts
 
 

@@ -1,9 +1,7 @@
-import pandas as pd
 import numpy as np
 import os
-import scipy
 from scipy import sparse as sps
-from Knowledge_Tracing.code.Similarity.Compute_Similarity import Compute_Similarity
+from code.actually_unuused.Similarity.Compute_Similarity import Compute_Similarity
 
 from sklearn.feature_extraction.text import CountVectorizer
 from Knowledge_Tracing.code.models.base_model import base_model
