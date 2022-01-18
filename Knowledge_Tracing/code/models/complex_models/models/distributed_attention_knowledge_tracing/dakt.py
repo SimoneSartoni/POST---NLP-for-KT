@@ -17,7 +17,7 @@ class Dakt(nn.Module):
         self.content_encoder = get_clones(EncoderBlock(enc_heads, n_dims, nb_questions, nb_skills, seq_len), n_encoder)
         self.results_decoder = get_clones(DecoderBlock(dec_heads, n_dims, nb_responses, seq_len), n_decoder)
         self.prediction_decoder = get_clones(PredictionBlock(dec_heads, n_dims, nb_responses, seq_len), n_predictors)
-        self.fc = nn.Linear(n_dims, 1)
+        self.linear = nn.Linear(n_dims, 1)
 
     def forward(self, inputs, decoder_targets):
         encoder_inputs, decoder_inputs = inputs['encoder'], inputs['decoder']
@@ -41,11 +41,11 @@ class Dakt(nn.Module):
             out_encoder = output_results_decoder
             in_results_decoder = output_results_decoder
         for n in range(self.n_encoder):
-            if n == 1:
+            if n == 0:
                 out_prediction_decoder = self.prediction_decoder[n](in_prediction_decoder, output_results_decoder)
             else:
                 out_prediction_decoder = self.prediction_decoder[n](out_prediction_decoder, out_prediction_decoder)
-        out_linear_layer = self.fc(out_prediction_decoder)
+        out_linear_layer = self.linear(out_prediction_decoder)
         return torch.sigmoid(out_linear_layer)
 
 
