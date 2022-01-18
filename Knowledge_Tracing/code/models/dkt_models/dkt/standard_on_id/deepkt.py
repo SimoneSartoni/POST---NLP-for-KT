@@ -1,5 +1,6 @@
 from Knowledge_Tracing.code.models.dkt_models.dkt.standard_on_id.data_utils import *
 from Knowledge_Tracing.code.models.tensorflow_utills.layers import *
+from tensorflow.keras import losses
 
 class DKTModel(tf.keras.Model):
     """ The Deep Knowledge Tracing model.
@@ -51,7 +52,7 @@ class DKTModel(tf.keras.Model):
         """
 
         def custom_loss(y_true, y_pred):
-            return tf.keras.losses.binary_crossentropy(y_true, y_pred)
+            return losses.binary_crossentropy(y_true, y_pred)
 
         super(DKTModel, self).compile(
             loss=custom_loss,
