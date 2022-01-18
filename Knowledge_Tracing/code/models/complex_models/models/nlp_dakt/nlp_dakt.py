@@ -7,13 +7,12 @@ from torch import nn
 
 
 class NLP_Dakt(nn.Module):
-    def __init__(self, n_encoder, n_decoder, n_predictors, enc_heads, dec_heads, n_dims, nb_questions, nb_skills, nb_responses,
-
-                 seq_len):
+    def __init__(self, n_encoder, n_decoder, n_predictors, enc_heads, dec_heads, n_dims, nb_questions, nb_skills,
+                 nb_responses, nlp_embedding_size, seq_len):
         super(NLP_Dakt, self).__init__()
         self.n_encoder = n_encoder
         self.n_decoder = n_decoder
-        self.embedding = EmbeddingBlock(n_dims, nb_questions, nb_skills, nb_responses,  seq_len)
+        self.embedding = EmbeddingBlock(n_dims, nb_questions, nb_skills, nb_responses, nlp_embedding_size, seq_len)
         self.content_encoder = get_clones(EncoderBlock(enc_heads, n_dims, nb_questions, nb_skills, seq_len), n_encoder)
         self.results_decoder = get_clones(DecoderBlock(dec_heads, n_dims, nb_responses, seq_len), n_decoder)
         self.prediction_decoder = get_clones(PredictionBlock(dec_heads, n_dims, nb_responses, seq_len), n_predictors)
