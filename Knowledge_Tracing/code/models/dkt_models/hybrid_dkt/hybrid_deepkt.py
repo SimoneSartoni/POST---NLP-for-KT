@@ -15,16 +15,16 @@ class hybrid_DKTModel(Model):
     def __init__(self, configs={}, dropout_rate=0.2, loss=None):
         inputs = {}
         multiply_outputs = []
-        model_name = ""
+        embeddings_names = ""
         if len(list(configs.keys())) > 0:
             for config in configs.values():
                 name, embedding_size, hidden_units = config['name'], config['embedding_size'], \
-                                                                 config['hidden_units']
-                model_name = model_name + name + "_"
+                                                     config['hidden_units']
+                embeddings_names = embeddings_names + name + "_"
                 input_embedding = Input(shape=[None, embedding_size], name=name)
                 target_embedding = Input(shape=[None, embedding_size], name="target_" + name)
                 inputs[name] = input_embedding
-                inputs['target_'+name] = target_embedding
+                inputs['target_' + name] = target_embedding
                 mask_embedding = layers.Masking(mask_value=-1.0)(input_embedding)
                 mask_target_embedding = layers.Masking(mask_value=-1.0)(target_embedding)
                 lstm_embedding = layers.LSTM(hidden_units, return_sequences=True, dropout=dropout_rate)(mask_embedding)
@@ -34,14 +34,16 @@ class hybrid_DKTModel(Model):
                 multiply_output = multiply_target_layer([dense_output, mask_target_embedding])
                 multiply_outputs.append(multiply_output)
         dense_label = layers.Dense(1, activation='sigmoid')
-        if len(multiply_outputs)>1:
+        if len(multiply_outputs) > 1:
             concatenate_layer = layers.concatenate(multiply_outputs)
             output_label = layers.TimeDistributed(dense_label, name='output_class')(concatenate_layer)
         else:
             output_label = layers.TimeDistributed(dense_label, name='output_class')(multiply_outputs[0])
-        model_name = model_name + "hybrid_dkt"
-        super(hybrid_DKTModel, self).__init__(inputs=inputs, outputs=output_label, name=model_name)
+        self.model_name = "hybrid_dkt_combination_of_predictions"
+        self.embeddings_names = embeddings_names
         self.configs = configs
+        super(hybrid_DKTModel, self).__init__(inputs=inputs, outputs=output_label,
+                                              name=self.embeddings_names + self.embeddings_names)
 
     def compile(self, optimizer, metrics=None):
         """Configures the model for training.
@@ -60,14 +62,16 @@ class hybrid_DKTModel(Model):
             ValueError: In case of invalid arguments for
                 `optimizer` or `metrics`.
         """
+
         def custom_loss(y_true, y_pred, sample_weight=None):
             return losses.binary_crossentropy(y_true, y_pred, sample_weight)
+
         super(hybrid_DKTModel, self).compile(
             loss=custom_loss,
             optimizer=optimizer,
             metrics=metrics,
             run_eagerly=True
-            )
+        )
 
     def fit(self,
             dataset,

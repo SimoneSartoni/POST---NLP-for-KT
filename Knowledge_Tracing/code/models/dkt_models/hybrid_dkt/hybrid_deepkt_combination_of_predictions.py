@@ -15,13 +15,13 @@ class hybrid_DKT_combination_of_predictions_Model(Model):
     def __init__(self, configs={}, dropout_rate=0.2):
         inputs = {}
         output_labels = []
-        model_name = ""
+        embeddings_names = ""
 
         if len(list(configs.keys())) > 0:
             for config in configs.values():
                 name, embedding_size, hidden_units = config['name'], config['embedding_size'], \
                                                                  config['hidden_units']
-                model_name = model_name + name + "_"
+                embeddings_names = embeddings_names + name + "_"
                 input_embedding = Input(shape=[None, embedding_size], name=name)
                 target_embedding = Input(shape=[None, embedding_size], name="target_" + name)
                 inputs[name] = input_embedding
@@ -39,10 +39,11 @@ class hybrid_DKT_combination_of_predictions_Model(Model):
         concatenate_layer = layers.concatenate(output_labels)
         dense_prediction_layer = layers.Dense(1, activation='sigmoid')
         hybrid_prediction = layers.TimeDistributed(dense_prediction_layer, name='hybrid_prediction')(concatenate_layer)
-        model_name = model_name + "hybrid_dkt_combination_of_predictions"
-        super(hybrid_DKT_combination_of_predictions_Model, self).__init__(inputs=inputs, outputs=hybrid_prediction,
-                                                                          name=model_name)
+        self.model_name = "hybrid_dkt_combination_of_predictions"
+        self.embeddings_names = embeddings_names
         self.configs = configs
+        super(hybrid_DKT_combination_of_predictions_Model, self).__init__(inputs=inputs, outputs=hybrid_prediction,
+                                                                          name=self.embeddings_names+self.embeddings_names)
 
     def compile(self, optimizer, metrics=None):
         """Configures the model for training.
