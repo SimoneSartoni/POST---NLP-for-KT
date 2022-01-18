@@ -15,11 +15,13 @@ class hybrid_DKT_combination_of_predictions_Model(Model):
     def __init__(self, configs={}, dropout_rate=0.2):
         inputs = {}
         output_labels = []
+        model_name = ""
 
         if len(list(configs.keys())) > 0:
             for config in configs.values():
                 name, embedding_size, hidden_units = config['name'], config['embedding_size'], \
                                                                  config['hidden_units']
+                model_name = model_name + name + "_"
                 input_embedding = Input(shape=[None, embedding_size], name=name)
                 target_embedding = Input(shape=[None, embedding_size], name="target_" + name)
                 inputs[name] = input_embedding
@@ -37,8 +39,9 @@ class hybrid_DKT_combination_of_predictions_Model(Model):
         concatenate_layer = layers.concatenate(output_labels)
         dense_prediction_layer = layers.Dense(1, activation='sigmoid')
         hybrid_prediction = layers.TimeDistributed(dense_prediction_layer, name='hybrid_prediction')(concatenate_layer)
-
-        super(hybrid_DKT_combination_of_predictions_Model, self).__init__(inputs=inputs, outputs=hybrid_prediction, name="hybrid_DKTModel")
+        model_name = model_name + "hybrid_dkt_combination_of_predictions"
+        super(hybrid_DKT_combination_of_predictions_Model, self).__init__(inputs=inputs, outputs=hybrid_prediction,
+                                                                          name=model_name)
         self.configs = configs
 
     def compile(self, optimizer, metrics=None):
