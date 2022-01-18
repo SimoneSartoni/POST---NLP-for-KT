@@ -56,7 +56,7 @@ def process_data_poj(min_questions=2, max_questions=50,
     print("shape after exclusion:", train_df.shape)
     texts_df['question_id'], _ = pd.factorize(texts_df['problem_id'], sort=True)
     train_df['question_id'], _ = pd.factorize(train_df['problem_id'], sort=True)
-
+    train_df['skill'] = 0
     texts_df.to_csv(output_filepath + 'texts_processed.csv')
     train_df.to_csv(output_filepath + 'interactions_processed.csv')
     return train_df, texts_df
