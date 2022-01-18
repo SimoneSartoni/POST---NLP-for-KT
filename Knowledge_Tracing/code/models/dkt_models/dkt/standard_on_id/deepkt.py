@@ -52,7 +52,7 @@ class DKTModel(tf.keras.Model):
         """
 
         super(DKTModel, self).compile(
-            loss=tf.keras.losses.BinaryCrossentropy(),
+            loss=tf.keras.losses.binary_crossentropy,
             optimizer=optimizer,
             metrics=metrics,
             experimental_run_tf_function=False,
