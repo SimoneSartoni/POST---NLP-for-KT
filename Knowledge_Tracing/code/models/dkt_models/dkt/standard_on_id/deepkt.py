@@ -51,11 +51,8 @@ class DKTModel(tf.keras.Model):
                 `optimizer` or `metrics`.
         """
 
-        def custom_loss(y_true, y_pred, sample_weight=None):
-            return losses.binary_crossentropy(y_true, y_pred, sample_weight)
-
         super(DKTModel, self).compile(
-            loss=custom_loss,
+            loss=tf.keras.losses.BinaryCrossentropy(),
             optimizer=optimizer,
             metrics=metrics,
             experimental_run_tf_function=False,
