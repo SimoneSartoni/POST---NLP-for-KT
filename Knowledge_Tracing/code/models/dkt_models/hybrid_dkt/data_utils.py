@@ -83,6 +83,7 @@ def load_dataset(batch_size=32, shuffle=True,
     text_df = load_preprocessed_texts(texts_filepath=texts_filepath)
     # Step 3.1 - Generate NLP extracted encoding for problems
     encode_models = []
+    encode_names = []
     if 'count_vectorizer' in nlp_kwargs:
         count_vectorizer_args = nlp_kwargs['count_vectorizer']
         min_df, max_df, max_features = count_vectorizer_args['min_df'], count_vectorizer_args['max_df'], \
@@ -90,6 +91,8 @@ def load_dataset(batch_size=32, shuffle=True,
         encode_model = count_vectorizer(min_df=min_df, max_df=max_df, binary=False, max_features=max_features)
         encode_model.fit(text_df, save_filepath)
         encode_models.append(encode_model)
+        parameters = "_".join([str(min_df), str(max_df), str(max_features)])
+        encode_names.append(encode_model.name + "_" + parameters)
 
     if 'pretrained_distilbert' in nlp_kwargs:
         pretrained_distilbert_args = nlp_kwargs['pretrained_distilbert']
@@ -104,6 +107,8 @@ def load_dataset(batch_size=32, shuffle=True,
             encode_model.fit_on_custom(text_df, text_column=text_column, batch_size=batch_size)
         encode_model.transform(text_df, text_column)
         encode_models.append(encode_model)
+        parameters = "_".join([str(fit_on_nli), str(fit_on_custom), str(text_column), str(text_column)])
+        encode_names.append(encode_model.name + "_" + parameters)
 
     if 'sentence_transformers' in nlp_kwargs:
         model_name, text_column, fit = nlp_kwargs['sentence_transformers']['model_name'], \
@@ -115,6 +120,8 @@ def load_dataset(batch_size=32, shuffle=True,
             encode_model.fit_on_custom(text_df, text_column=text_column, batch_size=batch_size, frac=fraction, epochs=epochs)
         encode_model.transform(text_df, text_column)
         encode_models.append(encode_model)
+        parameters = "_".join([str(model_name), str(fit), str(text_column)])
+        encode_names.append(encode_model.name + "_" + parameters)
 
     if 'bertopic' in nlp_kwargs:
         bertopic_args = nlp_kwargs['bertopic']
@@ -133,6 +140,9 @@ def load_dataset(batch_size=32, shuffle=True,
         encode_model.fit(text_df)
         encode_model.transform(text_df, text_column)
         encode_models.append(encode_model)
+        parameters = "_".join([str(pretrained), str(custom), str(text_column), str(output), str(nr_topics)])
+        encode_names.append(encode_model.name + "_" + parameters)
+
 
     train_gen, val_gen, test_gen, nb_questions, nb_skills = get_hybrid_dkt_dataloaders(
         batch_size, shuffle, interactions_filepath, output_filepath=save_filepath,
