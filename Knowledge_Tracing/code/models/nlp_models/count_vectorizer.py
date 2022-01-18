@@ -15,7 +15,7 @@ def identity_tokenizer(text):
     return text
 
 
-class count_vectorizer(base_model):
+class count_vectorizer:
     def __init__(self, max_df, min_df, binary, max_features=None):
         super().__init__("count_vectorizer", "NLP")
         self.count_vectorizer = CountVectorizer(
