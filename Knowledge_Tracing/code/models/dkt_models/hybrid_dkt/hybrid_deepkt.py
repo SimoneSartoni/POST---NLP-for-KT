@@ -43,7 +43,7 @@ class hybrid_DKTModel(Model):
         self.embeddings_names = embeddings_names
         self.configs = configs
         super(hybrid_DKTModel, self).__init__(inputs=inputs, outputs=output_label,
-                                              name=self.embeddings_names + self.embeddings_names)
+                                              name=self.embeddings_names + self.model_name)
 
     def compile(self, optimizer, metrics=None):
         """Configures the model for training.
