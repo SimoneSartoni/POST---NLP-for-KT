@@ -155,5 +155,4 @@ def load_dataset(batch_size=32, shuffle=True,
     val_loader = create_dataset(val_gen, encode_models, encoding_depths, shuffle=shuffle, batch_size=batch_size)
     test_loader = create_dataset(test_gen, encode_models, encoding_depths, shuffle=shuffle, batch_size=batch_size)
 
-    encode_names = [encode_model.name for encode_model in encode_models]
     return train_loader, val_loader, test_loader, encoding_depths, encode_names
