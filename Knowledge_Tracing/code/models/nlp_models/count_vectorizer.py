@@ -33,7 +33,7 @@ class count_vectorizer:
         self.max_features = max_features
         self.pro_num = None
         self.words_num = None
-        self.embeddings ={}
+        self.embeddings = {}
         self.texts_df = None
         self.vector_size = 0
         self.name = "count_vectorizer"
@@ -46,7 +46,7 @@ class count_vectorizer:
         embeddings = self.count_vectorizer.transform(self.texts_df['list_of_words'])
         for key, embedding in list(zip(list(self.texts_df['problem_id'].values), embeddings)):
             self.embeddings[key] = embedding
-        self.vector_size = self.embeddings.shape[1]
+        self.vector_size = embeddings.shape[1]
         self.pro_num = len(self.texts_df['problem_id'])
         self.words_num = self.vector_size
 
