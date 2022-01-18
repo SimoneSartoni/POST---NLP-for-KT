@@ -3,7 +3,7 @@ import ast
 import pandas as pd
 import numpy as np
 from code.garbage.dataset import dataset as Dataset
-from code.garbage.utils.utils import try_parsing_date
+from code.utils.utils import try_parsing_date
 
 
 def import_questions_text(datasets_dict):

@@ -3,7 +3,7 @@ import plotly.express as px
 import numpy as np
 from mlflow import log_artifact
 
-from code.garbage.utils.utils import make_dir
+from code.utils.utils import make_dir
 
 
 def histogram(data, path):

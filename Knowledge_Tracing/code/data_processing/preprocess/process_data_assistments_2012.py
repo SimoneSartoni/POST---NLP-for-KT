@@ -3,7 +3,7 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 
-from code.garbage.utils.utils import try_parsing_date
+from Knowledge_Tracing.code.utils.utils import try_parsing_date
 from Knowledge_Tracing.code.data_processing.preprocess.load_process_assistments_texts import load_process_assistments_texts
 
 

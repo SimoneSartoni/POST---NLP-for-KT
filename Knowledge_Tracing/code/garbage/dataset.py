@@ -11,7 +11,7 @@ from mlflow import log_artifact
 
 
 from code.garbage.partition_set import partition_set
-from code.garbage.utils.utils import write_txt
+from code.utils.utils import write_txt
 from sklearn.model_selection import train_test_split
 from Knowledge_Tracing.code.visualization.histogram import *
 from Knowledge_Tracing.code.utils.utils import try_parsing_date
