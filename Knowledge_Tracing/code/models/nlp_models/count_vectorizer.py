@@ -49,6 +49,7 @@ class count_vectorizer:
         self.vector_size = embeddings.shape[1]
         self.pro_num = len(self.texts_df['problem_id'])
         self.words_num = self.vector_size
+        print(list(self.embeddings.keys()))
 
     def get_encoding(self, problem):
         encoding = np.array(self.embeddings[problem].todense()).squeeze()

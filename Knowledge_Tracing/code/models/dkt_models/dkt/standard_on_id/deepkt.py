@@ -1,5 +1,5 @@
 from Knowledge_Tracing.code.models.dkt_models.dkt.standard_on_id.data_utils import *
-
+from Knowledge_Tracing.code.models.tensorflow_utills.layers import *
 
 class DKTModel(tf.keras.Model):
     """ The Deep Knowledge Tracing model.

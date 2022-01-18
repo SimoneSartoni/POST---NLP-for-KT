@@ -1,5 +1,6 @@
 import tensorflow as tf
 
+
 class CumSumLayer(tf.keras.layers.Layer):
     def __init__(self, **kwargs):
         super(CumSumLayer, self).__init__(**kwargs)
