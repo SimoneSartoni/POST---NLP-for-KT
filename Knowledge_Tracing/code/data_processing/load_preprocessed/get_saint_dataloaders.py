@@ -16,8 +16,8 @@ def get_saint_dataloaders(batch_size=128,
     df = load_preprocessed_interactions(interactions_filepath=interactions_filepath, dictionary=dictionary)
     print(df)
     # grouping based on user_id to get the data supply
-    nb_questions = df['question_id'].max()
-    nb_skills = df['skill'].max()
+    nb_questions = df['question_id'].max() + 1
+    nb_skills = df['skill'].max() + 1
     print("Grouping users...")
     print("question_ids:")
     print(list(df["question_id"].values)[0:10])
