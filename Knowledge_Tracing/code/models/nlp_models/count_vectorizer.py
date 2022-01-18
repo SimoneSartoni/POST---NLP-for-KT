@@ -37,7 +37,7 @@ class count_vectorizer(base_model):
         self.embeddings = None
         self.texts_df = None
         self.vector_size = 0
-        self.name = "sentence_transformer"
+        self.name = "count_vectorizer"
 
     def fit(self, texts_df, save_filepath='./'):
         self.texts_df = texts_df
