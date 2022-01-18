@@ -20,15 +20,20 @@ class NLP_Dakt(nn.Module):
 
     def forward(self, inputs, decoder_targets):
         encoder_inputs, decoder_inputs = inputs['encoder'], inputs['decoder']
-        in_exercise, in_skill, in_response = encoder_inputs['input_question_id'], encoder_inputs['input_skill'], \
-                                             decoder_inputs['input_label']
+        input_nlp_embedding, in_exercise, in_skill, in_response = encoder_inputs['input_text_encoding'].float(), \
+                                                                  encoder_inputs['input_question_id'], encoder_inputs[
+                                                                      'input_skill'], decoder_inputs['input_label']
         in_elapsed_time = decoder_inputs['input_r_elapsed_time'].float().unsqueeze(-1)
 
-        out_exercise, out_skill = decoder_targets['target_id'], decoder_targets['target_skill']
+        out_exercise, out_skill, output_nlp_embedding = decoder_targets['target_id'], decoder_targets['target_skill'], \
+                                                        decoder_targets['target_text_encoding'].float()
 
-        in_content_encoder, in_results_decoder, in_prediction_decoder = self.embedding(in_exercise, in_skill,
-                                                                                       in_response, in_elapsed_time,
-                                                                                       out_exercise, out_skill)
+        in_content_encoder, in_results_decoder, in_prediction_decoder = self.embedding(input_nlp_embedding, in_exercise,
+                                                                                       in_skill, in_response,
+                                                                                       in_elapsed_time,
+                                                                                       output_nlp_embedding,
+                                                                                       out_exercise,
+                                                                                       out_skill)
         for n in range(self.n_encoder):
             in_content_encoder = self.content_encoder[n](in_content_encoder)
         out_encoder = in_content_encoder
