@@ -33,7 +33,7 @@ class count_vectorizer:
         self.max_features = max_features
         self.pro_num = None
         self.words_num = None
-        self.embeddings = None
+        self.embeddings ={}
         self.texts_df = None
         self.vector_size = 0
         self.name = "count_vectorizer"
