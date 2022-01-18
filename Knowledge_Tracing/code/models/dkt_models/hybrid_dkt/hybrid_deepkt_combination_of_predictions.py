@@ -43,7 +43,7 @@ class hybrid_DKT_combination_of_predictions_Model(Model):
         self.embeddings_names = embeddings_names
         self.configs = configs
         super(hybrid_DKT_combination_of_predictions_Model, self).__init__(inputs=inputs, outputs=hybrid_prediction,
-                                                                          name=self.embeddings_names+self.embeddings_names)
+                                                                          name=self.embeddings_names+self.model_name)
 
     def compile(self, optimizer, metrics=None):
         """Configures the model for training.
