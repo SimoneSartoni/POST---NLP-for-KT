@@ -63,7 +63,7 @@ class DKT_Dataset:
 
     def generator(self):
         for user_id, unique_question_id, text_ids, answered_correctly, response_elapsed_time, exe_skill in self.data:
-            features = [2*skill+correct for skill, correct in list(zip(skill, answered_correctly))]
+            features = [2*skill+correct for skill, correct in list(zip(exe_skill, answered_correctly))]
             if self.negative_correctness:
                 ans = [1.0 if x == 1.0 else -1.0 for x in answered_correctly]
             else:
