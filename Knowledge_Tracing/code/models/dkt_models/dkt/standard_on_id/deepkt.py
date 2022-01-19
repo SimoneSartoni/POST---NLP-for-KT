@@ -31,7 +31,7 @@ class DKTModel(tf.keras.Model):
         outputs = CumSumLayer()(outputs)
         super(DKTModel, self).__init__(inputs={"input_feature_id": input_feature_id, "target_id": target_feature_id},
                                        outputs=outputs,
-                                       name="DKTModel")
+                                       name="DKTModel_on_question_id")
 
     def compile(self, optimizer, metrics=None):
         """Configures the model for training.
