@@ -7,7 +7,7 @@ MASK_VALUE = -1.  # The masking value cannot be zero.
 
 
 def create_dataset(generator, features_depth, skill_depth, shuffle=True, batch_size=1024):
-    input_types = {"feature": tf.float32, "target_skill": tf.int32}
+    input_types = {"feature": tf.int32, "target_skill": tf.int32}
     output_types = {"target_label": tf.float32}
 
     input_shapes = {"feature": [None],  "target_skill": [None]}
