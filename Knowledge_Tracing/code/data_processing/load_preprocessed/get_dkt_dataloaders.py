@@ -16,8 +16,8 @@ def get_DKT_dataloaders(batch_size=128, shuffle=False,
     df = load_preprocessed_interactions(interactions_filepath=interactions_filepath, dictionary=dictionary)
     print(df)
     # grouping based on user_id to get the data supply
-    nb_questions = len(df['question_id'].unique())
-    nb_skills = len(df['skill'].unique())
+    nb_questions = len(df['question_id'].max()) + 1
+    nb_skills = len(df['skill'].max()) + 1
     print("Grouping users...")
 
     group = generate_sequences_of_same_length(df, seq_len=interaction_sequence_len, min_seq_len=min_seq_len,
