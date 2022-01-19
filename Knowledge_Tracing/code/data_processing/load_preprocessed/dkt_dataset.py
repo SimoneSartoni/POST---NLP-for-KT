@@ -64,6 +64,7 @@ class DKT_Dataset:
     def generator(self):
         for user_id, unique_question_id, text_ids, answered_correctly, response_elapsed_time, exe_skill in self.data:
             features = [2*skill+correct for skill, correct in list(zip(exe_skill, answered_correctly))]
+            feature_ids = [2*question+correct for question, correct in list(zip(unique_question_id, answered_correctly))]
             if self.negative_correctness:
                 ans = [1.0 if x == 1.0 else -1.0 for x in answered_correctly]
             else:
@@ -73,6 +74,8 @@ class DKT_Dataset:
             input_text_ids = text_ids[:-1]
             input_skill = exe_skill[:-1]
             input_features = features[:-1]
+            input_feature_ids = feature_ids[:-1]
+
             text_encodings = []
             target_text_encodings = []
             if self.text_encoding_model:
@@ -97,16 +100,7 @@ class DKT_Dataset:
             target_skill = exe_skill[1:]
             target_label = ans[1:]
             target_features = features[1:]
-
-            feature_ids = []
-            target_feature_ids = []
-            if self.encode_correct_in_id:
-                for question_id, correct in list(zip(unique_question_id, answered_correctly)):
-                    feature_id, target_feature_id = encode_correctness_in_id(question_id, correct, self.nb_questions)
-                    feature_ids.append(feature_id)
-                    target_feature_ids.append(target_feature_id)
-                input_feature_ids = feature_ids[:-1]
-                target_feature_ids = target_feature_ids[1:]
+            target_feature_ids = feature_ids[1:]
 
             possible_inputs = {"question_id": input_ids, "text_id": input_text_ids, "skill": input_skill,
                                "label": input_label, "r_elapsed_time": input_r_elapsed_time,

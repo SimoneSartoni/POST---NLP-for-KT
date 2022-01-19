@@ -20,7 +20,10 @@ def get_DKT_dataloaders(batch_size=128, shuffle=False,
     nb_skills = df['skill'].max() + 1
     print("Grouping users...")
     print(nb_skills)
-    print(df['skill'].unique())
+    print(len(df['skill'].unique()))
+    print(nb_questions)
+    print(len(df['question_id'].unique()))
+
     group = generate_sequences_of_same_length(df, seq_len=interaction_sequence_len, min_seq_len=min_seq_len,
                                               output_filepath=output_filepath)
     del df

@@ -4,15 +4,13 @@ from sklearn.model_selection import train_test_split
 from Knowledge_Tracing.code.data_processing.load_preprocessed.get_dkt_dataloaders import get_DKT_dataloaders
 
 MASK_VALUE = -1.  # The masking value cannot be zero.
-from Knowledge_Tracing.code.data_processing.load_preprocessed.load_preprocessed_data import load_preprocessed_texts, \
-    load_preprocessed_interactions
-import sys
+
 
 def create_dataset(generator, ids_depth, nb_questions, shuffle=True, batch_size=1024):
     input_types = {"feature_id": tf.float32, "target_id": tf.int32}
     output_types = {"target_label": tf.float32}
 
-    input_shapes = {"feature_id": [None, ids_depth], "target_id": [None]}
+    input_shapes = {"feature_id": [None], "target_id": [None]}
     output_shapes = {"target_label": [None]}
     types = (input_types, output_types)
     shapes = (input_shapes, output_shapes)
@@ -29,7 +27,8 @@ def create_dataset(generator, ids_depth, nb_questions, shuffle=True, batch_size=
     print(dataset)
     dataset = dataset.map(
         lambda inputs, outputs: (
-            {"input_feature_id": inputs['feature_id'], "target_id": tf.one_hot(inputs['target_id'], depth=nb_questions)
+            {"input_feature_id": tf.one_hot(inputs['feature_id'], depth=ids_depth),
+             "target_id": tf.one_hot(inputs['target_id'], depth=nb_questions)
              },
             tf.expand_dims(outputs['target_label'], -1)
         )
