@@ -98,8 +98,6 @@ class DKT_Dataset:
             target_label = ans[1:]
             target_features = features[1:]
 
-            print(features)
-            print(target_features)
             feature_ids = []
             target_feature_ids = []
             if self.encode_correct_in_id:
