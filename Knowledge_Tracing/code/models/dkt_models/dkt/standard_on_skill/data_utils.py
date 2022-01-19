@@ -10,7 +10,7 @@ def create_dataset(generator, features_depth, skill_depth, shuffle=True, batch_s
     input_types = {"feature": tf.float32, "target_skill": tf.int32}
     output_types = {"target_label": tf.float32}
 
-    input_shapes = {"feature": [None, features_depth],  "target_skill": [None]}
+    input_shapes = {"feature": [None],  "target_skill": [None]}
     output_shapes = {"target_label": [None]}
     types = (input_types, output_types)
     shapes = (input_shapes, output_shapes)
@@ -27,7 +27,8 @@ def create_dataset(generator, features_depth, skill_depth, shuffle=True, batch_s
     print(dataset)
     dataset = dataset.map(
         lambda inputs, outputs: (
-            {"input_feature": inputs['feature'], "target_skill": tf.one_hot(inputs['target_skill'], depth=skill_depth)},
+            {"input_feature": tf.one_hot(inputs['feature'], depth=features_depth),
+             "target_skill": tf.one_hot(inputs['target_skill'], depth=skill_depth)},
             tf.expand_dims(outputs['target_label'], -1)
         )
     )

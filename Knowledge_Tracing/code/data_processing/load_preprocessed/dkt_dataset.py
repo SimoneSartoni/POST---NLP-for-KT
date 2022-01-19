@@ -16,12 +16,12 @@ def encode_correctness_in_skills(skill, correctness, nb_skills):
     zeros = np.zeros(nb_skills, dtype=np.int)
     skill_one_hot_encoding = zeros
     skill_one_hot_encoding[skill] = 1
-    target_features = np.concatenate([skill_one_hot_encoding, skill_one_hot_encoding])
     if correctness:
         features = np.concatenate([skill_one_hot_encoding, zeros])
     else:
         features = np.concatenate([zeros, skill_one_hot_encoding])
-    return features, target_features
+    return features, skill_one_hot_encoding
+
 
 def encode_correctness_in_id(question_id, correctness, nb_questions):
     zeros = np.zeros(nb_questions, dtype=np.int)
@@ -63,7 +63,7 @@ class DKT_Dataset:
 
     def generator(self):
         for user_id, unique_question_id, text_ids, answered_correctly, response_elapsed_time, exe_skill in self.data:
-
+            features = [2*skill+correct for skill, correct in list(zip(skill, answered_correctly))]
             if self.negative_correctness:
                 ans = [1.0 if x == 1.0 else -1.0 for x in answered_correctly]
             else:
@@ -72,12 +72,14 @@ class DKT_Dataset:
             input_ids = unique_question_id[:-1]
             input_text_ids = text_ids[:-1]
             input_skill = exe_skill[:-1]
+            input_features = features[:-1]
             text_encodings = []
             target_text_encodings = []
             if self.text_encoding_model:
                 if self.encode_correct_in_encodings:
                     for text_id, correct in list(zip(text_ids, answered_correctly)):
-                        text_encoding, target_encoding = encode_correctness_in_encodings(self.text_encoding_model, text_id, correct)
+                        text_encoding, target_encoding = encode_correctness_in_encodings(self.text_encoding_model,
+                                                                                         text_id, correct)
                         text_encodings.append(text_encoding)
                         target_text_encodings.append(target_encoding)
                     text_encodings = text_encodings[:-1]
@@ -94,16 +96,10 @@ class DKT_Dataset:
             target_text_ids = text_ids[1:]
             target_skill = exe_skill[1:]
             target_label = ans[1:]
-            features = []
-            target_features = []
-            if self.encode_correct_in_skills:
-                for skill, correct in list(zip(exe_skill, answered_correctly)):
-                    feature, skill_repeated = encode_correctness_in_skills(skill, correct, self.nb_skills)
-                    features.append(feature)
-                    target_features.append(skill_repeated)
-                input_features = features[:-1]
-                target_features = target_features[1:]
+            target_features = features[1:]
 
+            print(features)
+            print(target_features)
             feature_ids = []
             target_feature_ids = []
             if self.encode_correct_in_id:
