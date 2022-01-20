@@ -39,7 +39,7 @@ class hybrid_DKTModel(Model):
             output_label = layers.TimeDistributed(dense_label, name='output_class')(concatenate_layer)
         else:
             output_label = layers.TimeDistributed(dense_label, name='output_class')(multiply_outputs[0])
-        self.model_name = "hybrid_dkt_combination_of_predictions"
+        self.model_name = "hybrid_dkt_on_vectors"
         self.embeddings_names = embeddings_names
         self.configs = configs
         super(hybrid_DKTModel, self).__init__(inputs=inputs, outputs=output_label,
@@ -63,11 +63,8 @@ class hybrid_DKTModel(Model):
                 `optimizer` or `metrics`.
         """
 
-        def custom_loss(y_true, y_pred, sample_weight=None):
-            return losses.binary_crossentropy(y_true, y_pred, sample_weight)
-
         super(hybrid_DKTModel, self).compile(
-            loss=custom_loss,
+            loss=tf.keras.losses.binary_crossentropy,
             optimizer=optimizer,
             metrics=metrics,
             run_eagerly=True
