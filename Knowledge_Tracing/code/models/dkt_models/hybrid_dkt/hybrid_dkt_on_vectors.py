@@ -38,7 +38,7 @@ class hybrid_DKT_on_vectors(Model):
             concatenate_layer = layers.concatenate(multiply_outputs)
             output_label = layers.TimeDistributed(dense_label, name='output_class')(concatenate_layer)
         else:
-            output_label = layers.TimeDistributed(dense_label, name='output_class')(multiply_outputs[0])
+            output_label = layers.TimeDistributed(dense_label, name='output_class')(multiply_output)
         self.model_name = "hybrid_dkt_on_vectors"
         self.embeddings_names = embeddings_names
         self.configs = configs
@@ -64,7 +64,7 @@ class hybrid_DKT_on_vectors(Model):
         """
 
         super(hybrid_DKT_on_vectors, self).compile(
-            loss=losses.binary_crossentropy,
+            loss=tf.keras.losses.BinaryCrossentropy(),
             optimizer=optimizer,
             metrics=metrics,
             run_eagerly=True
