@@ -37,6 +37,7 @@ class SentenceSimilarityDataset(Dataset):
             texts_a == "not available"
         if texts_b == "":
             texts_b == "not available"
+
         def counter_cosine_similarity(c1, c2):
             common = set(c1).intersection(set(c2))
             dot_product = len(common)
