@@ -1,7 +1,7 @@
 from tensorflow.keras import Model, Input, layers, losses
 
 
-class hybrid_DKT_combination_of_predictions_Model(Model):
+class hybrid_DKT_on_predictions(Model):
     """ The Deep Knowledge Tracing model.
     Arguments in __init__:
         nb_skills: The number of skills in the dataset.
@@ -42,8 +42,8 @@ class hybrid_DKT_combination_of_predictions_Model(Model):
         self.model_name = "hybrid_dkt_on_predictions"
         self.embeddings_names = embeddings_names
         self.configs = configs
-        super(hybrid_DKT_combination_of_predictions_Model, self).__init__(inputs=inputs, outputs=hybrid_prediction,
-                                                                          name=self.embeddings_names+self.model_name)
+        super(hybrid_DKT_on_predictions, self).__init__(inputs=inputs, outputs=hybrid_prediction,
+                                                        name=self.embeddings_names+self.model_name)
 
     def compile(self, optimizer, metrics=None):
         """Configures the model for training.
@@ -63,7 +63,7 @@ class hybrid_DKT_combination_of_predictions_Model(Model):
                 `optimizer` or `metrics`.
         """
 
-        super(hybrid_DKT_combination_of_predictions_Model, self).compile(
+        super(hybrid_DKT_on_predictions, self).compile(
             loss=tf.keras.losses.binary_crossentropy,
             optimizer=optimizer,
             metrics=metrics,
@@ -138,16 +138,16 @@ class hybrid_DKT_combination_of_predictions_Model(Model):
             ValueError: In case of mismatch between the provided input data
                 and what the model expects.
         """
-        return super(hybrid_DKT_combination_of_predictions_Model, self).fit(x=dataset,
-                                                                            epochs=epochs,
-                                                                            verbose=verbose,
-                                                                            callbacks=callbacks,
-                                                                            validation_data=validation_data,
-                                                                            shuffle=shuffle,
-                                                                            initial_epoch=initial_epoch,
-                                                                            steps_per_epoch=steps_per_epoch,
-                                                                            validation_steps=validation_steps,
-                                                                            validation_freq=validation_freq)
+        return super(hybrid_DKT_on_predictions, self).fit(x=dataset,
+                                                          epochs=epochs,
+                                                          verbose=verbose,
+                                                          callbacks=callbacks,
+                                                          validation_data=validation_data,
+                                                          shuffle=shuffle,
+                                                          initial_epoch=initial_epoch,
+                                                          steps_per_epoch=steps_per_epoch,
+                                                          validation_steps=validation_steps,
+                                                          validation_freq=validation_freq)
 
     def custom_evaluate(self,
                         dataset,
@@ -179,10 +179,10 @@ class hybrid_DKT_combination_of_predictions_Model(Model):
         Raises:
             ValueError: in case of invalid arguments.
         """
-        return super(hybrid_DKT_combination_of_predictions_Model, self).evaluate(dataset,
-                                                                                 verbose=verbose,
-                                                                                 steps=steps,
-                                                                                 callbacks=callbacks)
+        return super(hybrid_DKT_on_predictions, self).evaluate(dataset,
+                                                               verbose=verbose,
+                                                               steps=steps,
+                                                               callbacks=callbacks)
 
     def evaluate_generator(self, *args, **kwargs):
         raise SyntaxError("Not supported")
