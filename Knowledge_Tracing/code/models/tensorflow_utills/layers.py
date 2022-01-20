@@ -7,7 +7,7 @@ class CumSumLayer(tf.keras.layers.Layer):
 
     def call(self, input_feature):
         output = tf.reduce_sum(input_feature, axis=-1, keepdims=True)
-        return output_sigmoid
+        return output
 
     def compute_mask(self, input_feature, mask=None):
         if mask is None:
