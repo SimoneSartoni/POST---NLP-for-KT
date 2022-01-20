@@ -21,6 +21,7 @@ class SentenceSimilarityDataset(Dataset):
     def __init__(self, texts_df, text_column, frac=1):
         self.texts_df = texts_df.sample(frac=frac, random_state=1)
         self.texts_df_2 = texts_df.sample(frac=frac, random_state=10)
+        texts_df[text_column].fillna("na", inplace=True)
         print(self.texts_df)
         print(self.texts_df_2)
         self.text_column = text_column
