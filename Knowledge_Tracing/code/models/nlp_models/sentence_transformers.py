@@ -33,9 +33,9 @@ class SentenceSimilarityDataset(Dataset):
         texts_b = list(self.texts_df_2[self.text_column].values)[idx]
         list_a = list(self.texts_df['list_of_words'].values)[idx]
         list_b = list(self.texts_df_2['list_of_words'].values)[idx]
-        if texts_a == "":
+        if not texts_a:
             texts_a == "not available"
-        if texts_b == "":
+        if not texts_b:
             texts_b == "not available"
 
         def counter_cosine_similarity(c1, c2):
