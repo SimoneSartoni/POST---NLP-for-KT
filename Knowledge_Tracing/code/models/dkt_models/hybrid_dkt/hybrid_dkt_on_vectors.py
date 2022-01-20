@@ -64,7 +64,7 @@ class hybrid_DKT_on_vectors(Model):
         """
 
         super(hybrid_DKT_on_vectors, self).compile(
-            loss=tf.keras.losses.BinaryCrossentropy(),
+            loss=losses.BinaryCrossentropy(),
             optimizer=optimizer,
             metrics=metrics,
             run_eagerly=True
