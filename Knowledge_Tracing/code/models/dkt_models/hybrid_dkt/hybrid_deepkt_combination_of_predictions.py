@@ -33,7 +33,7 @@ class hybrid_DKT_on_predictions(Model):
                 dense_output = layers.TimeDistributed(dense_layer, name=name + '_output_dense')(lstm_embedding)
                 multiply_target_layer = layers.Multiply()
                 multiply_output = multiply_target_layer([dense_output, mask_target_embedding])
-                dense_label = layers.Dense(1, activation='sigmoid')
+                dense_label = layers.Dense(1, activation='relu')
                 output_label = layers.TimeDistributed(dense_label, name=name + 'output_class')(multiply_output)
                 output_labels.append(output_label)
         concatenate_layer = layers.concatenate(output_labels)
