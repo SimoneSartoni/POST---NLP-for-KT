@@ -18,27 +18,24 @@ def identity_tokenizer(text):
     return text
 
 
-def spawn_process_st(queue, boh):
-    queue_dict = queue.get()
-    queue
-    """texts_df, text_column = queue_dict['texts_df'], queue_dict['text_coloumn']
+def spawn_process_st(input_dict):
+    texts_df, text_column, st_model = input_dict['texts_df'], input_dict['text_coloumn'], input_dict['st_model']
     embeddings_dict = {}
     length = len(texts_df[text_column].values)
-    embeddings = self.st_model.encode(sentences=texts_df[text_column].values[0:length // 2],
-                                      show_progress_bar=True)
+    embeddings = st_model.encode(sentences=texts_df[text_column].values[0:length // 2],
+                                 show_progress_bar=True)
     for problem_id, embedding in list(zip(list(texts_df['problem_id'].values[0:length // 2]), embeddings)):
         embeddings_dict[problem_id] = embedding
     del embeddings
     gc.collect()
-    embeddings = self.st_model.encode(sentences=texts_df[text_column].values[length // 2:],
-                                      show_progress_bar=True)
+    embeddings = st_model.encode(sentences=texts_df[text_column].values[length // 2:],
+                                 show_progress_bar=True)
     for problem_id, embedding in list(zip(list(texts_df['problem_id'].values[length // 2:]), embeddings)):
         embeddings_dict[problem_id] = embedding
     del embeddings
     del [texts_df, text_column]
     gc.collect()
-    queue.put(embeddings_dict)"""
-    return 0
+    return embeddings_dict
 
 
 class SentenceSimilarityDataset(Dataset):
@@ -109,11 +106,12 @@ class sentence_transformer:
             set_start_method('spawn')
         except RuntimeError:
             pass"""
-        input_dict = {"texts_df":texts_df, "text_column": text_column}
+        input_dict = {"texts_df": texts_df, "text_column": text_column, "st_model": self.st_model}
         multi_pool = Pool(processes=1)
-        predictions = multi_pool.map(spawn_process_st, [input_dict])
+        self.embeddings = multi_pool.map(spawn_process_st, [input_dict])
         multi_pool.join()
         multi_pool.close()
+        print(self.embeddings)
         print("out")
         # self.embeddings = queue.get()
         print(self.embeddings)
