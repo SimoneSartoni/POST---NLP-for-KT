@@ -84,7 +84,8 @@ class sentence_transformer:
 
         def run_tensorflow(queue):
             queue_dict = queue.get()
-            texts_df, text_column = queue_dict['texts_df'], queue_dict['text_coloumn']
+            print("entered")
+            """texts_df, text_column = queue_dict['texts_df'], queue_dict['text_coloumn']
             embeddings_dict = {}
             length = len(texts_df[text_column].values)
             embeddings = self.st_model.encode(sentences=texts_df[text_column].values[0:length // 2],
@@ -100,7 +101,7 @@ class sentence_transformer:
             del embeddings
             del [texts_df, text_column]
             gc.collect()
-            queue.put(embeddings_dict)
+            queue.put(embeddings_dict)"""
             return 0
 
         queue = torch.multiprocessing.Manager().Queue()
