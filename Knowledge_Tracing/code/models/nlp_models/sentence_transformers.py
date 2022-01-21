@@ -107,7 +107,7 @@ class sentence_transformer:
 
 
         queue = torch.multiprocessing.Manager().Queue()
-        torch.multiprocessing.spawn(run_tensorflow, args=(queue,), nprocs=1, join=True, daemon=False, start_method='spawn')
+        torch.multiprocessing.spawn(run_tensorflow, args=queue, nprocs=1, join=True, daemon=False, start_method='spawn')
         self.embeddings = queue.get()
         print(self.embeddings)
         # Save sparse matrix in current directory
