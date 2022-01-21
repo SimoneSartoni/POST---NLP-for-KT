@@ -107,7 +107,9 @@ class sentence_transformer:
         self.texts_df[text_column].fillna("na", inplace=True)
 
         queue = torch.multiprocessing.Queue()
-        torch.multiprocessing.spawn(run_tensorflow, args=(queue,), nprocs=1, join=True, daemon=False,
+        input_dict = {"texts_df":texts_df, "text_column": text_column}
+        queue.put(input_dict)
+        torch.multiprocessing.spawn(run_tensorflow, args=queue, nprocs=1, join=True, daemon=False,
                                     start_method='spawn')
         self.embeddings = queue.get()
         print(self.embeddings)
