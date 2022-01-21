@@ -81,17 +81,31 @@ class sentence_transformer:
         self.texts_df = texts_df
         self.texts_df[text_column].fillna("na", inplace=True)
         length = len(self.texts_df[text_column].values)
-        embeddings = self.st_model.encode(sentences=self.texts_df[text_column].values[0:length//2], show_progress_bar=True)
-        for problem_id, embedding in list(zip(list(self.texts_df['problem_id'].values[0:length//2]), embeddings)):
-            self.embeddings[problem_id] = embedding
-        del embeddings
-        gc.collect()
-        embeddings = self.st_model.encode(sentences=self.texts_df[text_column].values[length // 2:],
-                                          show_progress_bar=True)
-        for problem_id, embedding in list(zip(list(self.texts_df['problem_id'].values[length // 2:]), embeddings)):
-            self.embeddings[problem_id] = embedding
-        del embeddings
-        gc.collect()
+
+        def run_tensorflow(queue):
+            embeddings_dict = {}
+            embeddings = self.st_model.encode(sentences=self.texts_df[text_column].values[0:length // 2],
+                                              show_progress_bar=True)
+            for problem_id, embedding in list(zip(list(self.texts_df['problem_id'].values[0:length // 2]), embeddings)):
+                embeddings_dict[problem_id] = embedding
+            del embeddings
+            gc.collect()
+            embeddings = self.st_model.encode(sentences=self.texts_df[text_column].values[length // 2:],
+                                              show_progress_bar=True)
+            for problem_id, embedding in list(zip(list(self.texts_df['problem_id'].values[length // 2:]), embeddings)):
+                embeddings_dict[problem_id] = embedding
+            del embeddings
+            gc.collect()
+            queue.put(embeddings_dict)
+
+        import multiprocessing
+
+        queue = multiprocessing.Manager().Queue()
+        p = multiprocessing.Process(target=run_tensorflow, args=(queue,))
+        p.start()
+        p.join()
+        self.embeddings = queue.get()
+
         # Save sparse matrix in current directory
         self.vector_size = len(list(self.embeddings.values())[0])
 
