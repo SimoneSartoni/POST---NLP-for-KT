@@ -18,9 +18,7 @@ def identity_tokenizer(text):
     return text
 
 
-def run_tensorflow(queue, t):
-    print(queue)
-    print(t)
+def run_tensorflow(queue):
     queue_dict = queue.get()
     print("entered")
     """texts_df, text_column = queue_dict['texts_df'], queue_dict['text_coloumn']
@@ -41,6 +39,7 @@ def run_tensorflow(queue, t):
     gc.collect()
     queue.put(embeddings_dict)"""
     return 0
+
 
 class SentenceSimilarityDataset(Dataset):
     def __init__(self, texts_df, text_column, frac=1):
@@ -73,6 +72,7 @@ class SentenceSimilarityDataset(Dataset):
                 return float(dot_product) / float(mag_a * mag_b)
             else:
                 return 0.0
+
         cos_sim = counter_cosine_similarity(list_a, list_b)
         return InputExample(texts=[texts_a, texts_b], label=cos_sim)
 
@@ -106,10 +106,9 @@ class sentence_transformer:
         self.texts_df = texts_df
         self.texts_df[text_column].fillna("na", inplace=True)
 
-
-
-        queue = torch.multiprocessing.Manager().Queue()
-        torch.multiprocessing.spawn(run_tensorflow, args=(queue, ), nprocs=1, join=True, daemon=False, start_method='spawn')
+        queue = torch.multiprocessing.Queue()
+        torch.multiprocessing.spawn(run_tensorflow, args=(queue,), nprocs=1, join=True, daemon=False,
+                                    start_method='spawn')
         self.embeddings = queue.get()
         print(self.embeddings)
         # Save sparse matrix in current directory
