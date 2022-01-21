@@ -18,9 +18,8 @@ def identity_tokenizer(text):
     return text
 
 
-def run_tensorflow(queue):
+def spawn_process_st(queue, ):
     queue_dict = queue.get()
-    print("entered")
     """texts_df, text_column = queue_dict['texts_df'], queue_dict['text_coloumn']
     embeddings_dict = {}
     length = len(texts_df[text_column].values)
@@ -109,7 +108,7 @@ class sentence_transformer:
         queue = torch.multiprocessing.Queue()
         input_dict = {"texts_df":texts_df, "text_column": text_column}
         queue.put(input_dict)
-        torch.multiprocessing.spawn(run_tensorflow, args=queue, nprocs=1, join=True, daemon=False,
+        torch.multiprocessing.spawn(spawn_process_st, args=(queue, ), nprocs=1, join=True, daemon=False,
                                     start_method='spawn')
         self.embeddings = queue.get()
         print(self.embeddings)
