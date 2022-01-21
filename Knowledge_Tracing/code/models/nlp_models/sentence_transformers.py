@@ -18,6 +18,28 @@ def identity_tokenizer(text):
     return text
 
 
+def run_tensorflow(queue):
+    queue_dict = queue.get()
+    print("entered")
+    """texts_df, text_column = queue_dict['texts_df'], queue_dict['text_coloumn']
+    embeddings_dict = {}
+    length = len(texts_df[text_column].values)
+    embeddings = self.st_model.encode(sentences=texts_df[text_column].values[0:length // 2],
+                                      show_progress_bar=True)
+    for problem_id, embedding in list(zip(list(texts_df['problem_id'].values[0:length // 2]), embeddings)):
+        embeddings_dict[problem_id] = embedding
+    del embeddings
+    gc.collect()
+    embeddings = self.st_model.encode(sentences=texts_df[text_column].values[length // 2:],
+                                      show_progress_bar=True)
+    for problem_id, embedding in list(zip(list(texts_df['problem_id'].values[length // 2:]), embeddings)):
+        embeddings_dict[problem_id] = embedding
+    del embeddings
+    del [texts_df, text_column]
+    gc.collect()
+    queue.put(embeddings_dict)"""
+    return 0
+
 class SentenceSimilarityDataset(Dataset):
     def __init__(self, texts_df, text_column, frac=1):
         texts_df[text_column].fillna("na", inplace=True)
@@ -82,27 +104,7 @@ class sentence_transformer:
         self.texts_df = texts_df
         self.texts_df[text_column].fillna("na", inplace=True)
 
-        def run_tensorflow(queue):
-            queue_dict = queue.get()
-            print("entered")
-            """texts_df, text_column = queue_dict['texts_df'], queue_dict['text_coloumn']
-            embeddings_dict = {}
-            length = len(texts_df[text_column].values)
-            embeddings = self.st_model.encode(sentences=texts_df[text_column].values[0:length // 2],
-                                              show_progress_bar=True)
-            for problem_id, embedding in list(zip(list(texts_df['problem_id'].values[0:length // 2]), embeddings)):
-                embeddings_dict[problem_id] = embedding
-            del embeddings
-            gc.collect()
-            embeddings = self.st_model.encode(sentences=texts_df[text_column].values[length // 2:],
-                                              show_progress_bar=True)
-            for problem_id, embedding in list(zip(list(texts_df['problem_id'].values[length // 2:]), embeddings)):
-                embeddings_dict[problem_id] = embedding
-            del embeddings
-            del [texts_df, text_column]
-            gc.collect()
-            queue.put(embeddings_dict)"""
-            return 0
+
 
         queue = torch.multiprocessing.Manager().Queue()
         torch.multiprocessing.spawn(run_tensorflow, args=(queue,), nprocs=1, join=True, daemon=False, start_method='spawn')
