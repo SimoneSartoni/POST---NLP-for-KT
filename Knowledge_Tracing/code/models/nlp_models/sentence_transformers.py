@@ -81,21 +81,24 @@ class sentence_transformer:
     def transform(self, texts_df, text_column='sentence', save_filepath='./'):
         self.texts_df = texts_df
         self.texts_df[text_column].fillna("na", inplace=True)
-        length = len(self.texts_df[text_column].values)
 
         def run_tensorflow(queue):
+            queue_dict = queue.get()
+            texts_df, text_column = queue_dict['texts_df'], queue_dict['text_coloumn']
             embeddings_dict = {}
-            embeddings = self.st_model.encode(sentences=self.texts_df[text_column].values[0:length // 2],
+            length = len(texts_df[text_column].values)
+            embeddings = self.st_model.encode(sentences=texts_df[text_column].values[0:length // 2],
                                               show_progress_bar=True)
-            for problem_id, embedding in list(zip(list(self.texts_df['problem_id'].values[0:length // 2]), embeddings)):
+            for problem_id, embedding in list(zip(list(texts_df['problem_id'].values[0:length // 2]), embeddings)):
                 embeddings_dict[problem_id] = embedding
             del embeddings
             gc.collect()
-            embeddings = self.st_model.encode(sentences=self.texts_df[text_column].values[length // 2:],
+            embeddings = self.st_model.encode(sentences=texts_df[text_column].values[length // 2:],
                                               show_progress_bar=True)
-            for problem_id, embedding in list(zip(list(self.texts_df['problem_id'].values[length // 2:]), embeddings)):
+            for problem_id, embedding in list(zip(list(texts_df['problem_id'].values[length // 2:]), embeddings)):
                 embeddings_dict[problem_id] = embedding
             del embeddings
+            del [texts_df, text_column]
             gc.collect()
             queue.put(embeddings_dict)
             return 0
