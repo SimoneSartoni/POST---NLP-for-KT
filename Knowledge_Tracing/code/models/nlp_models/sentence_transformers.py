@@ -104,6 +104,7 @@ class sentence_transformer:
 
     def load_embeddings(self, load_path=""):
         self.embeddings = np.load(load_path, allow_pickle=True)
+        print(self.embeddings)
 
     def get_encoding(self, problem_id):
         encoding = np.array(self.embeddings[problem_id])
