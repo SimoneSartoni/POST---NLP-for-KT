@@ -112,14 +112,19 @@ def load_dataset(batch_size=32, shuffle=True,
         encode_names.append(encode_model.name)
 
     if 'sentence_transformers' in nlp_kwargs:
-        model_name, text_column, fit = nlp_kwargs['sentence_transformers']['model_name'], \
+        model_name, text_column, fit, load = nlp_kwargs['sentence_transformers']['model_name'], \
                                                nlp_kwargs['sentence_transformers']['text_column'], \
-                                               nlp_kwargs['sentence_transformers']['fit'],
+                                               nlp_kwargs['sentence_transformers']['fit'], \
+                                               nlp_kwargs['sentence_transformers']['load'],
+
         encode_model = sentence_transformer(encoding_model=model_name)
-        if fit:
-            batch_size, fraction, epochs = fit['batch_size'], fit['fraction'], fit['epochs']
-            encode_model.fit_on_custom(text_df, text_column=text_column, batch_size=batch_size, frac=fraction, epochs=epochs)
-        encode_model.transform(text_df, text_column)
+        if load:
+            encode_model.load_embeddings(load['load_path'])
+        else:
+            if fit:
+                batch_size, fraction, epochs = fit['batch_size'], fit['fraction'], fit['epochs']
+                encode_model.fit_on_custom(text_df, text_column=text_column, batch_size=batch_size, frac=fraction, epochs=epochs)
+            encode_model.transform(text_df, text_column)
         encode_models.append(encode_model)
         parameters.append("_".join([str(model_name), str(fit), str(text_column)]))
         encode_names.append(encode_model.name)

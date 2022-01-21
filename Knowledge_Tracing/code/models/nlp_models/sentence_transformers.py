@@ -82,27 +82,19 @@ class sentence_transformer:
         self.texts_df[text_column].fillna("na", inplace=True)
         length = len(self.texts_df[text_column].values)
 
-        def run_tensorflow(queue):
-            embeddings_dict = {}
-            embeddings = self.st_model.encode(sentences=self.texts_df[text_column].values[0:length // 2],
-                                              show_progress_bar=True)
-            for problem_id, embedding in list(zip(list(self.texts_df['problem_id'].values[0:length // 2]), embeddings)):
-                embeddings_dict[problem_id] = embedding
-            del embeddings
-            gc.collect()
-            embeddings = self.st_model.encode(sentences=self.texts_df[text_column].values[length // 2:],
-                                              show_progress_bar=True)
-            for problem_id, embedding in list(zip(list(self.texts_df['problem_id'].values[length // 2:]), embeddings)):
-                embeddings_dict[problem_id] = embedding
-            del embeddings
-            gc.collect()
-            queue.put(embeddings_dict)
-
-        queue = torch.multiprocessing.Manager().Queue()
-        p = torch.multiprocessing.Process(target=run_tensorflow, args=(queue,))
-        p.start()
-        p.join()
-        self.embeddings = queue.get()
+        embeddings = self.st_model.encode(sentences=self.texts_df[text_column].values[0:length // 2],
+                                          show_progress_bar=True)
+        for problem_id, embedding in list(zip(list(self.texts_df['problem_id'].values[0:length // 2]), embeddings)):
+            self.embeddings[problem_id] = embedding
+        del embeddings
+        gc.collect()
+        embeddings = self.st_model.encode(sentences=self.texts_df[text_column].values[length // 2:],
+                                          show_progress_bar=True)
+        for problem_id, embedding in list(zip(list(self.texts_df['problem_id'].values[length // 2:]), embeddings)):
+            self.embeddings[problem_id] = embedding
+        del embeddings
+        gc.collect()
+        np.save(save_filepath+"st_embeddings.npy", self.embeddings)
 
         # Save sparse matrix in current directory
         self.vector_size = len(list(self.embeddings.values())[0])
@@ -110,6 +102,10 @@ class sentence_transformer:
         self.pro_num = len(list(self.embeddings.values()))
         self.words_num = self.vector_size
 
+    def load_embeddings(self, load_path=""):
+        self.embeddings = np.load(load_path, allow_pickle=True)
+
     def get_encoding(self, problem_id):
         encoding = np.array(self.embeddings[problem_id])
         return encoding
+
