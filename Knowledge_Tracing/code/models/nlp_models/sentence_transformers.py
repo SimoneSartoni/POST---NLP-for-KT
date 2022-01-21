@@ -109,8 +109,8 @@ class sentence_transformer:
         input_dict = {"texts_df": texts_df, "text_column": text_column, "st_model": self.st_model}
         multi_pool = Pool(processes=1)
         self.embeddings = multi_pool.map(spawn_process_st, [input_dict])
-        multi_pool.join()
         multi_pool.close()
+        multi_pool.join()
         print(self.embeddings)
         print("out")
         # self.embeddings = queue.get()
