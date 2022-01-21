@@ -100,7 +100,7 @@ class sentence_transformer:
             queue.put(embeddings_dict)
 
         queue = torch.multiprocessing.Manager().Queue()
-        torch.multiprocessing.set_start_method("spawn")
+        torch.multiprocessing.set_start_method('spawn', force=True)
         p = torch.multiprocessing.Process(target=run_tensorflow, args=(queue,))
         p.start()
         p.join()
