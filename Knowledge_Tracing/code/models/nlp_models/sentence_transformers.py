@@ -19,6 +19,8 @@ def identity_tokenizer(text):
 
 
 def run_tensorflow(queue, t):
+    print(queue)
+    print(t)
     queue_dict = queue.get()
     print("entered")
     """texts_df, text_column = queue_dict['texts_df'], queue_dict['text_coloumn']
