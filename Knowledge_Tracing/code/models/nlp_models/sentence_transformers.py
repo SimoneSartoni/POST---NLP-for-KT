@@ -19,7 +19,7 @@ def identity_tokenizer(text):
 
 
 def spawn_process_st(input_dict):
-    texts_df, text_column, st_model = input_dict['texts_df'], input_dict['text_coloumn'], input_dict['st_model']
+    texts_df, text_column, st_model = input_dict['texts_df'], input_dict['text_column'], input_dict['st_model']
     embeddings_dict = {}
     length = len(texts_df[text_column].values)
     embeddings = st_model.encode(sentences=texts_df[text_column].values[0:length // 2],
