@@ -106,7 +106,7 @@ class sentence_transformer:
             p.start()
             p.join()
             self.embeddings = queue.get()
-
+            print(self.embeddings)
         # Save sparse matrix in current directory
         self.vector_size = len(list(self.embeddings.values())[0])
 
