@@ -98,10 +98,8 @@ class sentence_transformer:
             gc.collect()
             queue.put(embeddings_dict)
 
-        import multiprocessing
-
-        queue = multiprocessing.Manager().Queue()
-        p = multiprocessing.Process(target=run_tensorflow, args=(queue,))
+        queue = torch.multiprocessing.Manager().Queue()
+        p = torch.multiprocessing.Process(target=run_tensorflow, args=(queue,))
         p.start()
         p.join()
         self.embeddings = queue.get()
