@@ -5,7 +5,7 @@ from sentence_transformers import SentenceTransformer, InputExample, losses
 from torch.utils.data import Dataset
 import torch
 import math
-from torch.multiprocessing import Process, set_start_method
+from torch.multiprocessing import Process, Pool, set_start_method
 
 
 def write_txt(file, data):
@@ -105,13 +105,17 @@ class sentence_transformer:
     def transform(self, texts_df, text_column='sentence', save_filepath='./'):
         self.texts_df = texts_df
         self.texts_df[text_column].fillna("na", inplace=True)
-
-        queue = torch.multiprocessing.Queue()
+        """try:
+            set_start_method('spawn')
+        except RuntimeError:
+            pass"""
         input_dict = {"texts_df":texts_df, "text_column": text_column}
-        queue.put(input_dict)
-        torch.multiprocessing.spawn(spawn_process_st, args=(queue, ), nprocs=1, join=True, daemon=False,
-                                    start_method='spawn')
-        self.embeddings = queue.get()
+        multi_pool = Pool(processes=1)
+        predictions = multi_pool.map(spawn_process_st, [input_dict])
+        multi_pool.join()
+        multi_pool.close()
+        print("out")
+        # self.embeddings = queue.get()
         print(self.embeddings)
         # Save sparse matrix in current directory
         self.vector_size = len(list(self.embeddings.values())[0])
