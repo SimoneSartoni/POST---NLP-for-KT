@@ -5,6 +5,7 @@ from sentence_transformers import SentenceTransformer, InputExample, losses
 from torch.utils.data import Dataset
 import torch
 import math
+from torch.multiprocessing import Process, set_start_method
 
 
 def write_txt(file, data):
@@ -99,6 +100,10 @@ class sentence_transformer:
             queue.put(embeddings_dict)
 
         queue = torch.multiprocessing.Manager().Queue()
+        try:
+            set_start_method('spawn')
+        except RuntimeError:
+            pass
         p = torch.multiprocessing.Process(target=run_tensorflow, args=(queue,))
         p.start()
         p.join()
