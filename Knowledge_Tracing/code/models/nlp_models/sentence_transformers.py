@@ -80,7 +80,14 @@ class sentence_transformer:
     def transform(self, texts_df, text_column='sentence', save_filepath='./'):
         self.texts_df = texts_df
         self.texts_df[text_column].fillna("na", inplace=True)
-        embeddings = self.st_model.encode(sentences=self.texts_df[text_column].values, show_progress_bar=True)
+        length = len(self.texts_df[text_column].values)
+        embeddings = self.st_model.encode(sentences=self.texts_df[text_column].values[0:length//2], show_progress_bar=True)
+        for problem_id, embedding in list(zip(list(self.texts_df['problem_id'].values), embeddings)):
+            self.embeddings[problem_id] = embedding
+        del embeddings
+        gc.collect()
+        embeddings = self.st_model.encode(sentences=self.texts_df[text_column].values[length // 2:],
+                                          show_progress_bar=True)
         for problem_id, embedding in list(zip(list(self.texts_df['problem_id'].values), embeddings)):
             self.embeddings[problem_id] = embedding
         del embeddings
