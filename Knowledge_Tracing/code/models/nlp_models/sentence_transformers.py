@@ -105,6 +105,10 @@ class sentence_transformer:
     def load_embeddings(self, load_path=""):
         self.embeddings = np.load(load_path, allow_pickle=True).item()
         #print(self.embeddings)
+        self.vector_size = len(list(self.embeddings.values())[0])
+
+        self.pro_num = len(list(self.embeddings.values()))
+        self.words_num = self.vector_size
 
     def get_encoding(self, problem_id):
         encoding = np.array(self.embeddings[problem_id])
