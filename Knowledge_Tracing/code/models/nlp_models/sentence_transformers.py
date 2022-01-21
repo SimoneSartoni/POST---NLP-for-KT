@@ -103,7 +103,7 @@ class sentence_transformer:
         self.words_num = self.vector_size
 
     def load_embeddings(self, load_path=""):
-        self.embeddings = np.load(load_path, allow_pickle=True)
+        self.embeddings = np.load(load_path, allow_pickle=True).item()
         print(self.embeddings)
 
     def get_encoding(self, problem_id):
