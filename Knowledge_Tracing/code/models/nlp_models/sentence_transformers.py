@@ -18,8 +18,9 @@ def identity_tokenizer(text):
     return text
 
 
-def spawn_process_st(queue, ):
+def spawn_process_st(queue, boh):
     queue_dict = queue.get()
+    queue
     """texts_df, text_column = queue_dict['texts_df'], queue_dict['text_coloumn']
     embeddings_dict = {}
     length = len(texts_df[text_column].values)
