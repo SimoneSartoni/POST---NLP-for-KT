@@ -99,12 +99,13 @@ class sentence_transformer:
             gc.collect()
             queue.put(embeddings_dict)
 
-        queue = torch.multiprocessing.Manager().Queue()
-        torch.multiprocessing.set_start_method('spawn', force=True)
-        p = torch.multiprocessing.Process(target=run_tensorflow, args=(queue,))
-        p.start()
-        p.join()
-        self.embeddings = queue.get()
+        if __name__ == '__main__':
+            queue = torch.multiprocessing.Manager().Queue()
+            torch.multiprocessing.set_start_method('spawn', force=True)
+            p = torch.multiprocessing.Process(target=run_tensorflow, args=(queue,))
+            p.start()
+            p.join()
+            self.embeddings = queue.get()
 
         # Save sparse matrix in current directory
         self.vector_size = len(list(self.embeddings.values())[0])
