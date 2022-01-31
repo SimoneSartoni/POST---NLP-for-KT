@@ -283,7 +283,8 @@ class PretrainedDistilBERT():
                                                        encoding, attention_mask)):
                 x = mean_pool(enc, attention, dim=0)
                 y = F.normalize(x, p=2, dim=0)
-                self.encodings[problem_id] = y.detach().cpu().numpy()
+                z = y.detach().cpu()
+                self.encodings[problem_id] = z.numpy()
             start = start + batch_size
             del [ids, attention_mask, output, encoding]
             gc.collect()
