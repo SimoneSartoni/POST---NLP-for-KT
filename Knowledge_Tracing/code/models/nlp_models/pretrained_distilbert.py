@@ -281,7 +281,9 @@ class PretrainedDistilBERT():
             encoding = output.to_tuple()[0]
             for problem_id, enc, attention in list(zip(self.texts_df['problem_id'].values[start:end],
                                                        encoding, attention_mask)):
-                self.encodings[problem_id] = 0 #F.normalize(mean_pool(enc, attention, dim=0), p=2, dim=0).detach().cpu().numpy()
+                x = mean_pool(enc, attention, dim=0)
+                y = F.normalize(x, p=2, dim=0)
+                self.encodings[problem_id] = y.numpy()
             start = start + batch_size
             del [ids, attention_mask, output, encoding]
             gc.collect()
