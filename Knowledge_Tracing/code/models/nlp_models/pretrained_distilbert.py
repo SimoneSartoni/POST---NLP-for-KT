@@ -284,6 +284,7 @@ class PretrainedDistilBERT():
 
     def transform(self, texts_df, text_column="sentence", batch_size=10, save_filepath='./'):
         self.texts_df = texts_df
+        self.texts_df[text_column].fillna("na", inplace=True)
         start = 0
         while start < len(texts_df.index):
             end = start + batch_size
