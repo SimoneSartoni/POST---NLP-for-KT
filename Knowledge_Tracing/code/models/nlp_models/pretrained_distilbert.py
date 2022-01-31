@@ -268,26 +268,27 @@ class PretrainedDistilBERT():
             os.mkdir(model_path)
         self.model.save_pretrained(model_path)
 
+    def compute_encoding(self, start, end, text_column):
+        inputs = self.tokenizer(list(self.texts_df[text_column].values)[start:end], truncation=True,
+                                return_tensors="pt",
+                                padding=True)
+        ids, attention_mask = inputs['input_ids'].cuda(), inputs['attention_mask'].cuda()
+        output = self.model(input_ids=ids, attention_mask=attention_mask, output_attentions=False)
+        encoding = output.to_tuple()[0]
+        for problem_id, enc, attention in list(zip(self.texts_df['problem_id'].values[start:end],
+                                                   encoding, attention_mask)):
+            x = mean_pool(enc, attention, dim=0)
+            y = F.normalize(x, p=2, dim=0)
+            z = y.detach().cpu()
+            self.encodings[problem_id] = z.numpy()
+
     def transform(self, texts_df, text_column="sentence", batch_size=10, save_filepath='./'):
         self.texts_df = texts_df
         start = 0
         while start < len(texts_df.index):
             end = start + batch_size
-            inputs = self.tokenizer(list(self.texts_df[text_column].values)[start:end], truncation=True,
-                                    return_tensors="pt",
-                                    padding=True)
-            ids, attention_mask = inputs['input_ids'].cuda(), inputs['attention_mask'].cuda()
-            output = self.model(input_ids=ids, attention_mask=attention_mask, output_attentions=False)
-            encoding = output.to_tuple()[0]
-            for problem_id, enc, attention in list(zip(self.texts_df['problem_id'].values[start:end],
-                                                       encoding, attention_mask)):
-                x = mean_pool(enc, attention, dim=0)
-                y = F.normalize(x, p=2, dim=0)
-                z = y.detach().cpu()
-                self.encodings[problem_id] = z.numpy()
+            self.compute_encoding(start, end, text_column)
             start = start + batch_size
-            del [ids, attention_mask, output, encoding]
-            gc.collect()
             print(end)
         print(len(list(self.encodings.keys())))
         print("pretrainedBERT model created")
