@@ -107,7 +107,7 @@ def load_dataset(batch_size=32, shuffle=True,
         if fit_on_custom:
             batch_size = fit_on_custom['batch_size']
             encode_model.fit_on_custom(text_df, text_column=text_column, batch_size=batch_size)
-        encode_model.transform(text_df, text_column)
+        encode_model.transform(text_df, text_column, batch_size)
         encode_models.append(encode_model)
         parameters.append("_".join([str(fit_on_nli), str(fit_on_custom), str(text_column), str(text_column)]))
         encode_names.append(encode_model.name)
