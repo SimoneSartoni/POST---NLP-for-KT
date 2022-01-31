@@ -84,7 +84,7 @@ class PretrainedDistilBERT():
         self.name = "pretrained_distilbert"
         self.method = "nlp_model"
         self.config = DistilBertConfig.from_json_file(config_path)
-        self.model = DistilBertModel.from_pretrained(model_filepath, config=self.config, from_tf=True)
+        self.model = DistilBertModel.from_pretrained(model_filepath, config=self.config, from_tf=True).cuda()
         self.tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
         self.encodings = {}
         self.pro_num = None
