@@ -268,7 +268,7 @@ class PretrainedDistilBERT():
             os.mkdir(model_path)
         self.model.save_pretrained(model_path)
 
-    def transform(self, texts_df, text_column="sentence", save_filepath='./'):
+    def transform(self, texts_df, text_column="sentence", batch_size=10, save_filepath='./'):
         self.texts_df = texts_df
         start = 0
         batch_size = 100
