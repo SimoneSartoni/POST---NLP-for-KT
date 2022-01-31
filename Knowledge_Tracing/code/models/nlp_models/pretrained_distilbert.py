@@ -284,6 +284,8 @@ class PretrainedDistilBERT():
                                                        encoding, attention_mask)):
                 self.encodings[problem_id] = F.normalize(mean_pool(enc, attention, dim=0), p=2, dim=0).detach().cpu().numpy()
             start = start + batch_size
+            del [ids, attention_mask, output, encoding]
+            gc.collect()
             print(end)
         print(len(list(self.encodings.keys())))
         print("pretrainedBERT model created")
