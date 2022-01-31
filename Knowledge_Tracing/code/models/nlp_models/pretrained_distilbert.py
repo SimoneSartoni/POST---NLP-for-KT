@@ -271,7 +271,6 @@ class PretrainedDistilBERT():
     def transform(self, texts_df, text_column="sentence", batch_size=10, save_filepath='./'):
         self.texts_df = texts_df
         start = 0
-        batch_size = 100
         while start < len(texts_df.index):
             end = start + batch_size
             inputs = self.tokenizer(list(self.texts_df[text_column].values)[start:end], truncation=True,
