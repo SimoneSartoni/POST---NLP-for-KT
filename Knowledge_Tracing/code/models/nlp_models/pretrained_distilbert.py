@@ -84,7 +84,7 @@ class PretrainedDistilBERT():
         self.name = "pretrained_distilbert"
         self.method = "nlp_model"
         self.config = DistilBertConfig.from_json_file(config_path)
-        self.model = DistilBertModel.from_pretrained(model_filepath, config=self.config, from_tf=True)
+        self.model = DistilBertModel.from_pretrained(model_filepath, config=self.config, from_tf=True).cuda()
         self.tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
         self.encodings = {}
         self.pro_num = None
@@ -276,14 +276,14 @@ class PretrainedDistilBERT():
             inputs = self.tokenizer(list(self.texts_df[text_column].values)[start:end], truncation=True,
                                     return_tensors="pt",
                                     padding=True)
-            ids, attention_mask = inputs['input_ids'], inputs['attention_mask']
+            ids, attention_mask = inputs['input_ids'].cuda(), inputs['attention_mask'].cuda()
             output = self.model(input_ids=ids, attention_mask=attention_mask, output_attentions=False)
             encoding = output.to_tuple()[0]
             for problem_id, enc, attention in list(zip(self.texts_df['problem_id'].values[start:end],
                                                        encoding, attention_mask)):
                 x = mean_pool(enc, attention, dim=0)
                 y = F.normalize(x, p=2, dim=0)
-                self.encodings[problem_id] = y.detach().numpy()
+                self.encodings[problem_id] = y.detach().cpu().numpy()
             start = start + batch_size
             del [ids, attention_mask, output, encoding]
             gc.collect()
