@@ -71,11 +71,11 @@ class BERTopic_model():
         gc.collect()
         self.texts_df['topics'] = topic_predictions
         self.texts_df.to_csv(save_filepath + 'text_df_with_topics.csv')
-        self.topic_model.visualize_topics()
-        self.topic_model.visualize_hierarchy(topics=range(0, 10))
-        self.topic_model.visualize_barchart(topics=range(0, 10))
-        self.topic_model.visualize_heatmap(topics=range(0, 10))
-        self.topic_model.visualize_term_rank()
+        self.topic_model.visualize_topics().show()
+        self.topic_model.visualize_hierarchy(topics=range(0, 10)).show()
+        self.topic_model.visualize_barchart(topics=range(0, 10)).show()
+        self.topic_model.visualize_heatmap(topics=range(0, 10)).show()
+        self.topic_model.visualize_term_rank().show()
 
     def get_encoding(self, problem_id):
         encodings = np.array([])
