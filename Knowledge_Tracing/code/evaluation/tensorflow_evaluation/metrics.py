@@ -18,6 +18,7 @@ class AUC(tf.keras.metrics.AUC):
     def update_state(self, y_true, y_pred, sample_weight=None):
         print(y_true)
         print(y_pred)
+        print(sample_weight)
         super(AUC, self).update_state(y_true=y_true, y_pred=y_pred, sample_weight=sample_weight)
 
 
