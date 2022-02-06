@@ -76,7 +76,10 @@ class word2vec:
                 embedding = embedding + np.array(self.word2vec.wv[word])
             if len(text) > 0:
                 embedding = embedding / float(len(text))
+            norm = np.linalg.norm(embedding)
+            embedding = embedding / norm
             self.embeddings[problem] = embedding
+
         self.pro_num = len(self.texts_df['problem_id'])
         self.words_num = self.vector_size
 
@@ -88,5 +91,5 @@ class word2vec:
         word_vectors.save(path+name+"_word2vec_" + str(self.vector_size) + "_" + str(self.epochs) + ".wordvectors")
 
     def get_encoding(self, problem, norm=False):
-        return ;
+        return self.embeddings[problem]
 
