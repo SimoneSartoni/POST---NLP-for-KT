@@ -135,10 +135,6 @@ class ColdStartAUC(tf.keras.metrics.AUC):
                 sample_weight_2 = sample_weight
         else:
             y_true_2, y_pred_2, sample_weight_2 = y_true, y_pred, sample_weight"""
-        print(y_true)
-        print(y_pred)
-        print(np.sum(np.where(y_pred < 0.0, 1, 0)))
-        print(sample_weight)
         y_true_2, y_pred_2 = y_true[:, 0:self.window_size], y_pred[:, 0:self.window_size]
         sample_weight_2 = sample_weight[:, 0:self.window_size]
         super(ColdStartAUC, self).update_state(y_true=y_true_2, y_pred=y_pred_2, sample_weight=sample_weight_2)
