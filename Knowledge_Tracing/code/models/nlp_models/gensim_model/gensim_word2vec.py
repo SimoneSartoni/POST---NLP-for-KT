@@ -59,7 +59,7 @@ class word2vec:
         self.time_to_build = round((time() - t) / 60, 2)
         print('Time to build vocab: {} mins'.format(self.time_to_build))
         t = time()
-        self.word2vec.train(list(self.texts_df[self.text_column].values()), total_examples=self.word2vec.corpus_count,
+        self.word2vec.train(list(self.texts_df[self.text_column].values), total_examples=self.word2vec.corpus_count,
                             epochs=epochs, report_delay=1)
         self.time_to_train = round((time() - t) / 60, 2)
         print('Time to train the model: {} mins'.format(round((time() - t) / 60, 2)))
@@ -70,7 +70,7 @@ class word2vec:
     def transform(self, texts_df, text_column):
         self.texts_df = texts_df
         self.text_column = text_column
-        for problem, text in list(zip(list(self.texts_df[text_column].values()), list(self.texts_df['problem_id'].values()))):
+        for problem, text in list(zip(list(self.texts_df[text_column].values), list(self.texts_df['problem_id'].values()))):
             embedding = np.zeros(shape=self.vector_size)
             for word in text:
                 embedding = embedding + np.array(self.word2vec.wv[word])
