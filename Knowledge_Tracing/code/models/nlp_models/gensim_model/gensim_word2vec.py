@@ -55,7 +55,7 @@ class word2vec:
         self.texts_df = texts_df
         self.epochs = epochs
         self.text_column = text_column
-        self.word2vec.build_vocab(list(self.texts_df[self.text_column].values()), progress_per=100)
+        self.word2vec.build_vocab(list(self.texts_df[self.text_column].values), progress_per=100)
         self.time_to_build = round((time() - t) / 60, 2)
         print('Time to build vocab: {} mins'.format(self.time_to_build))
         t = time()
