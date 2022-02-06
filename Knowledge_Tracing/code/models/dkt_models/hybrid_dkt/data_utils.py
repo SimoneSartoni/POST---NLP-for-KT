@@ -156,8 +156,8 @@ def load_dataset(batch_size=32, shuffle=True,
         word2vec_args = nlp_kwargs['word2vec']
         text_column, epochs, save_filepath, save_name = word2vec_args['text_column'], word2vec_args['epochs'], \
             word2vec_args['save_filepath'], word2vec_args['save_name']
-        min_count, window, vector_size = word2vec_args['min_count'], word2vec_args['window'], \
-            word2vec_args['vector_size']
+        min_count, window, vector_size, sg = word2vec_args['min_count'], word2vec_args['window'], \
+            word2vec_args['vector_size'], word2vec_args['sg']
         encode_model = word2vec(min_count, window, vector_size)
         encode_model.fit(text_df, text_column, epochs, save_filepath, save_name)
         encode_model.transform(text_df, text_column)
