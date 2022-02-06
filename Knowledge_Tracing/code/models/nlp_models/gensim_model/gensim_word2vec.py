@@ -90,6 +90,6 @@ class word2vec:
         word_vectors = self.word2vec.wv
         word_vectors.save(path+name+"_word2vec_" + str(self.vector_size) + "_" + str(self.epochs) + ".wordvectors")
 
-    def get_encoding(self, problem, norm=False):
+    def get_encoding(self, problem):
         return self.embeddings[problem]
 
