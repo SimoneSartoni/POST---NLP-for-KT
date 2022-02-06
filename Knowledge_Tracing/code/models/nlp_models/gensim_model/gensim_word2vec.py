@@ -70,7 +70,7 @@ class word2vec:
     def transform(self, texts_df, text_column):
         self.texts_df = texts_df
         self.text_column = text_column
-        for problem, text in list(zip(list(self.texts_df[text_column].values), list(self.texts_df['problem_id'].values))):
+        for text, problem in list(zip(list(self.texts_df[text_column].values), list(self.texts_df['problem_id'].values))):
             embedding = np.zeros(shape=self.vector_size)
             for word in text:
                 embedding = embedding + np.array(self.word2vec.wv[word])
