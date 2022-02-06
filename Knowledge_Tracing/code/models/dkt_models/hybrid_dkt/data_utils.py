@@ -154,10 +154,10 @@ def load_dataset(batch_size=32, shuffle=True,
 
     if 'word2vec' in nlp_kwargs:
         word2vec_args = nlp_kwargs['word2vec']
-        text_column, epochs = word2vec_args['text_column'], word2vec_args['epochs']
+        text_column, epochs, save_filepath = word2vec_args['text_column'], word2vec_args['epochs'], word2vec_args['save_filepath']
         min_count, window, vector_size = word2vec_args['min_count'], word2vec_args['window'], word2vec_args['vector_size']
         encode_model = word2vec(min_count, window, vector_size)
-        encode_model.fit(text_df, text_column, epochs)
+        encode_model.fit(text_df, text_column, epochs, save_filepath)
         encode_model.transform(text_df, text_column)
         encode_models.append(encode_model)
         parameters.append("_".join([str(text_column), str(epochs), str(min_count), str(window), str(vector_size)]))
