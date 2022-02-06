@@ -77,7 +77,8 @@ class word2vec:
             if len(text) > 0:
                 embedding = embedding / float(len(text))
             norm = np.linalg.norm(embedding)
-            embedding = embedding / norm
+            if norm > 0.0:
+                embedding = embedding / norm
             self.embeddings[problem] = embedding
 
         self.pro_num = len(self.texts_df['problem_id'])
