@@ -19,7 +19,7 @@ class AUC(tf.keras.metrics.AUC):
     def update_state(self, y_true, y_pred, sample_weight=None):
         print(y_true)
         print(y_pred)
-        print(np.cumsum(np.cumsum(np.where(y_pred < 0.0, 1, 0))))
+        print(np.sum(np.where(y_pred < 0.0, 1, 0)))
         print(sample_weight)
         super(AUC, self).update_state(y_true=y_true, y_pred=y_pred, sample_weight=sample_weight)
 
