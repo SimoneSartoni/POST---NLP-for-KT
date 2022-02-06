@@ -7,6 +7,7 @@ from Knowledge_Tracing.code.models.nlp_models.count_vectorizer import count_vect
 from Knowledge_Tracing.code.models.nlp_models.pretrained_distilbert import PretrainedDistilBERT
 from Knowledge_Tracing.code.models.nlp_models.sentence_transformers import sentence_transformer
 from Knowledge_Tracing.code.models.nlp_models.bertopic_model import BERTopic_model
+from Knowledge_Tracing.code.models.nlp_models.gensim_model.gensim_word2vec import word2vec
 
 from Knowledge_Tracing.code.data_processing.load_preprocessed.load_preprocessed_data import load_preprocessed_texts
 from Knowledge_Tracing.code.data_processing.load_preprocessed.get_hybrid_dkt_dataloaders import \
@@ -151,6 +152,16 @@ def load_dataset(batch_size=32, shuffle=True,
         parameters.append("_".join([str(pretrained), str(custom), str(text_column), str(output), str(nr_topics)]))
         encode_names.append(encode_model.name)
 
+    if 'word2vec' in nlp_kwargs:
+        word2vec_args = nlp_kwargs['word2vec']
+        text_column, epochs = word2vec_args['text_column'], word2vec_args['epochs']
+        min_count, window, vector_size = word2vec_args['min_count'], word2vec_args['window'], word2vec_args['vector_size']
+        encode_model = word2vec(min_count, window, vector_size)
+        encode_model.fit(text_df, text_column, epochs)
+        encode_model.transform(text_df, text_column)
+        encode_models.append(encode_model)
+        parameters.append("_".join([str(text_column), str(epochs), str(min_count), str(window), str(vector_size)]))
+        encode_names.append(encode_model.name)
 
     train_gen, val_gen, test_gen, nb_questions, nb_skills = get_hybrid_dkt_dataloaders(
         batch_size, shuffle, interactions_filepath, output_filepath=save_filepath,
