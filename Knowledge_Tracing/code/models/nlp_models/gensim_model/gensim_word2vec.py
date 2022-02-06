@@ -2,7 +2,7 @@ import os.path
 
 import numpy as np
 from time import time
-from gensim.models import Word2Vec
+from gensim.models.word2vec import Word2Vec
 
 
 # WORD2VEC using Gensim:
@@ -16,9 +16,9 @@ class word2vec:
         self.sg = sg
         self.epochs = None
         self.name = "gensim_word2vec"
-        self.word2vec = Word2Vec(min_count=min_count,
+        self.word2vec = Word2Vec(vector_size=vector_size,
+                                 min_count=min_count,
                                  window=window,
-                                 vector_size=vector_size,
                                  workers=workers,
                                  sg=sg)
         self.embeddings = {}
