@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 
+
 class BinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
     def __init__(self):
         super(BinaryAccuracy, self).__init__(name="BinaryAccuracy")
@@ -18,6 +19,7 @@ class AUC(tf.keras.metrics.AUC):
     def update_state(self, y_true, y_pred, sample_weight=None):
         print(y_true)
         print(y_pred)
+        print(np.cumsum(np.where(y_pred < 0.0, 1, 0)))
         print(sample_weight)
         super(AUC, self).update_state(y_true=y_true, y_pred=y_pred, sample_weight=sample_weight)
 
@@ -101,7 +103,7 @@ class TruePositives(tf.keras.metrics.TruePositives):
 class ColdStartBinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
     def __init__(self, window_size=30):
         self.window_size = window_size
-        super(ColdStartBinaryAccuracy, self).__init__(name="ColdStartBinaryAccuracy"+str(window_size))
+        super(ColdStartBinaryAccuracy, self).__init__(name="ColdStartBinaryAccuracy" + str(window_size))
 
     def update_state(self, y_true, y_pred, sample_weight=None):
         """with tf.Session().as_default():
@@ -117,7 +119,8 @@ class ColdStartBinaryAccuracy(tf.keras.metrics.BinaryAccuracy):
             y_true_2, y_pred_2, sample_weight_2 = y_true, y_pred, sample_weight"""
         y_true_2, y_pred_2 = y_true[:, 0:self.window_size], y_pred[:, 0:self.window_size]
         sample_weight_2 = sample_weight[:, 0:self.window_size]
-        super(ColdStartBinaryAccuracy, self).update_state(y_true=y_true_2, y_pred=y_pred_2, sample_weight=sample_weight_2)
+        super(ColdStartBinaryAccuracy, self).update_state(y_true=y_true_2, y_pred=y_pred_2,
+                                                          sample_weight=sample_weight_2)
 
 
 class ColdStartAUC(tf.keras.metrics.AUC):
