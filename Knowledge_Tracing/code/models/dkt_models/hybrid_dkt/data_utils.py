@@ -8,6 +8,7 @@ from Knowledge_Tracing.code.models.nlp_models.pretrained_distilbert import Pretr
 from Knowledge_Tracing.code.models.nlp_models.sentence_transformers import sentence_transformer
 from Knowledge_Tracing.code.models.nlp_models.bertopic_model import BERTopic_model
 from Knowledge_Tracing.code.models.nlp_models.gensim_model.gensim_word2vec import word2vec
+from Knowledge_Tracing.code.models.nlp_models.gensim_model.gensim_doc2vec import doc2vec
 
 from Knowledge_Tracing.code.data_processing.load_preprocessed.load_preprocessed_data import load_preprocessed_texts
 from Knowledge_Tracing.code.data_processing.load_preprocessed.get_hybrid_dkt_dataloaders import \
@@ -159,6 +160,20 @@ def load_dataset(batch_size=32, shuffle=True,
         min_count, window, vector_size, sg = word2vec_args['min_count'], word2vec_args['window'], \
             word2vec_args['vector_size'], word2vec_args['sg']
         encode_model = word2vec(min_count, window, vector_size)
+        encode_model.fit(text_df, text_column, epochs, save_filepath, save_name)
+        encode_model.transform(text_df, text_column)
+        encode_models.append(encode_model)
+        parameters.append("_".join([str(text_column), str(epochs), "sg:"+str(sg), "min_count:"+str(min_count),
+                                    "window:"+str(window), "vector_size:"+str(vector_size)]))
+        encode_names.append(encode_model.name)
+
+    if 'doc2vec' in nlp_kwargs:
+        doc2vec_args = nlp_kwargs['doc2vec']
+        text_column, epochs, save_filepath, save_name = doc2vec_args['text_column'], doc2vec_args['epochs'], \
+            doc2vec_args['save_filepath'], doc2vec_args['save_name']
+        min_count, window, vector_size, sg = doc2vec_args['min_count'], doc2vec_args['window'], \
+            doc2vec_args['vector_size'], doc2vec_args['sg']
+        encode_model = doc2vec(min_count, window, vector_size)
         encode_model.fit(text_df, text_column, epochs, save_filepath, save_name)
         encode_model.transform(text_df, text_column)
         encode_models.append(encode_model)

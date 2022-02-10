@@ -49,7 +49,7 @@ class doc2vec:
         self.epochs = self.doc2vec.epochs
         self.time_to_build = 0.0"""
 
-    def fit(self, texts_df, text_column="plain_text", epochs=20, path='', name=''):
+    def fit(self, texts_df, text_column="plain_text", epochs=20, save_path='', save_name=''):
         t = time()
         self.epochs = epochs
         self.text_column = text_column
@@ -64,6 +64,8 @@ class doc2vec:
         self.doc2vec.train(tagged_documents, total_examples=self.doc2vec.corpus_count, epochs=epochs, report_delay=1)
         self.time_to_train = round((time() - t) / 60, 2)
         print('Time to train the model: {} mins'.format(round((time() - t) / 60, 2)))
+        self.save_vectors(save_path, save_name)
+        self.save_model(save_path, save_name)
 
     def save_model(self, path="", name="poj"):
         self.doc2vec.save(path + name + "_word2vec_" + str(self.vector_size) + "_" + str(self.epochs) + ".model")
