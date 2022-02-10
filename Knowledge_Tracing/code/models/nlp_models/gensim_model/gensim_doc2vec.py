@@ -78,7 +78,7 @@ class doc2vec:
         self.texts_df = texts_df
         self.text_column = text_column
         for text, problem in list(zip(list(self.texts_df[text_column].values), list(self.texts_df['problem_id'].values))):
-            self.embeddings[problem] = np.array(self.doc2vec.dw[problem])
+            self.embeddings[problem] = np.array(self.doc2vec.dv[problem])
 
         self.pro_num = len(self.texts_df['problem_id'])
         self.words_num = self.vector_size
