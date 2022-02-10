@@ -56,7 +56,7 @@ class doc2vec:
         self.texts_df = texts_df
         tagged_documents = []
         for text, problem in list(zip(list(self.texts_df[text_column].values), list(self.texts_df['problem_id'].values))):
-            tagged_documents.append(TaggedDocument(text, int(problem)))
+            tagged_documents.append(TaggedDocument(text, [problem]))
         self.doc2vec.build_vocab(tagged_documents, progress_per=100)
         self.time_to_build = round((time() - t) / 60, 2)
         print('Time to build vocab: {} mins'.format(self.time_to_build))
