@@ -177,7 +177,7 @@ def load_dataset(batch_size=32, shuffle=True,
         encode_model.fit(text_df, text_column, epochs, save_filepath, save_name)
         encode_model.transform(text_df, text_column)
         encode_models.append(encode_model)
-        parameters.append("_".join([str(text_column), str(epochs), "sg:"+str(sg), "min_count:"+str(min_count),
+        parameters.append("_".join([str(text_column), str(epochs), "dm:"+str(dm), "min_count:"+str(min_count),
                                     "window:"+str(window), "vector_size:"+str(vector_size)]))
         encode_names.append(encode_model.name)
 
