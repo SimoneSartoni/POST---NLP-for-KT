@@ -11,7 +11,7 @@ from Knowledge_Tracing.code.models.base_model import base_model
 
 class doc2vec:
     def __init__(self, min_count=2, window=5, vector_size=300, workers=3, dm=1):
-        super(doc2vec, self).__init__("gensim_doc2vec", "NLP")
+        self.name = "doc2vec"
         self.min_count = min_count
         self.window = window
         self.vector_size = vector_size
