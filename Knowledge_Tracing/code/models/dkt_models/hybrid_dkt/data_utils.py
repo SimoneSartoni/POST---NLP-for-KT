@@ -159,7 +159,7 @@ def load_dataset(batch_size=32, shuffle=True,
             word2vec_args['save_filepath'], word2vec_args['save_name']
         min_count, window, vector_size, sg = word2vec_args['min_count'], word2vec_args['window'], \
             word2vec_args['vector_size'], word2vec_args['sg']
-        encode_model = word2vec(min_count, window, vector_size)
+        encode_model = word2vec(min_count, window, vector_size, sg)
         encode_model.fit(text_df, text_column, epochs, save_filepath, save_name)
         encode_model.transform(text_df, text_column)
         encode_models.append(encode_model)
@@ -171,9 +171,9 @@ def load_dataset(batch_size=32, shuffle=True,
         doc2vec_args = nlp_kwargs['doc2vec']
         text_column, epochs, save_filepath, save_name = doc2vec_args['text_column'], doc2vec_args['epochs'], \
             doc2vec_args['save_filepath'], doc2vec_args['save_name']
-        min_count, window, vector_size, sg = doc2vec_args['min_count'], doc2vec_args['window'], \
-            doc2vec_args['vector_size'], doc2vec_args['sg']
-        encode_model = doc2vec(min_count, window, vector_size)
+        min_count, window, vector_size, dm = doc2vec_args['min_count'], doc2vec_args['window'], \
+            doc2vec_args['vector_size'], doc2vec_args['dm']
+        encode_model = doc2vec(min_count, window, vector_size, dm)
         encode_model.fit(text_df, text_column, epochs, save_filepath, save_name)
         encode_model.transform(text_df, text_column)
         encode_models.append(encode_model)

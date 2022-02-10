@@ -10,14 +10,14 @@ from Knowledge_Tracing.code.models.base_model import base_model
 # DOC2VEC using Gensim:
 
 class doc2vec:
-    def __init__(self, min_count=2, window=5, vector_size=300, workers=3, sg=1):
+    def __init__(self, min_count=2, window=5, vector_size=300, workers=3, dm=1):
         super(doc2vec, self).__init__("gensim_doc2vec", "NLP")
         self.min_count = min_count
         self.window = window
         self.vector_size = vector_size
         self.workers = workers
         self.epochs = None
-        self.doc2vec = Doc2Vec(dm=1, alpha=0.1, min_alpha=0.025, vector_size=vector_size, workers=workers)
+        self.doc2vec = Doc2Vec(dm=dm, alpha=0.1, min_alpha=0.025, vector_size=vector_size, workers=workers)
         self.embeddings = {}
         self.texts_df = None
         self.text_column = ""
