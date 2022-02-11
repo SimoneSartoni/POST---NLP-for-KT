@@ -9,11 +9,11 @@ from gensim.models import KeyedVectors
 
 # WORD2VEC using Gensim:
 
-class pretrained_word2vec(base_model):
+class pretrained_word2vec():
     def __init__(self, load=True, keyedvectors="C:/thesis_2/TransformersForKnowledgeTracing/Knowledge_Tracing/code/models/word2vec_DKT/"
                       "vectors.kv",
                  min_count=2, window=5, vector_size=300, workers=3, sg=1, pretrained='conceptnet-numberbatch-17-06-300'):
-        super(pretrained_word2vec, self).__init__("pretrained_world2vec_"+pretrained, "NLP")
+        self.name = "pretrained_word2vec_"
         self.min_count = min_count
         self.window = window
         self.workers = workers
@@ -36,23 +36,32 @@ class pretrained_word2vec(base_model):
         self.similarities = None
         self.texts = None
 
-    def get_similarity_matrix_from_vectors(self, word_vectors):
-        self.similarities = np.dot(word_vectors.vectors, word_vectors.vectors.T)
+    def load(self, load_path, load_name, download=False):
+        if download:
+            self.wordvectors = downloader.load(load_path)
+            self.name = self.name + load_name
+        else:
+            self.wordvectors = KeyedVectors.load(load_path)
+            self.name = self.name + load_name
+        self.wordvectors.save('vectors.kv')
 
-    def fit(self, epochs=20, path='', name=''):
-        t = time()
-        self.epochs = epochs
-        self.time_to_build = round((time() - t) / 60, 2)
-        print('Time to build vocab: {} mins'.format(self.time_to_build))
-        t = time()
-        self.time_to_train = round((time() - t) / 60, 2)
-        print('Time to train the model: {} mins'.format(round((time() - t) / 60, 2)))
-        # self.save_vectors(path, name)
-        # self.save_model(path, name)
-
-    def encode_problems(self, texts_df):
+    def transform(self, texts_df, text_column):
         self.texts_df = texts_df
-
+        self.text_column = text_column
+        for text, problem in list(zip(list(self.texts_df[self.text_column].values),
+                                      list(self.texts_df['problem_id'].values))):
+            embedding = np.zeros(shape=self.vector_size)
+            flag = False
+            for word in text:
+                if word in self.wordvectors.vocab:
+                    flag = True
+                    embedding = embedding + np.array(self.wordvectors.get_vector(word, norm=True))
+            if len(text) > 0:
+                embedding = embedding / float(len(text))
+            norm = np.linalg.norm(embedding)
+            if norm > 0.0:
+                embedding = embedding / norm
+            self.embeddings[problem] = embedding
         self.pro_num = len(self.texts_df['problem_id'])
         self.words_num = self.vector_size
 
@@ -65,74 +74,5 @@ class pretrained_word2vec(base_model):
         item_scores = item_scores.dot(corrects)
         return float(item_scores)
 
-    def compute_similarities(self, input_problems, target_problem):
-        """
-        """
-        item_scores = []
-        final_score = 0.
-        if target_problem in self.problem_id_to_index.keys():
-            for input_id in input_problems:
-                if input_id in self.problem_id_to_index.keys() and len(self.texts[input_id]) > 0 and \
-                        len(self.texts[target_problem]) > 0:
-                    similarity = self.wordvectors.n_similarity(self.texts[input_id],
-                                                               self.texts[target_problem])
-                else:
-                    similarity = 0.0
-                item_scores.append(similarity)
-            final_score = np.array(item_scores).transpose()
-        return final_score
-
-    def compute_encoding(self, input_problems, corrects, target_problem):
-        pos_mean_encoding = np.zeros(shape=self.vector_size, dtype=np.float)
-        neg_mean_encoding = np.zeros(shape=self.vector_size, dtype=np.float)
-        pos, neg = 0.0, 0.0
-        for p, c in list(zip(input_problems, corrects)):
-            if p in self.problem_id_to_index.keys():
-                # and p not in unique_problems_set:
-                # unique_problems_set.add(p)
-                text = self.texts[p]
-                sentence_encoding = np.zeros(shape=self.vector_size)
-                num = 0
-                for word in text:
-                    sentence_encoding = sentence_encoding + np.array(self.wordvectors[word])
-                    num += 1
-                if len(text) > 0:
-                    sentence_encoding = sentence_encoding / float(num)
-                if c > 0.0:
-                    pos_mean_encoding = pos_mean_encoding + sentence_encoding
-                    pos += 1.0
-                else:
-                    neg += 1.0
-                    neg_mean_encoding = neg_mean_encoding + sentence_encoding
-        if pos > 0.0:
-            pos_mean_encoding = pos_mean_encoding / float(pos)
-        if neg > 0.0:
-            neg_mean_encoding = neg_mean_encoding / float(neg)
-        target_encoding = np.zeros(shape=self.vector_size, dtype=np.float)
-        if target_problem in self.problem_id_to_index.keys():
-            text = self.texts[target_problem]
-            target_encoding = np.zeros(shape=self.vector_size)
-            num = 0
-            for word in text:
-                target_encoding = target_encoding + np.array(self.wordvectors[word])
-                num += 1
-            if num > 0:
-                target_encoding = target_encoding / float(num)
-        encoding = np.concatenate((pos_mean_encoding, neg_mean_encoding, target_encoding), axis=0)
-        return encoding
-
-    def get_encoding(self, problem, norm=False):
-        row = self.texts_df.loc[self.texts_df['question_id'] == problem]
-        sentence_encoding = np.zeros(shape=self.vector_size)
-        num = 0
-        for word in row['body'].values[0]:
-            if word in self.wordvectors.key_to_index:
-                sentence_encoding = sentence_encoding + np.array(self.wordvectors.get_vector(word, norm=norm))
-                num += 1
-        if num > 0:
-            sentence_encoding = sentence_encoding / float(num)
-        return sentence_encoding
-
-    def get_serializable_params(self):
-        return {"name": self.name, "min_count": self.min_count, "window": self.window, "vector_size": self.vector_size,
-                "sg": self.sg, "epochs": self.epochs}
+    def get_encoding(self, problem):
+        return self.embeddings[problem]
