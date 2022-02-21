@@ -21,7 +21,10 @@ def area_under_curve(y_true, y_pred):
 def cold_start_auc(y_true, y_pred, window_size=30):
     y_true = [label for label in y_true[0:window_size]]
     y_pred = [pred for pred in y_pred[0:window_size]]
-    return roc_auc_score(y_true, y_pred)
+    try:
+        return roc_auc_score(y_true, y_pred)
+    except ValueError:
+        return 0.5
 
 
 def precision(y_true, y_pred):
