@@ -1,8 +1,11 @@
 from sklearn.metrics import roc_auc_score, accuracy_score, precision_score, recall_score, confusion_matrix
 import numpy as np
 
+
 def binary_accuracy(y_true, y_pred):
-    predictions = [1.0 if output >= 0.5 else 0.0 for output in y_pred]
+    print(y_true)
+    print(y_pred)
+    predictions = [1 if output >= 0.5 else 0 for output in y_pred]
     return accuracy_score(y_true, predictions)
 
 
@@ -24,7 +27,7 @@ def cold_start_auc(y_true, y_pred, window_size=30):
 
 
 def precision(y_true, y_pred):
-    predictions = [1.0 if output >= 0.5 else 0.0 for output in y_pred]
+    predictions = [1 if output >= 0.5 else 0.0 for output in y_pred]
     return precision_score(y_true, predictions)
 
 
