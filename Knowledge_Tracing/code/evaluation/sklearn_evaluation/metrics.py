@@ -37,10 +37,7 @@ def recall(y_true, y_pred):
 def confusion_matrix_score(y_true, y_pred):
     predictions = [1.0 if output >= 0.5 else 0.0 for output in y_pred]
     confusion_m = confusion_matrix(y_true, predictions)
-    fp = confusion_m.sum(axis=0) - np.diag(confusion_m)
-    fn = confusion_m.sum(axis=1) - np.diag(confusion_m)
-    tp = np.diag(confusion_m)
-    tn = confusion_m.sum() - (fp + fn + tp)
+    tn, fp, fn, tp = confusion_m.ravel()
     return tp, tn, fp, fn
 
 
