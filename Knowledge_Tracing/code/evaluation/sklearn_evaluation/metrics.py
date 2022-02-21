@@ -42,7 +42,7 @@ def confusion_matrix_score(y_true, y_pred):
     fp = confusion_m.sum(axis=0) - np.diag(confusion_m)
     fn = confusion_m.sum(axis=1) - np.diag(confusion_m)
     tp = np.diag(confusion_m)
-    tn = confusion_m.values.sum() - (fp + fn + tp)
+    tn = confusion_m.sum() - (fp + fn + tp)
     return tp, tn, fp, fn
 
 
