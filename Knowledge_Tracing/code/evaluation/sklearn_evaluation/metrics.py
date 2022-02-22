@@ -2,6 +2,7 @@ from sklearn.metrics import roc_auc_score, accuracy_score, precision_score, reca
 import numpy as np
 import torch
 
+
 def binary_accuracy(y_true, y_pred):
     predictions = [1.0 if output >= 0.5 else 0.0 for output in y_pred]
     return accuracy_score(y_true, predictions)
@@ -10,11 +11,7 @@ def binary_accuracy(y_true, y_pred):
 def cold_start_binary_accuracy(y_true, y_pred, window_size=30):
     y_true = y_true[0:window_size]
     y_pred = y_pred[0:window_size]
-    print(y_pred)
-    predictions_2 = torch.where(y_pred>=0.5, 1.0, 0.0)
     predictions = [1.0 if output >= 0.5 else 0.0 for output in y_pred]
-    print(predictions)
-    print(predictions_2)
     return accuracy_score(y_true, predictions)
 
 
@@ -23,9 +20,8 @@ def area_under_curve(y_true, y_pred):
 
 
 def cold_start_auc(y_true, y_pred, window_size=30):
-    y_true = [label for label in y_true[0:window_size]]
-    y_pred = [pred for pred in y_pred[0:window_size]]
-
+    y_true = y_true[0:window_size]
+    y_pred = y_pred[0:window_size]
     try:
         return roc_auc_score(y_true, y_pred)
     except ValueError:
