@@ -52,3 +52,7 @@ def compute_metrics(y_true, y_pred):
     prec, rec = precision(y_true, y_pred), recall(y_true, y_pred)
     tp, tn, fp, fn = confusion_matrix_score(y_true, y_pred)
     return acc, auc, acc_10, auc_10, acc_30, auc_30, acc_50, auc_50, prec, rec, tp, tn, fp, fn
+
+
+def get_metrics_names():
+    return ["acc", "auc", "acc_10", "auc_10", "acc_30", "auc_30", "acc_50", "auc_50", "prec", "rec", "tp", "tn", "fp", "fn"]
