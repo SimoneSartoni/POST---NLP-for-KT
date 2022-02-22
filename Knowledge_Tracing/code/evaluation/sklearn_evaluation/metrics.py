@@ -1,6 +1,6 @@
 from sklearn.metrics import roc_auc_score, accuracy_score, precision_score, recall_score, confusion_matrix
 import numpy as np
-
+import torch
 
 def binary_accuracy(y_true, y_pred):
     predictions = [1.0 if output >= 0.5 else 0.0 for output in y_pred]
