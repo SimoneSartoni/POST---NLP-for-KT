@@ -8,9 +8,13 @@ def binary_accuracy(y_true, y_pred):
 
 
 def cold_start_binary_accuracy(y_true, y_pred, window_size=30):
+    print(y_true[0:25])
+    print(y_pred[0:25])
     y_true = [label for label in y_true[0:window_size]]
     y_pred = [pred for pred in y_pred[0:window_size]]
+    print(y_pred)
     predictions = [1.0 if output >= 0.5 else 0.0 for output in y_pred]
+    print(predictions)
     return accuracy_score(y_true, predictions)
 
 
@@ -21,6 +25,9 @@ def area_under_curve(y_true, y_pred):
 def cold_start_auc(y_true, y_pred, window_size=30):
     y_true = [label for label in y_true[0:window_size]]
     y_pred = [pred for pred in y_pred[0:window_size]]
+    print(y_true)
+    print(y_pred)
+
     try:
         return roc_auc_score(y_true, y_pred)
     except ValueError:
