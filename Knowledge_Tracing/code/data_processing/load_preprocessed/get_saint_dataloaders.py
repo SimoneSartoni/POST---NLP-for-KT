@@ -17,7 +17,7 @@ def get_saint_dataloaders(batch_size=128,
     print(df)
     # grouping based on user_id to get the data supply
     nb_questions = df['question_id'].max() + 1
-    nb_skills = df['skill'].max() + 1
+    nb_skills = int(df['skill'].max() + 1)
     print("Grouping users...")
     print("question_ids:")
     print(list(df["question_id"].values)[0:10])
