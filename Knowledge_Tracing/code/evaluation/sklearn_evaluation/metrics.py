@@ -24,6 +24,7 @@ def cold_start_auc(y_true, y_pred, window_size=30):
     try:
         return roc_auc_score(y_true, y_pred)
     except ValueError:
+        print("error")
         return 0.5
 
 
