@@ -6,10 +6,10 @@ import torch
 from torch import nn
 
 
-class NlpSaintFCLayer(nn.Module):
+class nlp_exe_skill_saint_plus_fc(nn.Module):
     def __init__(self, n_encoder, n_decoder, enc_heads, dec_heads, n_dims, nb_questions, nb_skills, nb_responses, nlp_embedding_size,
                  seq_len):
-        super(NlpSaintFCLayer, self).__init__()
+        super(nlp_saint_plus_fc, self).__init__()
         self.n_encoder = n_encoder
         self.n_decoder = n_decoder
         self.embedding = EmbeddingBlock(n_dims, nb_questions, nb_skills, nb_responses, nlp_embedding_size, seq_len)

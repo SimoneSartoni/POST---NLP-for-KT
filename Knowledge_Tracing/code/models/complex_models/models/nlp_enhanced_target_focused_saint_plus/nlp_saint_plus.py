@@ -6,13 +6,13 @@ import torch
 from torch import nn
 
 
-class SaintEncodingsFCLayer(nn.Module):
-    def __init__(self, n_encoder, n_decoder, enc_heads, dec_heads, n_dims, nb_questions, nb_skills, nb_responses, nlp_embedding_size,
+class nlp_saint_plus(nn.Module):
+    def __init__(self, n_encoder, n_decoder, enc_heads, dec_heads, n_dims, nb_questions, nb_skills, nb_responses,
                  seq_len):
-        super(SaintEncodingsFCLayer, self).__init__()
+        super(nlp_saint_plus, self).__init__()
         self.n_encoder = n_encoder
         self.n_decoder = n_decoder
-        self.embedding = EmbeddingBlock(n_dims, nb_questions, nb_skills, nb_responses, nlp_embedding_size, seq_len)
+        self.embedding = EmbeddingBlock(n_dims, nb_questions, nb_skills, nb_responses, seq_len)
         self.encoder = get_clones(EncoderBlock(enc_heads, n_dims, nb_questions, nb_skills, seq_len), n_encoder)
         self.decoder = get_clones(DecoderBlock(dec_heads, n_dims, nb_responses, seq_len), n_decoder)
 
@@ -20,6 +20,7 @@ class SaintEncodingsFCLayer(nn.Module):
         self.fc = nn.Linear(n_dims, 1)
 
     def forward(self, inputs, decoder_targets):
+        first_block = True
         encoder_inputs, decoder_inputs = inputs['encoder'], inputs['decoder']
         input_nlp_embedding, in_exercise, in_skill, in_response = encoder_inputs['input_text_encoding'].float(), \
             encoder_inputs['input_question_id'], encoder_inputs['input_skill'], decoder_inputs['input_label']
@@ -45,24 +46,21 @@ class SaintEncodingsFCLayer(nn.Module):
 
 
 class EmbeddingBlock(nn.Module):
-    def __init__(self, n_dims, nb_questions, nb_skills, nb_responses, nlp_embedding_size, seq_len):
+    def __init__(self, n_dims, nb_questions, nb_skills, nb_responses, seq_len):
         super(EmbeddingBlock, self).__init__()
         self.seq_len = seq_len
         self.response_embed = nn.Embedding(nb_responses, n_dims)
-        self.nlp_embed = nn.Linear(nlp_embedding_size, n_dims)
         self.elapsed_time = nn.Linear(1, n_dims)
         self.position_embed = nn.Embedding(seq_len, n_dims)
 
     def forward(self, input_nlp_embedding, input_r, in_elapsed_time, output_nlp_embedding):
         position_encoded = pos_encode(self.seq_len).cuda()
         _pos = self.position_embed(position_encoded)
-        _input_nlp_embedding = self.nlp_embed(input_nlp_embedding)
         _response = self.response_embed(input_r)
         _elapsed_time = self.elapsed_time(in_elapsed_time)
-        _output_nlp_embedding = self.nlp_embed(output_nlp_embedding)
-        input_encoder = _input_nlp_embedding + _pos
+        input_encoder = input_nlp_embedding + _pos
         input_decoder = _response + _elapsed_time + _pos
-        output = _output_nlp_embedding
+        output = output_nlp_embedding
         return input_encoder, input_decoder, output
 
 
