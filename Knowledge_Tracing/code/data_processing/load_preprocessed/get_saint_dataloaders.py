@@ -12,7 +12,7 @@ def get_saint_dataloaders(batch_size=128,
                           interactions_filepath="../input/assistmentds-2012/2012-2013-data-with-predictions-4-final.csv"
                           , output_filepath='/kaggle/working/', interaction_sequence_len=25, min_seq_len=5,
                           text_encoding_model=None, negative_value=0.0, mask_value=0.0, dictionary=None,
-                          encoder_inputs=None, decoder_inputs=None, outputs=None):
+                          encoder_inputs=None, decoder_inputs=None, outputs=None, shuffle=True):
     df = load_preprocessed_interactions(interactions_filepath=interactions_filepath, dictionary=dictionary)
     print(df)
     # grouping based on user_id to get the data supply
@@ -60,7 +60,7 @@ def get_saint_dataloaders(batch_size=128,
     train_loader = DataLoader(train_dataset,
                               batch_size=batch_size,
                               num_workers=2,
-                              shuffle=True)
+                              shuffle=shuffle)
     del train_dataset
     gc.collect()
     val_loader = DataLoader(val_dataset,
