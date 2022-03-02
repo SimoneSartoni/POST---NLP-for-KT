@@ -7,7 +7,7 @@ from torch import nn
 
 
 class NLP_POT(nn.Module):
-    def __init__(self, n_encoder, n_decoder, n_predictors, enc_heads, dec_heads, n_dims, nb_questions, nb_skills,
+    def __init__(self, n_encoder, n_decoder, n_predictors, enc_heads, dec_heads, pred_heads, n_dims, nb_questions, nb_skills,
                  nb_responses, nlp_embedding_size, seq_len):
         super(NLP_POT, self).__init__()
         self.n_encoder = n_encoder
@@ -15,7 +15,7 @@ class NLP_POT(nn.Module):
         self.embedding = EmbeddingBlock(n_dims, nb_questions, nb_skills, nb_responses, nlp_embedding_size, seq_len)
         self.content_encoder = get_clones(EncoderBlock(enc_heads, n_dims, nb_questions, nb_skills, seq_len), n_encoder)
         self.results_decoder = get_clones(DecoderBlock(dec_heads, n_dims, nb_responses, seq_len), n_decoder)
-        self.prediction_decoder = get_clones(PredictionBlock(dec_heads, n_dims, nb_responses, seq_len), n_predictors)
+        self.prediction_decoder = get_clones(PredictionBlock(pred_heads, n_dims, nb_responses, seq_len), n_predictors)
         self.linear = nn.Linear(n_dims, 1)
 
     def forward(self, inputs, decoder_targets):
