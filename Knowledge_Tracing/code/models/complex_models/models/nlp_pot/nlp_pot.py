@@ -6,10 +6,10 @@ import torch
 from torch import nn
 
 
-class NLP_Dakt(nn.Module):
+class NLP_POT(nn.Module):
     def __init__(self, n_encoder, n_decoder, n_predictors, enc_heads, dec_heads, n_dims, nb_questions, nb_skills,
                  nb_responses, nlp_embedding_size, seq_len):
-        super(NLP_Dakt, self).__init__()
+        super(NLP_POT, self).__init__()
         self.n_encoder = n_encoder
         self.n_decoder = n_decoder
         self.embedding = EmbeddingBlock(n_dims, nb_questions, nb_skills, nb_responses, nlp_embedding_size, seq_len)
