@@ -33,8 +33,8 @@ def cold_start_auc(y_true, y_pred, window_size=30):
         return roc_auc_score(y_true, y_pred)
     except ValueError:
         x = torch.tensor([0.0, 1.0])
-        y_true = torch.cat(y_true, x)
-        y_pred = torch.cat(y_pred, x)
+        y_true = torch.cat([y_true, x], 0)
+        y_pred = torch.cat([y_pred, x], 0)
         print("error")
         return roc_auc_score(y_true, y_pred)
 
@@ -46,8 +46,8 @@ def window_auc(y_true, y_pred, low_index=0, high_index=30):
         return roc_auc_score(y_true, y_pred)
     except ValueError:
         x = torch.tensor([0.0, 1.0])
-        y_true = torch.cat(y_true, x)
-        y_pred = torch.cat(y_pred, x)
+        y_true = torch.cat([y_true, x], 0)
+        y_pred = torch.cat([y_pred, x], 0)
         print("error")
         return roc_auc_score(y_true, y_pred)
 
