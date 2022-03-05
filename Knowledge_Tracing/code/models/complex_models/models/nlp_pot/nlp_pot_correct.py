@@ -154,6 +154,5 @@ class PredictionBlock(nn.Module):
         else:
             out_attention = out_norm
         out_attention = out_attention.permute(1, 0, 2)
-        out_attention = out_attention.permute(1, 0, 2)
         output = self.multihead(q_input=out_attention, kv_input=encoder_output)
         return output
