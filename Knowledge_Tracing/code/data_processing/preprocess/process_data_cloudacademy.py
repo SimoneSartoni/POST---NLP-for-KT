@@ -26,7 +26,6 @@ def process_data_cloudacademy(min_questions=2, max_questions=50, interactions_fi
     print(train_df)
     renaming_dict = {"_actor_id": "user_id", "_time_stamp": "timestamp", "question_id": "problem_id", }
     train_df = train_df.rename(columns=renaming_dict, errors="raise")
-    # Step 3.1 - Define start, end and elapsed time, fill no timed elapsed time and cap values under a max
 
 
     print("removing session_mode different from test or exam")
