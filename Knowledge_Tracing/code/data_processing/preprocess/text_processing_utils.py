@@ -80,8 +80,10 @@ def rem_stopwords_tokenize(data, name, personal_cleaning):
     def getting(sen):
         example_sent = sen
         word_tokens = word_tokenize(example_sent)
-        filtered_sentence = list(set(word_tokens).difference(stop_words))
-        return list(filtered_sentence)
+        filtered_sentence = list(set(word_tokens).intersection(stop_words))
+        for word in filtered_sentence:
+            word_tokens.remove(word)
+        return word_tokens
 
     def filter_existing_words(text):
         filtered_text = []
@@ -91,6 +93,7 @@ def rem_stopwords_tokenize(data, name, personal_cleaning):
         return filtered_text
 
     data[name] = data[name].apply(lambda text: escape_values(text))
+
     data[name] = data[name].apply(lambda text: getting(text))
     data[name] = data[name].apply(lambda text: filter_existing_words(text))
 
