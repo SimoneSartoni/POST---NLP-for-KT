@@ -24,7 +24,7 @@ def process_data_assistments_2009(min_questions=2, max_questions=50,
     print("shape of dataframe :", train_df.shape)
     questions_ids = train_df['problem_id'].unique()
     n_ids = len(questions_ids)
-    n_skills = len(train_df['skill'].unique())
+    n_skills = len(train_df['skill_id'].unique())
     print("no. of problems :", n_ids)
     print("no. of skills: ", n_skills)
     print("shape:", train_df.shape)
