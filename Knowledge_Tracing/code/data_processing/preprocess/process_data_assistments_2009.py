@@ -22,7 +22,12 @@ def process_data_assistments_2009(min_questions=2, max_questions=50,
     else:
         train_df = pd.read_csv(interactions_filepath, dtype=dtypes, encoding='unicode_escape')
     print("shape of dataframe :", train_df.shape)
-
+    questions_ids = train_df['problem_id'].unique()
+    n_ids = len(questions_ids)
+    n_skills = len(train_df['skill'].unique())
+    print("no. of problems :", n_ids)
+    print("no. of skills: ", n_skills)
+    print("shape:", train_df.shape)
     print("number of users:" + str(len(train_df['user_id'].unique())))
 
     # Step 3.1 - Define start, end and elapsed time, fill no timed elapsed time and cap values under a max
@@ -54,10 +59,12 @@ def process_data_assistments_2009(min_questions=2, max_questions=50,
     print("shape after factorize:", train_df.shape)
 
     # Step 5 - Compute number of unique skills ids and number of unique question ids
+    questions_ids = train_df['problem_id'].unique()
+    n_ids = len(questions_ids)
     n_skills = len(train_df['skill'].unique())
+    print("no. of problems :", n_ids)
     print("no. of skills: ", n_skills)
     print("shape after exclusion:", train_df.shape)
-
     print("number of users:" + str(len(train_df['user_id'].unique())))
 
     print("Get texts, intersection...")
