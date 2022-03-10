@@ -27,11 +27,22 @@ def process_data_cloudacademy(min_questions=2, max_questions=50, interactions_fi
     renaming_dict = {"_actor_id": "user_id", "_time_stamp": "timestamp", "question_id": "problem_id", }
     train_df = train_df.rename(columns=renaming_dict, errors="raise")
 
+    questions_ids = train_df['problem_id'].unique()
+    n_ids = len(questions_ids)
+    print("no. of problems :", n_ids)
+    print("shape after exclusion:", train_df.shape)
+    print("number of users:" + str(len(train_df['user_id'].unique())))
 
     print("removing session_mode different from test or exam")
     train_df = train_df.loc[train_df['session_mode'].isin(['test', 'exam'])]
     print("shape after exclusion:", train_df.shape)
     print(train_df)
+    questions_ids = train_df['problem_id'].unique()
+    n_ids = len(questions_ids)
+    print("no. of problems :", n_ids)
+    print("shape after exclusion:", train_df.shape)
+    print("number of users:" + str(len(train_df['user_id'].unique())))
+
     # Step 4 - Sort interactions according to timestamp
     train_df['timestamp'] = [try_parsing_date(x) for x in train_df['timestamp']]
     train_df = train_df.sort_values(["timestamp"], ascending=True)
@@ -57,10 +68,9 @@ def process_data_cloudacademy(min_questions=2, max_questions=50, interactions_fi
     # Step 5 - Compute number of unique skills ids and number of unique question ids
     questions_ids = train_df['problem_id'].unique()
     n_ids = len(questions_ids)
-    # n_skills = len(train_df['skill'].unique())
     print("no. of problems :", n_ids)
-    # print("no. of skills: ", n_skills)
-    print("shape:", train_df.shape)
+    print("shape after exclusion:", train_df.shape)
+    print("number of users:" + str(len(train_df['user_id'].unique())))
 
     print("Get texts, intersection...")
 
@@ -73,10 +83,11 @@ def process_data_cloudacademy(min_questions=2, max_questions=50, interactions_fi
     train_df['correct'] = [1.0 if answer == 't' else 0.0 if answer == 'f' else 0.0 for answer in train_df['correct']]
     print(train_df['correct'].mean())
     print(train_df.describe())
+    questions_ids = train_df['problem_id'].unique()
     n_ids = len(questions_ids)
-    # n_skills = len(train_df['skill'].unique())
     print("no. of problems :", n_ids)
-    # print("no. of skills: ", n_skills)
+    print("shape after merge:", train_df.shape)
+    print("number of users:" + str(len(train_df['user_id'].unique())))
     print("shape of intersection after intersection of interactions and texts datasets:", train_df.shape)
     train_df['skill'] = 0
     texts_df['question_id'], _ = pd.factorize(texts_df['problem_id'], sort=True)
