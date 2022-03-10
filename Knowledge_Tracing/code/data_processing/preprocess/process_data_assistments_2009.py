@@ -15,12 +15,15 @@ def process_data_assistments_2009(min_questions=2, max_questions=50,
               'correct': 'float64', 'skill_id': "string",
               'order_id': "string"}
 
+    dataset_info = {}
     print("loading csv.....")
     if n_rows:
         train_df = pd.read_csv(interactions_filepath, dtype=dtypes, nrows=n_rows, encoding='unicode_escape')
     else:
         train_df = pd.read_csv(interactions_filepath, dtype=dtypes, encoding='unicode_escape')
     print("shape of dataframe :", train_df.shape)
+
+    print("number of users:" + str(train_df['user_id'].unique()))
 
     # Step 3.1 - Define start, end and elapsed time, fill no timed elapsed time and cap values under a max
     train_df['order_id'] = [try_parsing_date(x) for x in train_df['order_id']]
@@ -55,6 +58,8 @@ def process_data_assistments_2009(min_questions=2, max_questions=50,
     print("no. of skills: ", n_skills)
     print("shape after exclusion:", train_df.shape)
 
+    print("number of users:" + str(train_df['user_id'].unique()))
+
     print("Get texts, intersection...")
 
     # Step 6 - Remove questions interactions we do not have text
@@ -70,6 +75,8 @@ def process_data_assistments_2009(min_questions=2, max_questions=50,
     print("no. of problems :", n_ids)
     print("no. of skills: ", n_skills)
     print("shape after exclusion:", train_df.shape)
+    print("number of users:" + str(train_df['user_id'].unique()))
+
     train_df['skill'], _ = pd.factorize(train_df['skill'], sort=True)
     texts_df['question_id'], _ = pd.factorize(texts_df['problem_id'], sort=True)
     train_df['question_id'], _ = pd.factorize(train_df['problem_id'], sort=True)
