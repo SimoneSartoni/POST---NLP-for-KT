@@ -15,8 +15,8 @@ def generate_sequences_of_same_length(df, seq_len, min_seq_len, output_filepath=
     number = 0.0
     length = 0.0
     for name, group in grouped:
-        index = 0.0
-        number += 1
+        index = 0
+        number += 1.0
         length += len(group['question_id'].values)
         while index + seq_len < len(group['question_id'].values):
             if index == 0:
