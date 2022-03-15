@@ -12,8 +12,12 @@ def generate_sequences_of_same_length(df, seq_len, min_seq_len, output_filepath=
     timestamp = []
     chunk_count = 0
     n_seq_longer_than_seq_len = 0
+    number = 0.0
+    length = []
     for name, group in grouped:
-        index = 0
+        index = 0.0
+        number += 1
+        length += len(group['question_id'].values)
         while index + seq_len < len(group['question_id'].values):
             if index == 0:
                 n_seq_longer_than_seq_len += 1
@@ -38,7 +42,7 @@ def generate_sequences_of_same_length(df, seq_len, min_seq_len, output_filepath=
             end_time.append(group['end_time'].values[index:])
             elapsed_time.append(group['elapsed_time'].values[index:])
             timestamp.append(group['timestamp'].values[index:])
-
+    print("Average sequence length is:", float(length)/float(number))
     print("Number of users with sequences longer than "+str(seq_len)+" is: ", +str(n_seq_longer_than_seq_len))
     print("Number of times we chunk sequences with seq_len="+str(seq_len)+" is: ", +str(chunk_count))
     data = {'question_id': question_id, 'problem_id': problem_id, 'user_id': user_id, 'correct': correct,
