@@ -13,7 +13,7 @@ def generate_sequences_of_same_length(df, seq_len, min_seq_len, output_filepath=
     chunk_count = 0
     n_seq_longer_than_seq_len = 0
     number = 0.0
-    length = []
+    length = 0.0
     for name, group in grouped:
         index = 0.0
         number += 1
