@@ -19,8 +19,16 @@ def process_data_poj(min_questions=2, max_questions=50,
     else:
         train_df = pd.read_csv(interactions_filepath,)
     print("shape of dataframe :", train_df.shape)
+
     renaming_dict = {"Problem": "problem_id", "User": "user_id", "Result": "correct", "Submit Time": "order_id"}
     train_df = train_df.rename(columns=renaming_dict, errors="raise")
+
+    questions_ids = train_df['problem_id'].unique()
+    n_ids = len(questions_ids)
+    print("no. of problems :", n_ids)
+    print("shape after exclusion:", train_df.shape)
+    print("number of users:" + str(len(train_df['user_id'].unique())))
+
     # Step 3.1 - Define start, end and elapsed time, fill no timed elapsed time and cap values under a max
     train_df['order_id'] = [try_parsing_date(x) for x in train_df['order_id']]
     train_df['correct'] = [1.0 if c == "Accepted" else 0.0 for c in train_df['correct']]
@@ -38,9 +46,20 @@ def process_data_poj(min_questions=2, max_questions=50,
     train_df = train_df.drop_duplicates(subset=['user_id', 'problem_id'], keep='first').reset_index(drop=True)
     print("shape after remove duplicates:", train_df.shape)
 
+    questions_ids = train_df['problem_id'].unique()
+    n_ids = len(questions_ids)
+    print("no. of problems :", n_ids)
+    print("shape after remove dupl and max questions:", train_df.shape)
+    print("number of users:" + str(len(train_df['user_id'].unique())))
+
     # Step 1 - Remove users with less than a certain number of answers
     train_df = train_df.groupby('user_id').filter(lambda q: len(q) >= min_questions).copy()
     print("shape after at least 2 interactions:", train_df.shape)
+    questions_ids = train_df['problem_id'].unique()
+    n_ids = len(questions_ids)
+    print("no. of problems :", n_ids)
+    print("shape after remove min:", train_df.shape)
+    print("number of users:" + str(len(train_df['user_id'].unique())))
 
     print("Get texts, intersection...")
     # Step 6 - Remove questions interactions we do not have text
@@ -53,7 +72,8 @@ def process_data_poj(min_questions=2, max_questions=50,
     questions_ids = train_df['problem_id'].unique()
     n_ids = len(questions_ids)
     print("no. of problems :", n_ids)
-    print("shape after exclusion:", train_df.shape)
+    print("shape after merge:", train_df.shape)
+    print("number of users:" + str(len(train_df['user_id'].unique())))
     texts_df['question_id'], _ = pd.factorize(texts_df['problem_id'], sort=True)
     train_df['question_id'], _ = pd.factorize(train_df['problem_id'], sort=True)
     train_df['skill'] = 0
