@@ -5,11 +5,18 @@ In this research work, we studied three directions to improve Knowledge Tracing 
 - Proposing Prediction Oriented Self-attentive knowledge Tracing (POST), a new state-of-the-art model for KT outperforming both DKT and SAINT+ architectures.
 - Using six Natural Language Processing methods (CountVectorizer, word2vec, doc2vec, DistilBERT, Sentence Transformer and BERTopic) to create embeddings from exercises' texts. Then developing "NLP-enhanced" versions of DKT and POST, able to use as additional information the created textual embeddings. We propose two methods to create hybrid models too, able to sue at the same time the exercise embeddings created by multiple NLP methods.
 
-Here POST and "NLP-enhanced" POST architectures:
+
+## Here POST and "NLP-enhanced" POST architectures:
+
+
 - ![POST architecture](https://github.com/SimoneSartoni/POST---NLP-for-KT/blob/main/Knowledge_Tracing/analysis_and_results/images/proposed%20models/post.png)
 - ![NLP-POST architecture](https://github.com/SimoneSartoni/POST---NLP-for-KT/blob/main/Knowledge_Tracing/analysis_and_results/images/proposed%20models/nlp_post.png)
 
+
+## RESULTS
 All our models have provided improvements to KT. Here the results of our best models on the four datasets used for evaluation:
+
+
 ![Results of our models on ASSISTments 2009 dataset](https://github.com/SimoneSartoni/POST---NLP-for-KT/blob/main/Knowledge_Tracing/analysis_and_results/images/results/2009_best_models.png)
 ![Results of our models on ASSISTments 2012 dataset](https://github.com/SimoneSartoni/POST---NLP-for-KT/blob/main/Knowledge_Tracing/analysis_and_results/images/results/2012_best_models.png)
 ![Results of our models on Cloud Academy dataset](https://github.com/SimoneSartoni/POST---NLP-for-KT/blob/main/Knowledge_Tracing/analysis_and_results/images/results/Cloud_Academy_best_models.png)
