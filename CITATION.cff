@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "SARTONI"
+  given-names: "SIMONE"
+title: "POST---NLP-for-KT"
+version: 1.0.0
+date-released: 2022-04-01
+url: "https://github.com/SimoneSartoni/POST---NLP-for-KT"
