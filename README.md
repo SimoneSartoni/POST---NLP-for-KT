@@ -21,3 +21,7 @@ All our models have provided improvements to KT. Here the results of our best mo
 ![Results of our models on ASSISTments 2012 dataset](https://github.com/SimoneSartoni/POST---NLP-for-KT/blob/main/Knowledge_Tracing/analysis_and_results/images/results/2012_best_models.png)
 ![Results of our models on Cloud Academy dataset](https://github.com/SimoneSartoni/POST---NLP-for-KT/blob/main/Knowledge_Tracing/analysis_and_results/images/results/Cloud_Academy_best_models.png)
 ![Results of our models on Peking Online Judge dataset](https://github.com/SimoneSartoni/POST---NLP-for-KT/blob/main/Knowledge_Tracing/analysis_and_results/images/results/Peking_Online_Judge_best_models.png)
+
+## CITE THIS REPOSITORY
+If you make use of any part of code from this repository, please cite this repository in your work.
+@software{SARTONI_POST---NLP-for-KT_2022,author = {SARTONI, SIMONE},month = apr,title = {{POST---NLP-for-KT}},url = {https://github.com/SimoneSartoni/POST---NLP-for-KT},version = {1.0.0},year = {2022}}
